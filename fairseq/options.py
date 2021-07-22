@@ -53,6 +53,16 @@ def get_generation_parser(interactive=False, default_task="translation"):
         add_interactive_args(parser)
     return parser
 
+def get_knn_generation_parser(interactive=False, default_task="translation"):
+    parser = get_parser("Generation", default_task)
+    add_dataset_args(parser, gen=True)
+    add_distributed_training_args(parser, default_world_size=1)
+    add_generation_args(parser)
+    add_datastore_args(parser)
+    if interactive:
+        add_interactive_args(parser)
+    return parser
+
 
 def get_interactive_generation_parser(default_task="translation"):
     return get_generation_parser(interactive=True, default_task=default_task)
@@ -291,6 +301,23 @@ def add_preprocess_args(parser):
     # fmt: on
     return parser
 
+def add_datastore_args(parser):
+    group = parser.add_argument_group("datastore")
+    group.add_argument("--dstore-fp16", action='store_true',help="if save only fp16")
+    group.add_argument("--dstore-size", metavar="N", default=1, type=int, help="datastore size")
+    group.add_argument("--dstore-mmap", default=None, type=str, help="save dir for datastore")
+    group.add_argument("--decoder-embed-dim", metavar="N", default=1024, type=int, help="decoder embedding size")
+    group.add_argument("--use-knn-store", default=False, action='store_true')
+    group.add_argument("--k", default=16, type=int)
+    group.add_argument("--knn-coefficient", default=0, type=float, help="this has been duplicated")
+    group.add_argument("--faiss-metric-type", default=None, type=str)
+    group.add_argument("--knn-sim-func", default=None, type=str)
+    group.add_argument("--knn-temperature", default=1., type=float)
+    group.add_argument("--use-gpu-to-search", default=False, action='store_true')
+    group.add_argument("--dstore-filename", default=None, type=str)
+    group.add_argument("--probe", default=8, type=int)
+
+    return parser
 
 def add_dataset_args(parser, train=False, gen=False):
     group = parser.add_argument_group("dataset_data_loading")
