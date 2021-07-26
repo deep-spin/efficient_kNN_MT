@@ -88,6 +88,24 @@ class FairseqDecoder(nn.Module):
             return out.exp_() if not log_probs else out
 
         logits = net_output[0]
+
+        if self.use_knn_datastore:
+
+            knn_probs = net_output[2]  # [batch, seq len, vocab size]
+            knn_lambda = net_output[3]  # [batch, seq len, 1]
+            network_probs = utils.softmax(logits, dim=-1, onnx_trace=self.onnx_trace)  # [batch, seq len, vocab size]
+
+            if self.knn_lambda_type == "fix":
+                probs = network_probs * (1 - knn_lambda) + knn_probs * knn_lambda
+            else:
+                probs = network_probs * (1 - knn_lambda) + knn_probs
+
+            if log_probs:
+                return torch.log(probs)
+            else:
+                return probs
+
+
         if log_probs:
             return utils.log_softmax(logits, dim=-1, onnx_trace=self.onnx_trace)
         else:

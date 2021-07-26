@@ -138,6 +138,14 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         if self.output_projection is None:
             self.build_output_projection(cfg, dictionary, embed_tokens)
 
+        self.knn_datastore = None
+        if cfg.load_knn_datastore:
+            self.knn_datastore = KNN_Dstore(cfg.decoder, len(dictionary))
+
+        self.use_knn_datastore = cfg.use_knn_datastore
+        self.knn_lambda_type = cfg.knn_lambda_type
+        self.knn_temperature_type = cfg.knn_temperature_type
+
     def build_output_projection(self, cfg, dictionary, embed_tokens):
         if cfg.adaptive_softmax_cutoff is not None:
             self.adaptive_softmax = AdaptiveSoftmax(
@@ -222,9 +230,31 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             alignment_heads=alignment_heads,
         )
 
+        if self.use_knn_datastore:
+            last_hidden = x
+
         if not features_only:
             x = self.output_layer(x)
-        return x, extra
+
+
+        if self.use_knn_datastore:
+            knn_search_result = self.knn_datastore.retrieve(last_hidden)
+
+            knn_dists = knn_search_result['distance']  # [batch, seq len, k]  # we need do sort
+            knn_index = knn_search_result['knn_index']
+            tgt_index = knn_search_result['tgt_index']
+
+            knn_temperature = self.knn_datastore.get_temperature()
+            knn_lambda = self.knn_datastore.get_lambda()
+
+            decode_result = self.knn_datastore.calculate_knn_prob(knn_index, tgt_index, knn_dists, last_hidden, knn_temperature)
+
+            knn_prob = decode_result['prob']
+           
+            return x, extra, knn_prob, knn_lambda, knn_dists, knn_index
+
+        else:
+            return x, extra
 
     def extract_features(
         self,

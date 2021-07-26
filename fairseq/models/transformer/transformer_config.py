@@ -220,6 +220,24 @@ class TransformerConfig(FairseqDataclass):
         metadata={"help": "don't add an extra layernorm after the last decoder block"},
     )
 
+    load_knn_datastore: bool = field(default=False)
+    dstore_filename: str = field(default=None)
+    use_knn_datastore: bool = field(default=False)
+    dstore_fp16: bool = field(default=False)
+    dstore_size: int = field(default=1)
+    k: int = field(default=8)
+    probe: int = field(default=32)
+    faiss_metric_type: str = field(default=None)
+    knn_sim_func: str = field(default=None)
+    use_gpu_to_search: bool = field(default=False)
+    no_load_keys: bool = field(default=False)
+    move_dstore_to_mem: bool = field(default=False)
+    only_use_max_idx: bool = field(default=False)
+    knn_lambda_type: str = field(default='fix')
+    knn_lambda_value: float = field(default=.5)
+    knn_temperature_type: str = field(default='fix')
+    knn_temperature_value: float = field(default=10)
+
     # We need to make this hierarchical dataclass like the flat namespace
     # __getattr__ and __setattr__ here allow backward compatibility
     # for subclasses of Transformer(Legacy) that depend on read/write on
