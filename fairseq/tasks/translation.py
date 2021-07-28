@@ -393,6 +393,14 @@ class TranslationTask(FairseqTask):
                 logging_output["_bleu_totals_" + str(i)] = bleu.totals[i]
         return loss, sample_size, logging_output
 
+    def forward_and_get_hidden_state_step(self, sample, model):
+        decoder_output, extra = model(src_tokens=sample['net_input']['src_tokens'],
+                                      src_lengths=sample['net_input']['src_lengths'],
+                                      prev_output_tokens=sample['net_input']['prev_output_tokens'],
+                                      return_all_hiddens=False,
+                                      features_only=True)
+        return decoder_output
+
     def reduce_metrics(self, logging_outputs, criterion):
         super().reduce_metrics(logging_outputs, criterion)
         if self.cfg.eval_bleu:
