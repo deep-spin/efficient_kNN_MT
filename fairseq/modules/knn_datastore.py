@@ -39,7 +39,7 @@ class KNN_Dstore(object):
 
         self.k = args.k
 
-        self.mask_for_label_count = self.generate_label_count_mask(args.max_k if args.max_k is not None else args.k)
+        self.mask_for_label_count = self.generate_label_count_mask(args.k)
 
     def generate_neighbor_mask(self, max_k):
 
