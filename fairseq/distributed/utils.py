@@ -332,10 +332,10 @@ def distributed_main(i, main, cfg: FairseqConfig, kwargs):
 
 
 def call_main(cfg: FairseqConfig, main, **kwargs):
-    if cfg.distributed_init_method is None:
+    if cfg.distributed_training.distributed_init_method is None:
         infer_init_method(cfg.distributed_training)
 
-    if cfg.distributed_init_method is not None:
+    if cfg.distributed_training.distributed_init_method is not None:
         # distributed training
         if not cfg.distributed_training.distributed_no_spawn:
             start_rank = cfg.distributed_training.distributed_rank
@@ -352,7 +352,7 @@ def call_main(cfg: FairseqConfig, main, **kwargs):
             )
         else:
             distributed_main(cfg.distributed_training.device_id, main, cfg, kwargs)
-    elif cfg.common.tpu and cfg.distributed_world_size > 1:
+    elif cfg.common.tpu and cfg.distributed_training.distributed_world_size > 1:
         import torch_xla.distributed.xla_multiprocessing as xmp
 
         torch.multiprocessing.set_sharing_strategy("file_system")
