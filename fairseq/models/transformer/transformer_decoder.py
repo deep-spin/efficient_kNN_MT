@@ -140,6 +140,8 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         if self.output_projection is None:
             self.build_output_projection(cfg, dictionary, embed_tokens)
 
+        self.fp16 = cfg.fp16
+
         self.knn_datastore = None
         if cfg.load_knn_datastore:
             self.knn_datastore = KNN_Dstore(cfg.decoder, len(dictionary))
