@@ -386,7 +386,7 @@ def convert_namespace_to_omegaconf(args: Namespace) -> DictConfig:
 
     with initialize(config_path=config_path):
         try:
-            composed_cfg = compose("config", overrides=overrides)
+            composed_cfg = compose("config", overrides=overrides, strict=False)
         except:
             logger.error("Error when composing. Overrides: " + str(overrides))
             raise
