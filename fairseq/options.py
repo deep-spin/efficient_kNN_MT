@@ -84,6 +84,14 @@ def get_validation_parser(default_task=None):
     gen_parser_from_dataclass(group, CommonEvalConfig())
     return parser
 
+def get_save_datastore_parser(default_task=None):
+    parser = get_parser("Validation", default_task)
+    add_dataset_args(parser, train=True)
+    add_distributed_training_args(parser, default_world_size=1)
+    add_datastore_args(parser)
+    group = parser.add_argument_group("Evaluation")
+    gen_parser_from_dataclass(group, CommonEvalParams())
+    return parser
 
 def parse_args_and_arch(
     parser: argparse.ArgumentParser,
