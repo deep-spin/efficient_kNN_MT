@@ -17,7 +17,6 @@ class KNN_Dstore(object):
         self.metric_type = args.faiss_metric_type
         self.sim_func = args.knn_sim_func
         self.dstore_fp16 = args.dstore_fp16
-        self.temperature = args.knn_temperature
         self.use_gpu_to_search = args.use_gpu_to_search
         self.vocab_size = trg_vocab_size
 
