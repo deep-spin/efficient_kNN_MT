@@ -90,7 +90,7 @@ def get_save_datastore_parser(default_task=None):
     add_distributed_training_args(parser, default_world_size=1)
     add_datastore_args(parser)
     group = parser.add_argument_group("Evaluation")
-    gen_parser_from_dataclass(group, CommonEvalParams())
+    gen_parser_from_dataclass(group, CommonEvalConfig())
     return parser
 
 def parse_args_and_arch(
