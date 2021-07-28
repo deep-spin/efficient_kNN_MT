@@ -22,6 +22,7 @@ _NAME_PARSER = r"(decoder|encoder|quant_noise)_(.*)"
 
 @dataclass
 class EncDecBaseConfig(FairseqDataclass):
+    fp16: bool = field(default=False)
     embed_path: Optional[str] = field(
         default=None, metadata={"help": "path to pre-trained embedding"}
     )
