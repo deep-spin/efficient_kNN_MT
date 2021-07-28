@@ -31,14 +31,14 @@ res = faiss.StandardGpuResources()
 # load the saved keys and values
 if args.dstore_fp16:
     print('load dstore fp16', args.dstore_size, args.dimension)
-    keys = np.memmap(args.dstore_mmap + '_keys.npy', dtype=np.float16, mode='r', 
+    keys = np.memmap(args.dstore_mmap + '/keys.npy', dtype=np.float16, mode='r', 
                         shape=(args.dstore_size, args.dimension))
-    vals = np.memmap(args.dstore_mmap + '_vals.npy', dtype=np.int, mode='r', 
+    vals = np.memmap(args.dstore_mmap + '/vals.npy', dtype=np.int, mode='r', 
                         shape=(args.dstore_size, 1))
 else:
-    keys = np.memmap(args.dstore_mmap + '_keys.npy', dtype=np.float32, mode='r', 
+    keys = np.memmap(args.dstore_mmap + '/keys.npy', dtype=np.float32, mode='r', 
                         shape=(args.dstore_size, args.dimension))
-    vals = np.memmap(args.dstore_mmap + '_vals.npy', dtype=np.int, mode='r', 
+    vals = np.memmap(args.dstore_mmap + '/vals.npy', dtype=np.int, mode='r', 
                         shape=(args.dstore_size, 1))
 
 print('done.')
