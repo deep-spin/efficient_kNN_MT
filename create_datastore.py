@@ -75,6 +75,7 @@ def main(args, override_args=None):
     dstore_idx = 0
     data_idx = 1
     for subset in args.valid_subset.split(","):
+        print(task)
         try:
             task.args.required_seq_len_multiple = 1
             task.args.load_alignments = False
