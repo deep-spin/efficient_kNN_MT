@@ -11,8 +11,8 @@ class KNN_Dstore(object):
 
     def __init__(self, args, trg_vocab_size):
 
-        self.half = args.fp16
-        self.dimension = args.decoder_embed_dim
+        self.half = args.decoder.fp16
+        self.dimension = args.decoder.embed_dim
         self.dstore_size = args.dstore_size
         self.metric_type = args.faiss_metric_type
         self.sim_func = args.knn_sim_func

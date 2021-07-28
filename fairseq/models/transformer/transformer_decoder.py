@@ -144,7 +144,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
         self.knn_datastore = None
         if cfg.load_knn_datastore:
-            self.knn_datastore = KNN_Dstore(cfg.decoder, len(dictionary))
+            self.knn_datastore = KNN_Dstore(cfg, len(dictionary))
 
         self.use_knn_datastore = cfg.use_knn_datastore
         self.knn_lambda_type = cfg.knn_lambda_type
