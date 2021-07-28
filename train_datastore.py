@@ -20,7 +20,7 @@ parser.add_argument('--faiss_index', type=str, help='file to write the faiss ind
 parser.add_argument('--num_keys_to_add_at_a_time', default=500000, type=int,
                     help='can only load a certain amount of data to memory at a time.')
 parser.add_argument('--starting_point', type=int, default=0, help='index to start adding keys at')
-parse.add_argument('--use_gpu', default=False, action='store_true')
+parser.add_argument('--use_gpu', default=False, action='store_true')
 
 args = parser.parse_args()
 
