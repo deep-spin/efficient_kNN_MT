@@ -263,3 +263,17 @@ def transformer_wmt_en_de_big_t2t(args):
     args.attention_dropout = getattr(args, "attention_dropout", 0.1)
     args.activation_dropout = getattr(args, "activation_dropout", 0.1)
     transformer_vaswani_wmt_en_de_big(args)
+
+
+@register_model_architecture("transformer", "transformer_wmt19_de_en")
+def transformer_wmt19_de_en(args):
+    args.dropout = getattr(args, "dropout", 0.2)
+    args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 8192)
+    args.share_decoder_input_output_embed = getattr(args, "share_decoder_input_output_embed", True)
+    args.share_all_embeddings = getattr(args, "share_all_embeddings", True)
+    transformer_wmt_en_de_big(args)
+
+
+@register_model_architecture("transformer", "transformer_wmt19_de_en_with_datastore")
+def transformer_wmt19_de_en_with_datastore(args):
+    transformer_wmt19_de_en(args)
