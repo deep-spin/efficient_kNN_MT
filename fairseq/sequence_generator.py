@@ -338,9 +338,7 @@ class SequenceGenerator(nn.Module):
 
             if self.lm_model is not None:
                 lm_out = self.lm_model(tokens[:, : step + 1])
-                probs = self.lm_model.get_normalized_probs(
-                    lm_out, log_probs=True, sample=None
-                )
+                probs = self.lm_model.get_normalized_probs(lm_out, log_probs=True, sample=None)
                 probs = probs[:, -1, :] * self.lm_weight
                 lprobs += probs
 
@@ -811,10 +809,13 @@ class EnsembleModel(nn.Module):
             decoder_out_tuple = (
                 decoder_out[0][:, -1:, :].div_(temperature),
                 None if decoder_len <= 1 else decoder_out[1],
+                None if decoder_len <= 2 else decoder_out[2],  # knn prob
+                None if decoder_len <= 3 else decoder_out[3],  # knn lambda
+                None if decoder_len <= 4 else decoder_out[4],  # knn distance
+                None if decoder_len <= 5 else decoder_out[5],  # knn index
+                None if decoder_len <= 6 else decoder_out[6],  # knn label counts
             )
-            probs = model.get_normalized_probs(
-                decoder_out_tuple, log_probs=True, sample=None
-            )
+            probs = model.get_normalized_probs(decoder_out_tuple, log_probs=True, sample=None)
             probs = probs[:, -1, :]
             if self.models_size == 1:
                 return probs, attn
