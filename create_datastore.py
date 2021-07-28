@@ -75,11 +75,10 @@ def main(args, override_args=None):
     dstore_idx = 0
     data_idx = 1
     for subset in args.valid_subset.split(","):
-        print(task)
         try:
-            task.args.required_seq_len_multiple = 1
-            task.args.load_alignments = False
-            task.load_dataset(subset, combine=False, epoch=data_idx)
+            model_args.required_seq_len_multiple = 1
+            model_args.load_alignments = False
+            model_args.load_dataset(subset, combine=False, epoch=data_idx)
             data_idx = data_idx + 1
             dataset = task.dataset(subset)
         except KeyError:
