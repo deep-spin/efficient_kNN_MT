@@ -17,8 +17,8 @@ CLEAN=$SCRIPTS/training/clean-corpus-n.perl
 NORM_PUNC=$SCRIPTS/tokenizer/normalize-punctuation.perl
 REM_NON_PRINT_CHAR=$SCRIPTS/tokenizer/remove-non-printing-char.perl
 FASTBPE=$HOME/fastBPE
-BPECODES=$HOME/knnmt/checkpoints/wmt19.de-en/bpecodes
-VOCAB=$HOME/knnmt/checkpoints/wmt19.de-en/dict.en.txt
+BPECODES=/media/hdd1/pam/mt/models/wmt19.de-en/bpecodes
+VOCAB=/media/hdd1/pam/mt/models/wmt19.de-en/dict.en.txt
 
 if [ ! -d "$SCRIPTS" ]; then
   echo "Please set SCRIPTS variable correctly to point to Moses scripts."
