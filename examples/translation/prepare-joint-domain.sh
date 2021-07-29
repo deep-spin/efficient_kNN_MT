@@ -31,17 +31,17 @@ fileen=${DATADIR}/joint_train.en
 cat $filede | \
   perl $NORM_PUNC $l | \
   perl $REM_NON_PRINT_CHAR | \
-  perl $TOKENIZER -threads 8 -a -l de  >> ${DATADIR}/train.tok.de
+  perl $TOKENIZER -threads 8 -a -l de  >> ${DATADIR}/processed/train.tok.de
 
 cat $fileen | \
   perl $NORM_PUNC $l | \
   perl $REM_NON_PRINT_CHAR | \
-  perl $TOKENIZER -threads 8 -a -l en  >> ${DATADIR}/train.tok.en
+  perl $TOKENIZER -threads 8 -a -l en  >> ${DATADIR}/processed/train.tok.en
 
-$FASTBPE/fast applybpe ${DATADIR}/train.bpe.de ${DATADIR}/train.tok.de $BPECODES $VOCAB
-$FASTBPE/fast applybpe ${DATADIR}/train.bpe.en ${DATADIR}/train.tok.en $BPECODES $VOCAB
+$FASTBPE/fast applybpe ${DATADIR}/processed/train.bpe.de ${DATADIR}/processed/train.tok.de $BPECODES $VOCAB
+$FASTBPE/fast applybpe ${DATADIR}/processed/train.bpe.en ${DATADIR}/processed/train.tok.en $BPECODES $VOCAB
 
-perl $CLEAN -ratio 1.5 ${DATADIR}/train.bpe de en ${DATADIR}/train.bpe.filtered 1 250
+perl $CLEAN -ratio 1.5 ${DATADIR}/processed/train.bpe de en ${DATADIR}/processed/train.bpe.filtered 1 250
 
 for domain in it koran law medical subtitles
 do
@@ -51,30 +51,30 @@ do
   cat $filede | \
     perl $NORM_PUNC $l | \
     perl $REM_NON_PRINT_CHAR | \
-    perl $TOKENIZER -threads 8 -a -l de  >> ${DATADIR}/${domain}/train.tok.de
+    perl $TOKENIZER -threads 8 -a -l de  >> ${DATADIR}/${domain}/processed/train.tok.de
 
   cat $fileen | \
     perl $NORM_PUNC $l | \
     perl $REM_NON_PRINT_CHAR | \
-    perl $TOKENIZER -threads 8 -a -l en  >> ${DATADIR}/${domain}/train.tok.en
+    perl $TOKENIZER -threads 8 -a -l en  >> ${DATADIR}/${domain}/processed/train.tok.en
 
-  $FASTBPE/fast applybpe ${DATADIR}/${domain}/train.bpe.de ${DATADIR}/${domain}/train.tok.de $BPECODES $VOCAB
-  $FASTBPE/fast applybpe ${DATADIR}/${domain}/train.bpe.en ${DATADIR}/${domain}/train.tok.en $BPECODES $VOCAB
+  $FASTBPE/fast applybpe ${DATADIR}/${domain}/processed/train.bpe.de ${DATADIR}/${domain}/processed/train.tok.de $BPECODES $VOCAB
+  $FASTBPE/fast applybpe ${DATADIR}/${domain}/processed/train.bpe.en ${DATADIR}/${domain}/processed/train.tok.en $BPECODES $VOCAB
 
-  perl $CLEAN -ratio 1.5 ${DATADIR}/${domain}/train.bpe de en ${DATADIR}/${domain}/train.bpe.filtered 1 250
+  perl $CLEAN -ratio 1.5 ${DATADIR}/${domain}/processed/train.bpe de en ${DATADIR}/${domain}/processed/train.bpe.filtered 1 250
 done
 
-for split in dev test
+for split in joint_dev joint_test
 do
   filede=${DATADIR}/${split}.de
   fileen=${DATADIR}/${split}.en
 
   cat $filede | \
-    perl $TOKENIZER -threads 8 -a -l de  >> ${DATADIR}/${split}.tok.de
+    perl $TOKENIZER -threads 8 -a -l de  >> ${DATADIR}/processed/${split}.tok.de
 
   cat $fileen | \
-    perl $TOKENIZER -threads 8 -a -l en  >> ${DATADIR}/${split}.tok.en
+    perl $TOKENIZER -threads 8 -a -l en  >> ${DATADIR}/processed/${split}.tok.en
 
-  $FASTBPE/fast applybpe ${DATADIR}/${split}.bpe.de ${DATADIR}/${split}.tok.de $BPECODES $VOCAB
-  $FASTBPE/fast applybpe ${DATADIR}/${split}.bpe.en ${DATADIR}/${split}.tok.en $BPECODES $VOCAB
+  $FASTBPE/fast applybpe ${DATADIR}/processed/${split}.bpe.de ${DATADIR}/processed/${split}.tok.de $BPECODES $VOCAB
+  $FASTBPE/fast applybpe ${DATADIR}/processed/${split}.bpe.en ${DATADIR}/processed/${split}.tok.en $BPECODES $VOCAB
 done
