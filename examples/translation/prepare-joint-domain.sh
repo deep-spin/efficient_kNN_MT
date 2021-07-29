@@ -43,6 +43,7 @@ $FASTBPE/fast applybpe ${DATADIR}/processed/train.bpe.en ${DATADIR}/processed/tr
 
 perl $CLEAN -ratio 1.5 ${DATADIR}/processed/train.bpe de en ${DATADIR}/processed/train.bpe.filtered 1 250
 
+"""
 for domain in it koran law medical subtitles
 do
   filede=${DATADIR}/${domain}/train.de
@@ -63,6 +64,7 @@ do
 
   perl $CLEAN -ratio 1.5 ${DATADIR}/${domain}/processed/train.bpe de en ${DATADIR}/${domain}/processed/train.bpe.filtered 1 250
 done
+"""
 
 for split in joint_dev joint_test
 do
