@@ -119,7 +119,7 @@ with open('./subtitles/dev.de','r') as f:
 de.close()
 
 
-en=open('joint_dev.en','w')
+en=open('joint_test.en','w')
 
 with open('./it/test.en','r') as f:
     lines=f.readlines()
