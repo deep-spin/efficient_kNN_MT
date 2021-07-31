@@ -4,7 +4,7 @@
 
 # Usage: bash prepare-domadap.sh medical
 
-DATADIR=/media/hdd1/pam/mt/data/joint_multi_domain/capped
+DATADIR=/media/hdd1/pam/mt/data/joint_multi_domain
 HOME=/home/pam
 if [ -z $HOME ]
 then
