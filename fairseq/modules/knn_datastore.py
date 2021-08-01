@@ -258,8 +258,8 @@ class KNN_Dstore(object):
         tgt_idx = torch.from_numpy(self.vals[knns]).to(queries.device).squeeze(-1)  # [Batch size * Seq len, K]
         tgt_idx = tgt_idx.view(bsz, seq_len, -1)  # [B, S, K]
 
-        dists = dists.view(bsz, seq_len, -1)  # [Batch, Seq len, k]
-        knns = knns.view(bsz, seq_len, -1)
+        dists = dists.view(bsz, seq_len, -1).cuda()  # [Batch, Seq len, k]
+        knns = knns.view(bsz, seq_len, -1).cuda()
 
         return {'distance': dists, 'knn_index': knns, 'tgt_index': tgt_idx}
 
