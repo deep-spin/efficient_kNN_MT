@@ -252,8 +252,8 @@ class KNN_Dstore(object):
 
         dists, knns = self.get_knns(queries.contiguous().view(-1, queries.size(-1)))  # [Batch * seq len, K]
         # move retireval results to torch tensor from numpy, if faiss version < 1.6.5
-        # knns = torch.from_numpy(knns).to(queries.device)
-        # dists = torch.from_numpy(dists).to(queries.device)  # [Batch size * seq len, k]
+        knns = torch.from_numpy(knns).to(queries.device)
+        dists = torch.from_numpy(dists).to(queries.device)  # [Batch size * seq len, k]
 
         tgt_idx = self.vals[knns].to(queries.device).squeeze(-1)  # [Batch size * Seq len, K]
         tgt_idx = tgt_idx.view(bsz, seq_len, -1)  # [B, S, K]
