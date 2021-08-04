@@ -317,14 +317,14 @@ def add_datastore_args(parser):
     group.add_argument("--dstore-mmap", default=None, type=str, help="save dir for datastore")
     group.add_argument("--decoder-embed-dim", metavar="N", default=1024, type=int, help="decoder embedding size")
     group.add_argument("--use-knn-store", default=False, action='store_true')
-    group.add_argument("--k", default=16, type=int)
+    group.add_argument("--k", default=64, type=int)
     group.add_argument("--knn-coefficient", default=0, type=float, help="this has been duplicated")
     group.add_argument("--faiss-metric-type", default=None, type=str)
     group.add_argument("--knn-sim-func", default=None, type=str)
     group.add_argument("--knn-temperature", default=1., type=float)
     group.add_argument("--use-gpu-to-search", default=False, action='store_true')
     group.add_argument("--dstore-filename", default=None, type=str)
-    group.add_argument("--probe", default=8, type=int)
+    group.add_argument("--probe", default=32, type=int)
 
     return parser
 

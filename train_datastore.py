@@ -17,7 +17,7 @@ parser.add_argument('--ncentroids', type=int, default=4096, help='number of cent
 parser.add_argument('--code_size', type=int, default=64, help='size of quantized vectors')
 parser.add_argument('--probe', type=int, default=32, help='number of clusters to query')
 parser.add_argument('--faiss_index', type=str, help='file to write the faiss index')
-parser.add_argument('--num_keys_to_add_at_a_time', default=500000, type=int,
+parser.add_argument('--num_keys_to_add_at_a_time', default=1000000, type=int,
                     help='can only load a certain amount of data to memory at a time.')
 parser.add_argument('--starting_point', type=int, default=0, help='index to start adding keys at')
 parser.add_argument('--use_gpu', default=False, action='store_true')
