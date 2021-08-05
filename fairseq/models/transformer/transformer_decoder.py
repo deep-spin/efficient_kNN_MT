@@ -149,6 +149,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.use_knn_datastore = cfg.use_knn_datastore
         self.knn_lambda_type = cfg.knn_lambda_type
         self.knn_temperature_type = cfg.knn_temperature_type
+        self.pruned_datastore = cfg.pruned_datastore
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
         if cfg.adaptive_softmax_cutoff is not None:

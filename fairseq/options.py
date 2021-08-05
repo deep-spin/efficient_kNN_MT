@@ -325,6 +325,7 @@ def add_datastore_args(parser):
     group.add_argument("--use-gpu-to-search", default=False, action='store_true')
     group.add_argument("--dstore-filename", default=None, type=str)
     group.add_argument("--probe", default=32, type=int)
+    group.add_argument("--pruned_datastore", action='store_true')
 
     return parser
 

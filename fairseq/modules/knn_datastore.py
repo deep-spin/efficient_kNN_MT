@@ -161,18 +161,16 @@ class KNN_Dstore(object):
         if args.dstore_fp16:
             print('Keys are fp16 and vals are int32')
             if not args.no_load_keys:
-                self.keys = np.memmap(args.dstore_filename + '/keys.npy', dtype=np.float16, mode='r',
-                                      shape=(self.dstore_size, self.dimension))
-            self.vals = np.memmap(args.dstore_filename + '/vals.npy', dtype=np.int, mode='r',
-                                  shape=(self.dstore_size, 1))
+                self.keys = np.memmap(args.dstore_filename + 'keys.npy', dtype=np.float16, mode='r',shape=(self.dstore_size, self.dimension))
+            self.vals = np.memmap(args.dstore_filename + 'vals.npy', dtype=np.int, mode='r',shape=(self.dstore_size, 1))
         else:
             print('Keys are fp32 and vals are int32')
             if not args.no_load_keys:
-                self.keys = np.memmap(args.dstore_filename + '/keys.npy', dtype=np.float32, mode='r',
-                                      shape=(self.dstore_size, self.dimension))
+                self.keys = np.memmap(args.dstore_filename + 'keys.npy', dtype=np.float32, mode='r',shape=(self.dstore_size, self.dimension))
 
-            self.vals = np.memmap(args.dstore_filename + '/vals.npy', dtype=np.int, mode='r',
-                                  shape=(self.dstore_size, 1))
+            self.vals = np.memmap(args.dstore_filename + 'vals.npy', dtype=np.int, mode='r',shape=(self.dstore_size, 1))
+        if args.pruned_datastore:
+            self.weights = np.memmap(args.dstore_filename+'weights.npy', dtype=np.int, mode='r', shape=(self.dstore_size, 1))
 
         # If you wish to load all the keys into memory
         # CAUTION: Only do this if your RAM can handle it!
@@ -263,43 +261,6 @@ class KNN_Dstore(object):
 
         return {'distance': dists, 'knn_index': knns, 'tgt_index': tgt_idx}
 
-    def calculate_select_knn_prob(self,
-                                  knn_index: torch.Tensor,  # [B, S, K]
-                                  tgt_index: torch.Tensor,  # [B, S, K]
-                                  distance: torch.Tensor,  # [B, S, K]
-                                  queries: torch.Tensor,  # [B, S, H]
-                                  temperature: torch.Tensor,  # [B, S, 1]
-                                  knn_select_prob: torch.Tensor = None,  # [B, S, Reduce K]
-                                  is_test=False):
-
-        B, S, K = distance.size()
-        R_K = knn_select_prob.size(-1)
-        assert R_K == self.reduce_k
-
-        re_compute_dists = self.dist_func(distance, knn_index, queries, function=self.sim_func)  # [B, S, K]
-
-        re_compute_dists = re_compute_dists.unsqueeze(-2).expand(B, S, R_K, K)
-
-        # start = time.time()
-        re_compute_dists = re_compute_dists * self.mask_for_distance  # [B, S, R_K, K]
-
-        scaled_dists = re_compute_dists / temperature
-
-        knn_weight = torch.softmax(scaled_dists, dim=-1)  # [B, S, R_K, K]
-        weight_sum_knn_weight = torch.matmul(knn_select_prob.unsqueeze(-2), knn_weight).squeeze(-2).unsqueeze(-1)  # [B, S, K, 1]
-
-
-        knn_tgt_prob = torch.zeros(B, S, K, self.vocab_size).to(queries.device)  # [B, S, K, Vocab Size]
-        tgt_index = tgt_index.unsqueeze_(-1)  # [B, S, K, 1]
-
-        scatter(src=weight_sum_knn_weight.float(), out=knn_tgt_prob, index=tgt_index, dim=-1)
-
-        prob = knn_tgt_prob.sum(dim=-2)  # [Batch Size, seq len, vocab size]
-
-        return {'prob': prob}
-
-
-
     def calculate_knn_prob(self,
                            knn_index: torch.Tensor,  # [B, S, K]
                            tgt_index: torch.Tensor,  # [B, S, K]
@@ -313,6 +274,10 @@ class KNN_Dstore(object):
 
         # update the dist and compute each neighbor weight, neg distance
         re_compute_dists = self.dist_func(distance, knn_index, queries, function=self.sim_func)  # [B, S, K]
+
+        if self.pruned_datastore:
+            weights = re_compute_dists.new_tensor(self.weights[knn_index]).squeeze(-1)
+            re_compute_dists = re_compute_dists + weights
 
         scaled_dists = re_compute_dists / temperature
         knn_weight = torch.softmax(scaled_dists, dim=-1).unsqueeze(-1)  # [B, S, K, 1]
