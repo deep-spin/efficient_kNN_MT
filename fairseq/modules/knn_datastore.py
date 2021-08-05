@@ -18,6 +18,7 @@ class KNN_Dstore(object):
         self.sim_func = args.knn_sim_func
         self.dstore_fp16 = args.dstore_fp16
         self.use_gpu_to_search = args.use_gpu_to_search
+        self.pruned_datastore = args.pruned_datastore
         self.vocab_size = trg_vocab_size
 
         self.index = self.setup_faiss(args)
@@ -169,7 +170,7 @@ class KNN_Dstore(object):
                 self.keys = np.memmap(args.dstore_filename + '/keys.npy', dtype=np.float32, mode='r',shape=(self.dstore_size, self.dimension))
 
             self.vals = np.memmap(args.dstore_filename + '/vals.npy', dtype=np.int, mode='r',shape=(self.dstore_size, 1))
-        if args.pruned_datastore:
+        if self.pruned_datastore:
             self.weights = np.memmap(args.dstore_filename+'/weights.npy', dtype=np.int, mode='r', shape=(self.dstore_size, 1))
 
         # If you wish to load all the keys into memory
