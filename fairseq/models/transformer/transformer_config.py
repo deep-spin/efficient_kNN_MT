@@ -238,6 +238,7 @@ class TransformerConfig(FairseqDataclass):
     knn_lambda_value: float = field(default=.5)
     knn_temperature_type: str = field(default='fix')
     knn_temperature_value: float = field(default=10)
+    pruned_datastore: bool = field(default=False)
 
     # We need to make this hierarchical dataclass like the flat namespace
     # __getattr__ and __setattr__ here allow backward compatibility
