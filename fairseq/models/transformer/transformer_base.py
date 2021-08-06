@@ -89,6 +89,18 @@ class TransformerModelBase(FairseqEncoderDecoderModel):
             # fsdp_wrap is a no-op when --ddp-backend != fully_sharded
             encoder = fsdp_wrap(encoder, min_num_params=cfg.min_params_to_wrap)
             decoder = fsdp_wrap(decoder, min_num_params=cfg.min_params_to_wrap)
+
+        if cfg.only_train_knn_parameters:
+            for name, param in encoder.named_parameters():
+                param.requires_grad = False
+
+            for name, param in decoder.named_parameters():
+                param.requires_grad = False
+
+            for name, param in decoder.named_parameters():
+                if "knn_lambda" in name and cfg.knn_lambda_type == "trainable":
+                    param.requires_grad = True
+
         return cls(cfg, encoder, decoder)
 
     @classmethod

@@ -20,6 +20,7 @@ from fairseq.modules import (
     LayerNorm,
     PositionalEmbedding,
     SinusoidalPositionalEmbedding,
+    LambdaMLP
 )
 from fairseq.modules import transformer_layer
 from fairseq.modules.checkpoint_activations import checkpoint_wrapper
@@ -28,6 +29,7 @@ from torch import Tensor
 
 from fairseq.modules.knn_datastore import KNN_Dstore
 
+import pickle
 
 # rewrite name for backward compatibility in `make_generation_fast_`
 def module_name_fordropout(module_name: str) -> str:
@@ -148,8 +150,14 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
         self.use_knn_datastore = cfg.use_knn_datastore
         self.knn_lambda_type = cfg.knn_lambda_type
+        self.knn_lambda_threshold = cfg.knn_lambda_threshold
+        self.knn_lambda_feat = cfg.knn_lambda_feat
         self.knn_temperature_type = cfg.knn_temperature_type
         self.pruned_datastore = cfg.pruned_datastore
+
+         if self.knn_lambda_type == 'trainable':
+            self.lambda_mlp = LambdaMLP.MLP()
+
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
         if cfg.adaptive_softmax_cutoff is not None:
@@ -250,7 +258,25 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             tgt_index = knn_search_result['tgt_index']
 
             knn_temperature = self.knn_datastore.get_temperature()
-            knn_lambda = self.knn_datastore.get_lambda()
+
+            if self.knn_lambda_type == 'trainable':
+                if 'freq' in self.knn_lambda_feat:
+                    print('loading freq cache')
+                    freq = pickle.load(open(os.path.join(self.lambda_cache_feat, 'freq_cache_id.pickle'), 'rb'))
+                else:
+                    freq = None
+
+                if 'fert' in self.knn_lambda_feat:
+                    print('loading fert cache')
+                    fert = pickle.load(open(os.path.join(self.lambda_cache_feat, 'fertility_cache_id.pickle'), 'rb'))
+                else:
+                    fert = None
+
+                prob = torch.softmax(decoder_out_tuple)
+                lambda_features = {'fert': fert, 'freq': freq, 'mt_ent': -(prob*torch.log(prob)).sum(dim=-1), 'mt_max': prob.max(dim=-1)[0],'ctxt': last_hidden}
+                knn_lambda = self.lambda_mlp(lambda_features)
+            else:
+                knn_lambda = self.knn_datastore.get_lambda()
 
             decode_result = self.knn_datastore.calculate_knn_prob(knn_index, tgt_index, knn_dists, last_hidden, knn_temperature)
 

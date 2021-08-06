@@ -96,11 +96,8 @@ class FairseqDecoder(nn.Module):
             knn_lambda = net_output[3]  # [batch, seq len, 1]
             network_probs = utils.softmax(logits, dim=-1, onnx_trace=self.onnx_trace)  # [batch, seq len, vocab size]
 
-            if self.knn_lambda_type == "fix":
-                probs = network_probs * (1 - knn_lambda) + knn_probs * knn_lambda
-            else:
-                probs = network_probs * (1 - knn_lambda) + knn_probs
-
+            probs = network_probs * (1 - knn_lambda) + knn_probs * knn_lambda
+            
             if log_probs:
                 return torch.log(probs)
             else:
