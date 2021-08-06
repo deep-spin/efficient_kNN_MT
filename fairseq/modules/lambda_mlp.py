@@ -49,7 +49,6 @@ class MLP(nn.Module):
 
         models.append(nn.Linear(hidden_units, 2))
 
-        models.append(nn.LogSoftmax(dim=-1))
 
         self.model = nn.Sequential(*models)
 
@@ -72,5 +71,5 @@ class MLP(nn.Module):
             if k != 'ctxt':
                 features_cat.append(self.input_layer[k](features[k]))
 
-        return self.model(torch.cat(features_cat, -1))
+        return torch.softmax(self.model(torch.cat(features_cat, -1)), dim=-1)
 
