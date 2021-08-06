@@ -159,19 +159,40 @@ class KNN_Dstore(object):
 
         index.nprobe = args.probe
 
-        if args.dstore_fp16:
-            print('Keys are fp16 and vals are int32')
-            if not args.no_load_keys:
-                self.keys = np.memmap(args.dstore_filename + '/keys.npy', dtype=np.float16, mode='r',shape=(self.dstore_size, self.dimension))
-            self.vals = np.memmap(args.dstore_filename + '/vals.npy', dtype=np.int, mode='r',shape=(self.dstore_size, 1))
-        else:
-            print('Keys are fp32 and vals are int32')
-            if not args.no_load_keys:
-                self.keys = np.memmap(args.dstore_filename + '/keys.npy', dtype=np.float32, mode='r',shape=(self.dstore_size, self.dimension))
+        if args.multiple_dstores:
+            self.keys=[]
+            self.vals=[]
+            if self.pruned_datastore:
+                self.weights=[]
+            
+            for i in range(len(args.multiple_dstores_path)):
+                path = args.multiple_dstores_path[i]
+                dstore_size = args.multiple_dstores_sizes[i]
+                if args.dstore_fp16:
+                    if not args.no_load_keys:
+                        self.keys.append(np.memmap(path + '/keys.npy', dtype=np.float16, mode='r',shape=(dstore_size, self.dimension)))
+                    self.vals.append(np.memmap(path + '/vals.npy', dtype=np.int, mode='r',shape=(dstore_size, 1)))
+                else:
+                    if not args.no_load_keys:
+                        self.keys.append(np.memmap(path + '/keys.npy', dtype=np.float32, mode='r',shape=(dstore_size, self.dimension)))
+                    self.vals.append(np.memmap(path + '/vals.npy', dtype=np.int, mode='r',shape=(dstore_size, 1)))
+                if self.pruned_datastore:
+                    self.weights.append(np.memmap(path+'/weights.npy', dtype=np.int, mode='r', shape=(dstore_size, 1)))
 
-            self.vals = np.memmap(args.dstore_filename + '/vals.npy', dtype=np.int, mode='r',shape=(self.dstore_size, 1))
-        if self.pruned_datastore:
-            self.weights = np.memmap(args.dstore_filename+'/weights.npy', dtype=np.int, mode='r', shape=(self.dstore_size, 1))
+        else:    
+            if args.dstore_fp16:
+                print('Keys are fp16 and vals are int32')
+                if not args.no_load_keys:
+                    self.keys = np.memmap(args.dstore_filename + '/keys.npy', dtype=np.float16, mode='r',shape=(self.dstore_size, self.dimension))
+                self.vals = np.memmap(args.dstore_filename + '/vals.npy', dtype=np.int, mode='r',shape=(self.dstore_size, 1))
+            else:
+                print('Keys are fp32 and vals are int32')
+                if not args.no_load_keys:
+                    self.keys = np.memmap(args.dstore_filename + '/keys.npy', dtype=np.float32, mode='r',shape=(self.dstore_size, self.dimension))
+
+                self.vals = np.memmap(args.dstore_filename + '/vals.npy', dtype=np.int, mode='r',shape=(self.dstore_size, 1))
+            if self.pruned_datastore:
+                self.weights = np.memmap(args.dstore_filename+'/weights.npy', dtype=np.int, mode='r', shape=(self.dstore_size, 1))
 
         # If you wish to load all the keys into memory
         # CAUTION: Only do this if your RAM can handle it!

@@ -325,7 +325,9 @@ def add_datastore_args(parser):
     group.add_argument("--use-gpu-to-search", default=False, action='store_true')
     group.add_argument("--dstore-filename", default=None, type=str)
     group.add_argument("--probe", default=32, type=int)
-
+    group.add_argument("--multiple_dstores", action='store_true')
+    group.add_argument("--multiple_dstores_paths", default=None, type=list)
+    group.add_argument("--multiple_dstores_sizes", default=None, type=list)
     return parser
 
 def add_dataset_args(parser, train=False, gen=False):
