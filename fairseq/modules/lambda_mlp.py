@@ -15,7 +15,7 @@ class LeakyReLUNet(nn.Module):
         return self.model(features)
 
 
-class MLP(nn.Module):
+class LambdaMLP(nn.Module):
     def __init__(self, feature_size=None, hidden_units=32, nlayers=3, dropout=0, non_ctxt_dim=512, activation='relu'):
         super().__init__()
 
