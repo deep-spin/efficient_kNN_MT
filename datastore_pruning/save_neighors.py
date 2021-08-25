@@ -69,7 +69,8 @@ for id_, i in enumerate(range(args.starting_point, min(args.starting_point + arg
         assert knns.shape[0] == bsz
 
         retrieve[offset:offset + knns.shape[0]] = knns
-        print(batches[0])
+        print(batches[0].shape)
+        
         print(knns[0].shape)
         print(knns[0])
 
