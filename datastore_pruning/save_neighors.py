@@ -51,6 +51,7 @@ index = faiss.read_index(args.faiss_index, faiss.IO_FLAG_ONDISK_SAME_DIR)
 batches = []
 cnt = 0
 offset = 0
+bsz = args.batch_size
 
 score = defaultdict(float)
 t = time.time()
