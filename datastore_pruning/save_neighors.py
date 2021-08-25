@@ -4,6 +4,7 @@ import numpy as np
 import faiss
 import time
 from collections import defaultdict
+import ctypes
 
 
 parser = argparse.ArgumentParser()
@@ -43,10 +44,10 @@ index = faiss.read_index(args.faiss_index, faiss.IO_FLAG_ONDISK_SAME_DIR)
 
 # from https://github.com/numpy/numpy/issues/13172
 # to speed up access to np.memmap
-#madvise = ctypes.CDLL("libc.so.6").madvise
-#madvise.argtypes = [ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int]
-#madvise.restype = ctypes.c_int
-#assert madvise(keys.ctypes.data, keys.size * keys.dtype.itemsize, 1) == 0, "MADVISE FAILED" # 2 means MADV_SEQUENTIAL
+madvise = ctypes.CDLL("libc.so.6").madvise
+madvise.argtypes = [ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int]
+madvise.restype = ctypes.c_int
+assert madvise(keys.ctypes.data, keys.size * keys.dtype.itemsize, 1) == 0, "MADVISE FAILED" # 2 means MADV_SEQUENTIAL
 
 batches = []
 cnt = 0

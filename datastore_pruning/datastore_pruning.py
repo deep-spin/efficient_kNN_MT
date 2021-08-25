@@ -3,6 +3,7 @@ import os
 import numpy as np
 import faiss
 import time
+import ctypes
 
 
 parser = argparse.ArgumentParser()
