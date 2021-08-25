@@ -4,7 +4,7 @@ import numpy as np
 import faiss
 import time
 import ctypes
-
+import random
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--dstore_mmap', type=str, help='memmap where keys and vals are stored')
