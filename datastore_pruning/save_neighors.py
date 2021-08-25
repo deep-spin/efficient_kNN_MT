@@ -38,7 +38,7 @@ else:
 
 save_size = min(args.num, args.dstore_size - args.starting_point)
 
-retrieve =  np.memmap(args.save_dir + f'_size{save_size}_k{args.k}_int32.npy', dtype=np.int32, mode='w+', shape=(save_size, args.k))
+retrieve =  np.memmap(args.save_dir + f'retrieve_start0_size{save_size}_k{args.k}_int32.npy', dtype=np.int32, mode='w+', shape=(save_size, args.k))
 
 index = faiss.read_index(args.faiss_index, faiss.IO_FLAG_ONDISK_SAME_DIR)
 
