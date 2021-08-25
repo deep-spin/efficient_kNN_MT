@@ -35,7 +35,7 @@ else:
     keys = np.memmap(args.dstore_mmap + '/keys.npy', dtype=np.float32, mode='r', shape=(args.dstore_size, args.dimension))
     vals = np.memmap(args.dstore_mmap + '/vals.npy', dtype=np.int, mode='r', shape=(args.dstore_size, 1))
 
-save_size = min(args.num, args.dstore_size - args.start_point)
+save_size = min(args.num, args.dstore_size - args.starting_point)
 
 retrieve =  np.memmap(args.save_dir + f'_size{save_size}_k{args.k}_int32.npy', dtype=np.int32, mode='w+', shape=(save_size, args.k))
 
