@@ -78,14 +78,9 @@ def merge_knn(fname):
 
         # already removed
         if weights[cur_id] <= 0:
-            print('already removed')
             continue
 
         for k, v in enumerate(ret_mem[id_]):
-            print('cur_id', cur_id)
-            print('v', v)
-            print('weights', weights[v])
-            print('vals', vals[v])
             if cur_id != v and weights[v] == 1 and vals[v] == vals[cur_id]:
                 # select one to drop
                 weights[v] = 0
