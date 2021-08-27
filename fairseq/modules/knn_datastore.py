@@ -211,7 +211,7 @@ class KNN_Dstore(object):
                 self.keys = self.keys.astype(np.float16 if args.dstore_fp16 else np.float32)
 
             del self.vals
-            self.vals_from_memmap = np.memmap(args.dstore_filename + '/vals.npy',
+            self.vals_from_memmap = np.memmap(args.dstore_filename + '_vals.npy',
                                               dtype=np.int, mode='r',
                                               shape=(self.dstore_size, 1))
             self.vals = np.zeros((self.dstore_size, 1), dtype=np.int)
