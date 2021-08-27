@@ -170,14 +170,14 @@ class KNN_Dstore(object):
                 dstore_size = args.multiple_dstores_sizes[i]
                 if args.dstore_fp16:
                     if not args.no_load_keys:
-                        self.keys.append(np.memmap(path + '_keys.npy', dtype=np.float16, mode='r',shape=(dstore_size, self.dimension)))
-                    self.vals.append(np.memmap(path + '_vals.npy', dtype=np.int, mode='r',shape=(dstore_size, 1)))
+                        self.keys.append(np.memmap(path + 'keys.npy', dtype=np.float16, mode='r',shape=(dstore_size, self.dimension)))
+                    self.vals.append(np.memmap(path + 'vals.npy', dtype=np.int, mode='r',shape=(dstore_size, 1)))
                 else:
                     if not args.no_load_keys:
-                        self.keys.append(np.memmap(path + '_keys.npy', dtype=np.float32, mode='r',shape=(dstore_size, self.dimension)))
-                    self.vals.append(np.memmap(path + '_vals.npy', dtype=np.int, mode='r',shape=(dstore_size, 1)))
+                        self.keys.append(np.memmap(path + 'keys.npy', dtype=np.float32, mode='r',shape=(dstore_size, self.dimension)))
+                    self.vals.append(np.memmap(path + 'vals.npy', dtype=np.int, mode='r',shape=(dstore_size, 1)))
                 if self.pruned_datastore:
-                    self.weights.append(np.memmap(path+'_weights.npy', dtype=np.int, mode='r', shape=(dstore_size, 1)))
+                    self.weights.append(np.memmap(path+'weights.npy', dtype=np.int, mode='r', shape=(dstore_size, 1)))
 
         else:    
             if args.dstore_fp16:
