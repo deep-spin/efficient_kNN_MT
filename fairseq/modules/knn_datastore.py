@@ -145,7 +145,7 @@ class KNN_Dstore(object):
             raise ValueError('Cannot build a datastore without the data.')
 
         start = time.time()
-        index = faiss.read_index(args.dstore_filename + '_knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
+        index = faiss.read_index(args.dstore_filename + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
         if self.use_gpu_to_search:
             print('put index from cpu to gpu')
             res = faiss.StandardGpuResources()
