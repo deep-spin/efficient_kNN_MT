@@ -131,6 +131,7 @@ def _main(cfg: DictConfig, output_file):
     # (None if no unknown word replacement, empty if no path to align dictionary)
     align_dict = utils.load_align_dict(cfg.generation.replace_unk)
 
+    print(cfg.common.no_progress_bar)
     # Load dataset (possibly sharded)
     itr = task.get_batch_iterator(
         dataset=task.dataset(cfg.dataset.gen_subset),
