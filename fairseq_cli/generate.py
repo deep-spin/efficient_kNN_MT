@@ -377,6 +377,8 @@ def _main(cfg: DictConfig, output_file):
             1.0 / gen_timer.avg,
         )
     )
+
+    print('tokens per second:', 1.0 / gen_timer.avg)
     if has_target:
         if cfg.bpe and not cfg.generation.sacrebleu:
             if cfg.common_eval.post_process:
