@@ -131,7 +131,6 @@ def _main(cfg: DictConfig, output_file):
     # (None if no unknown word replacement, empty if no path to align dictionary)
     align_dict = utils.load_align_dict(cfg.generation.replace_unk)
 
-    print(cfg.common.no_progress_bar)
     # Load dataset (possibly sharded)
     itr = task.get_batch_iterator(
         dataset=task.dataset(cfg.dataset.gen_subset),
@@ -300,7 +299,7 @@ def _main(cfg: DictConfig, output_file):
             gen_timer.sum,
             num_sentences / gen_timer.sum,
             1.0 / gen_timer.avg,))
-    
+    print('tokens per second:', 1.0 / gen_timer.avg)
     if has_target:
         if cfg.bpe and not cfg.generation.sacrebleu:
             if cfg.common_eval.post_process:
