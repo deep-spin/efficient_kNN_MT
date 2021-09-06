@@ -27,7 +27,7 @@ class EncDecBaseConfig(FairseqDataclass):
         default=None, metadata={"help": "path to pre-trained embedding"}
     )
     embed_dim: Optional[int] = field(
-        default=512, metadata={"help": "embedding dimension"}
+        default=1024, metadata={"help": "embedding dimension"}
     )
     ffn_embed_dim: int = field(
         default=2048, metadata={"help": "embedding dimension for FFN"}
