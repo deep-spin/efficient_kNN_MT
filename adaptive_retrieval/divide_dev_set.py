@@ -30,6 +30,7 @@ print(dev_size)
 train_lines = np.random.randint(data_size,size=train_size).tolist()
 
 print(len(train_lines))
+print(train_lines)
 
 for i in range(data_size):
 	if i in train_lines:
