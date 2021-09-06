@@ -27,7 +27,7 @@ print(data_size)
 print(train_size)
 print(dev_size)
 
-train_lines = np.random.randint(data_size,size=train_size).tolist()
+train_lines = np.random.choice(data_size,size=train_size,replace=False).tolist()
 
 print(len(train_lines))
 print(train_lines)
