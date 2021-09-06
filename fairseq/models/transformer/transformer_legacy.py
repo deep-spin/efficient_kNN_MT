@@ -276,5 +276,4 @@ def transformer_wmt19_de_en(args):
 
 @register_model_architecture("transformer", "transformer_wmt19_de_en_with_datastore")
 def transformer_wmt19_de_en_with_datastore(args):
-    args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 8192)
     transformer_wmt19_de_en(args)
