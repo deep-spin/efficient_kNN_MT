@@ -268,7 +268,7 @@ def transformer_wmt_en_de_big_t2t(args):
 @register_model_architecture("transformer", "transformer_wmt19_de_en")
 def transformer_wmt19_de_en(args):
     args.dropout = getattr(args, "dropout", 0.2)
-    args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 4096)
+    args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 8192)
     args.share_decoder_input_output_embed = getattr(args, "share_decoder_input_output_embed", True)
     args.share_all_embeddings = getattr(args, "share_all_embeddings", True)
     transformer_wmt_en_de_big(args)
@@ -276,4 +276,5 @@ def transformer_wmt19_de_en(args):
 
 @register_model_architecture("transformer", "transformer_wmt19_de_en_with_datastore")
 def transformer_wmt19_de_en_with_datastore(args):
+    args.encoder_ffn_embed_dim = getattr(args, "encoder_ffn_embed_dim", 8192)
     transformer_wmt19_de_en(args)
