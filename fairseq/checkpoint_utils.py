@@ -257,12 +257,7 @@ def load_checkpoint(cfg: CheckpointConfig, trainer, **passthrough_args):
         epoch_itr = trainer.get_train_iterator(
             epoch=itr_state["epoch"], load_dataset=True, **passthrough_args
         )
-        print('-------------------------------------------------------------')
-        print('-------------------------------------------------------------')
-        print('-------------------------------------------------------------')
-        print('-------------------------------------------------------------')
-        print('-------------------------------------------------------------')
-        epoch_itr.load_state_dict(itr_state, strict=False)
+        epoch_itr.load_state_dict(itr_state)
     else:
         epoch_itr = trainer.get_train_iterator(
             epoch=1, load_dataset=True, **passthrough_args
