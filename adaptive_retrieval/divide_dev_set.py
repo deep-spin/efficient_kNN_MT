@@ -26,7 +26,7 @@ dev_size = data_size-train_size
 train_lines = np.random.randint(data_size,size=train_size)[0]
 
 for i in range(data_size):
-	if i in train_lines:
+	if i in list(train_lines):
 		file_train_de.write(lines_de[i])
 		file_train_en.write(lines_en[i])
 	else:
