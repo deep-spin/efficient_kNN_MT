@@ -10,11 +10,11 @@ args = parser.parse_args()
 file_de = open(args.data+'.de','r')
 file_en = open(args.data+'.en','r')
 
-file_train_de = open(args.out_dir+'_train.de','r')
-file_train_en = open(args.out_dir+'_train.en','r')
+file_train_de = open(args.out_dir+'train.de','w')
+file_train_en = open(args.out_dir+'train.en','w')
 
-file_dev_de = open(args.out_dir+'_dev.de','r')
-file_dev_en = open(args.out_dir+'_dev.en','r')
+file_dev_de = open(args.out_dir+'dev.de','w')
+file_dev_en = open(args.out_dir+'dev.en','w')
 
 lines_de = file_de.readlines()
 lines_en = file_en.readlines()
