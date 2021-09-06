@@ -30,7 +30,6 @@ for i in range(data_size):
 		file_train_de.write(lines_de[i])
 		file_train_en.write(lines_en[i])
 	else:
-		print(i)
 		file_dev_de.write(lines_de[i])
 		file_dev_en.write(lines_en[i])
 
