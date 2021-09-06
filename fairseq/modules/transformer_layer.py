@@ -53,6 +53,8 @@ class TransformerEncoderLayerBase(nn.Module):
         )
         self.normalize_before = cfg.encoder.normalize_before
 
+        print('-------------------------')
+        print(cfg.encoder.ffn_embed_dim)
         self.fc1 = self.build_fc1(
             self.embed_dim,
             cfg.encoder.ffn_embed_dim,
