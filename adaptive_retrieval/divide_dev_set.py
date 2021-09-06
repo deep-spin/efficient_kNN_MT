@@ -33,11 +33,11 @@ print(len(train_lines))
 print(train_lines)
 
 for i in range(data_size):
-	print(i)
 	if i in train_lines:
 		file_train_de.write(lines_de[i])
 		file_train_en.write(lines_en[i])
 	else:
+		print(i)
 		file_dev_de.write(lines_de[i])
 		file_dev_en.write(lines_en[i])
 
