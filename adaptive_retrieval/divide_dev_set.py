@@ -20,7 +20,7 @@ lines_de = file_de.readlines()
 lines_en = file_en.readlines()
 
 data_size = len(lines)
-train_size = int(.9*len(lines))
+train_size = int(.9*len(lines_de))
 dev_size = data_size-train_size
 
 train_lines = np.random.randint(data_size,train_size)[0]
