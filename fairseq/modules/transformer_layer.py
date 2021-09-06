@@ -52,6 +52,8 @@ class TransformerEncoderLayerBase(nn.Module):
             float(activation_dropout_p), module_name=self.__class__.__name__
         )
         self.normalize_before = cfg.encoder.normalize_before
+
+        cfg.encoder.ffn_embed_dim=4096
         self.fc1 = self.build_fc1(
             self.embed_dim,
             cfg.encoder.ffn_embed_dim,
