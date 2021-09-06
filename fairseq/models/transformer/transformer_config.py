@@ -34,7 +34,7 @@ class EncDecBaseConfig(FairseqDataclass):
     )
     layers: int = field(default=6, metadata={"help": "number of layers"})
     attention_heads: int = field(
-        default=8, metadata={"help": "number of attention heads"}
+        default=6, metadata={"help": "number of attention heads"}
     )
     normalize_before: bool = field(
         default=False, metadata={"help": "apply layernorm before each block"}
