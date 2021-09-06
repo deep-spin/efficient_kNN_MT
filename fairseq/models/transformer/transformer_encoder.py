@@ -51,7 +51,7 @@ class TransformerEncoderBase(FairseqEncoder):
         super().__init__(dictionary)
         self.register_buffer("version", torch.Tensor([3]))
 
-        cfg.encoder.ffn_embed_dim = 8192
+        cfg.encoder.ffn_embed_dim = 4096
 
         self.dropout_module = FairseqDropout(
             cfg.dropout, module_name=module_name_fordropout(self.__class__.__name__)
