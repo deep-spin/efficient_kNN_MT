@@ -30,7 +30,7 @@ class EncDecBaseConfig(FairseqDataclass):
         default=1024, metadata={"help": "embedding dimension"}
     )
     ffn_embed_dim: int = field(
-        default=4096, metadata={"help": "embedding dimension for FFN"}
+        default=8192, metadata={"help": "embedding dimension for FFN"}
     )
     layers: int = field(default=6, metadata={"help": "number of layers"})
     attention_heads: int = field(
