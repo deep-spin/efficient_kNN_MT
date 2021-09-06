@@ -52,6 +52,7 @@ class EncDecBaseConfig(FairseqDataclass):
 @dataclass
 class DecoderConfig(EncDecBaseConfig):
     input_dim: int = II("model.decoder.embed_dim")
+    ffn_embed_dim : int  = field(default=4096)
     output_dim: int = field(
         default=II("model.decoder.embed_dim"),
         metadata={
