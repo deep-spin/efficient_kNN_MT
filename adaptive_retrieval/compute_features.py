@@ -11,8 +11,6 @@ import numpy as np
 from fairseq.data import Dictionary
 from collections import Counter, defaultdict
 
-from datasets import load_dataset
-
 parser = argparse.ArgumentParser(description='')
 parser.add_argument('--data', type=str, help='the text file used to compute the statistics')
 parser.add_argument('--cache', type=str, help='the frequency cache dir')
