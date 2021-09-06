@@ -23,14 +23,7 @@ data_size = len(lines_de)
 train_size = int(.9*data_size)
 dev_size = data_size-train_size
 
-print(data_size)
-print(train_size)
-print(dev_size)
-
 train_lines = np.random.choice(data_size,size=train_size,replace=False).tolist()
-
-print(len(train_lines))
-print(train_lines)
 
 for i in range(data_size):
 	if i in train_lines:
