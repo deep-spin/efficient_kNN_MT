@@ -472,8 +472,6 @@ class Trainer(object):
 
             # load model parameters
             try:
-                print('-------------------------')
-                print(state['model'])
                 self.model.load_state_dict(
                     state["model"], strict=True, model_cfg=self.cfg.model
                 )
