@@ -23,6 +23,10 @@ data_size = len(lines_de)
 train_size = int(.9*data_size)
 dev_size = data_size-train_size
 
+print(data_size)
+print(train_size)
+print(dev_size)
+
 train_lines = np.random.randint(data_size,size=train_size).tolist()
 
 for i in range(data_size):
