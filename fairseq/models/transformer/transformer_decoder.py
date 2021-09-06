@@ -156,7 +156,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.pruned_datastore = cfg.pruned_datastore
 
         if self.knn_lambda_type == 'trainable':
-            self.lambda_mlp = LambdaMLP.MLP()
+            self.lambda_mlp = LambdaMLP
 
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
@@ -274,7 +274,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                 prob = torch.softmax(decoder_out_tuple)
                 lambda_features = {'fert': fert, 'freq': freq, 'mt_ent': -(prob*torch.log(prob)).sum(dim=-1), 'mt_max': prob.max(dim=-1)[0],'ctxt': last_hidden}
-                knn_lambda = self.lambda_mlp(lambda_features)
+                knn_lambda = self.lambda_mlp.forward(lambda_features)
             else:
                 knn_lambda = self.knn_datastore.get_lambda()
 
