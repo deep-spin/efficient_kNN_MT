@@ -263,11 +263,6 @@ class Trainer(object):
         return self._lr_scheduler
 
     def _build_optimizer(self):
-        print('---------------')
-        print('parameters')
-        for n in self.model.parameters():
-            print(n)
-        print('---------------')
         params = list(
             filter(
                 lambda p: p.requires_grad,
@@ -305,10 +300,7 @@ class Trainer(object):
         else:
             if self.cuda and torch.cuda.get_device_capability(0)[0] >= 7:
                 logger.info("NOTE: your device may support faster training with --fp16 or --amp")
-            print('---------------')
-            print('---------------')
-            print('---------------')
-            print(params)
+
             self._optimizer = optim.build_optimizer(self.cfg.optimizer, params)
 
         if self.is_fsdp:
