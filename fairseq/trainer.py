@@ -264,7 +264,9 @@ class Trainer(object):
 
     def _build_optimizer(self):
         print('---------------')
-        print('parameters', self.model.parameters())
+        print('parameters')
+        for n, p in self.model.parameters():
+            print(n)
         print('---------------')
         params = list(
             filter(
