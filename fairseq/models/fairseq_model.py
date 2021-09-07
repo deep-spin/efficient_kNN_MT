@@ -139,14 +139,15 @@ class BaseFairseqModel(nn.Module):
             state_dict (dict): state dictionary to upgrade, in place
             name (str): the state dict key corresponding to the current module
         """
+
         assert state_dict is not None
 
         def do_upgrade(m, prefix):
+            print(',,,,,,,,,,,')
             if len(prefix) > 0:
                 prefix += "."
 
             for n, c in m.named_children():
-                print(n,c)
                 name = prefix + n
                 if hasattr(c, "upgrade_state_dict_named"):
                     c.upgrade_state_dict_named(state_dict, name)
