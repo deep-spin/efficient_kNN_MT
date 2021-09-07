@@ -116,11 +116,7 @@ class BaseFairseqModel(nn.Module):
         if model_cfg is None and args is not None:
             logger.warn("using 'args' is deprecated, please update your code to use dataclass config")
             model_cfg = convert_namespace_to_omegaconf(args).model
-
-        print('---------------------------------')
-        print('---------------------------------')
-        print('---------------------------------')
-        print('---------------------------------')
+            
         self.upgrade_state_dict(state_dict)
 
         from fairseq.checkpoint_utils import prune_state_dict
