@@ -263,7 +263,9 @@ class Trainer(object):
         return self._lr_scheduler
 
     def _build_optimizer(self):
-        print('parameters', self.model.parameters)
+        print('---------------')
+        print('parameters', self.model.parameters())
+        print('---------------')
         params = list(
             filter(
                 lambda p: p.requires_grad,
