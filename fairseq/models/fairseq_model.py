@@ -146,6 +146,7 @@ class BaseFairseqModel(nn.Module):
                 prefix += "."
 
             for n, c in m.named_children():
+                print(n,c)
                 name = prefix + n
                 if hasattr(c, "upgrade_state_dict_named"):
                     c.upgrade_state_dict_named(state_dict, name)
