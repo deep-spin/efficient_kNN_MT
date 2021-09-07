@@ -143,7 +143,6 @@ class BaseFairseqModel(nn.Module):
         assert state_dict is not None
 
         def do_upgrade(m, prefix):
-            print(',,,,,,,,,,,')
             if len(prefix) > 0:
                 prefix += "."
 

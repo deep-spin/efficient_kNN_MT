@@ -482,6 +482,8 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 if not self.share_input_output_embed:
                     del state_dict[embed_out_key]
 
+            print(state_dict)
+
         for i in range(self.num_layers):
             # update layer norms
             layer_norm_map = {
