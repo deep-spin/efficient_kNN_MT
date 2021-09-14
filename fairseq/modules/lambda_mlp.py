@@ -58,10 +58,9 @@ class LambdaMLP(nn.Module):
 
         for k in self.feature_set:
             if k != 'ctxt':
-                print(k)
-                print(features[k])
-                print(features[k].shape)
                 features_cat.append(self.input_layer[k](features[k]))
+
+        print(torch.cat(features_cat, -1).shape)
 
         return torch.softmax(self.model(torch.cat(features_cat, -1)), dim=-1)
 

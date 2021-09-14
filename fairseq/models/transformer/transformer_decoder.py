@@ -285,7 +285,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     else:
                         mt_max = None
                 
-                print(last_hidden.shape)
                 lambda_features = {'fert': fert, 'freq': freq, 'mt_ent': mt_ent, 'mt_max': mt_max,'ctxt': last_hidden}
                 knn_lambda = self.lambda_mlp.forward(lambda_features)
             else:
