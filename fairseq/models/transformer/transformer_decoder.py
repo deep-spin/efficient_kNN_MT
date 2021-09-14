@@ -156,6 +156,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.knn_lambda_feat = cfg.knn_lambda_feat
         self.knn_temperature_type = cfg.knn_temperature_type
         self.pruned_datastore = cfg.pruned_datastore
+        self.lambda_cache_feat = cfg.lambda_cache_feat
 
         if self.knn_lambda_type == 'trainable':
             feature_set = ['ctxt', 'freq', 'lm_ent', 'lm_max', 'fert']
