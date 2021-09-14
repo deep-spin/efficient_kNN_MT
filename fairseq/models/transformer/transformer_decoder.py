@@ -275,7 +275,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 else:
                     fert = None
 
-                prob = torch.softmax(decoder_out_tuple)
+                prob = torch.softmax(x)
                 lambda_features = {'fert': fert, 'freq': freq, 'mt_ent': -(prob*torch.log(prob)).sum(dim=-1), 'mt_max': prob.max(dim=-1)[0],'ctxt': last_hidden}
                 knn_lambda = self.lambda_mlp.forward(lambda_features)
             else:
