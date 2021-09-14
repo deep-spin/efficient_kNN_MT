@@ -159,7 +159,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.lambda_cache_feat = cfg.lambda_cache_feat
 
         if self.knn_lambda_type == 'trainable':
-            feature_set = ['ctxt', 'freq', 'lm_ent', 'lm_max', 'fert']
+            feature_set = ['ctxt', 'lm_ent', 'lm_max']
             self.lambda_mlp = lambda_mlp.LambdaMLP(feature_set)
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
