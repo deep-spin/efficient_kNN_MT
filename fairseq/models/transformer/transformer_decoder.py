@@ -272,6 +272,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 if 'fert' in self.knn_lambda_feat:
                     print('loading fert cache')
                     fert = pickle.load(open(os.path.join(self.lambda_cache_feat, 'fertility_cache.pickle'), 'rb'))
+                    print(fert)
                 else:
                     fert = None
 
