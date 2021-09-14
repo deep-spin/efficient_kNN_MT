@@ -31,7 +31,7 @@ from fairseq.modules.knn_datastore import KNN_Dstore
 
 import pickle
 from collections import Counter, OrderedDict
-
+import os
 
 # rewrite name for backward compatibility in `make_generation_fast_`
 def module_name_fordropout(module_name: str) -> str:
