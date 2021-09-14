@@ -9,8 +9,6 @@ class LeakyReLUNet(nn.Module):
             nn.Linear(in_feat, out_feat),
             nn.LeakyReLU(),
             nn.Linear(out_feat, out_feat),)
-        
-        print(',,,,,,,,,,,,,,')
 
     def forward(self, features):
         return self.model(features)
