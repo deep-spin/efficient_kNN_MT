@@ -53,13 +53,13 @@ class LambdaMLP(nn.Module):
 
         self.input_layer = nn.ModuleDict(input_layer)
 
-        self.feature_size = feature_size
+        self.feature_set = feature_set
 
     def forward(self, features):
 
-        features_cat = [features['ctxt']] if 'ctxt' in self.feature_size else []
+        features_cat = [features['ctxt']] if 'ctxt' in self.feature_set else []
 
-        for k in self.feature_size:
+        for k in self.feature_set:
             if k != 'ctxt':
                 features_cat.append(self.input_layer[k](features[k]))
 
