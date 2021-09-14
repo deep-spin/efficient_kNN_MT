@@ -159,7 +159,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         if self.knn_lambda_type == 'trainable':
             print('------------------------------')
             self.lambda_mlp = lambda_mlp.LambdaMLP
-            print(self.lambda_mlp.model)
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
         if cfg.adaptive_softmax_cutoff is not None:
@@ -262,6 +261,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             knn_temperature = self.knn_datastore.get_temperature()
 
             if self.knn_lambda_type == 'trainable':
+                print('gggggggggggggggggggggggggggggggggggggggg')
                 if 'freq' in self.knn_lambda_feat:
                     print('loading freq cache')
                     freq = pickle.load(open(os.path.join(self.lambda_cache_feat, 'freq_cache_id.pickle'), 'rb'))
