@@ -159,7 +159,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         if self.knn_lambda_type == 'trainable':
             print('------------------------------')
             self.lambda_mlp = LambdaMLP
-            print(self.lambda_mlp)
+            print(self.lambda_mlp.model)
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
         if cfg.adaptive_softmax_cutoff is not None:
