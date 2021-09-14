@@ -47,11 +47,9 @@ class LambdaMLP(nn.Module):
         print(self.model)
 
         input_layer = {}
-        if non_ctxt_size != 0:
-            ndim = non_ctxt_dim // non_ctxt_size
-            for k in feature_size:
-                if k != 'ctxt':
-                    input_layer[k] = LeakyReLUNet(feature_size[k], ndim)
+        for k in feature_size:
+            if k != 'ctxt':
+                input_layer[k] = LeakyReLUNet(feature_size[k], ndim)
 
         self.input_layer = nn.ModuleDict(input_layer)
 
