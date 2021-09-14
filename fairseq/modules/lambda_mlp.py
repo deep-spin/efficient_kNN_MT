@@ -15,20 +15,12 @@ class LeakyReLUNet(nn.Module):
 
 
 class LambdaMLP(nn.Module):
-    def __init__(self, feature_size=None, hidden_units=32, nlayers=3, dropout=0, non_ctxt_dim=512, activation='relu'):
+    def __init__(self, feature_set=None, hidden_units=32, nlayers=3, dropout=0,ctxt_dim=1024, non_ctxt_dim=512, activation='relu'):
         super().__init__()
 
-        if 'ctxt' in feature_size:
-            non_ctxt_dim = feature_size['ctxt']
 
-        non_ctxt_size = len([x for x in feature_size if x != 'ctxt'])
+        non_ctxt_dim=4*non_ctxt_dim
 
-        if non_ctxt_size != 0:
-            non_ctxt_dim = (non_ctxt_dim // non_ctxt_size) * non_ctxt_size
-        else:
-            non_ctxt_dim = 0
-
-        ctxt_dim = feature_size.get('ctxt', 0)
         models = [nn.Linear(ctxt_dim + non_ctxt_dim, hidden_units), nn.Dropout(p=dropout)]
         if activation == 'relu':
             models.append(nn.ReLU())
