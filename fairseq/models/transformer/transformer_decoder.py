@@ -155,7 +155,9 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.knn_temperature_type = cfg.knn_temperature_type
         self.pruned_datastore = cfg.pruned_datastore
 
+        print('sssssssssssss')
         if self.knn_lambda_type == 'trainable':
+            print('------------------------------')
             self.lambda_mlp = LambdaMLP
 
 
