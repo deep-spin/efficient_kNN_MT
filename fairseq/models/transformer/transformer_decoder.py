@@ -260,7 +260,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             tgt_index = knn_search_result['tgt_index']
 
             knn_temperature = self.knn_datastore.get_temperature()
-
+            self.knn_lambda_feat=['freq','fert']
             if self.knn_lambda_type == 'trainable':
                 if 'freq' in self.knn_lambda_feat:
                     print('loading freq cache')
