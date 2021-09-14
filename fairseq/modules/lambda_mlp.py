@@ -58,6 +58,7 @@ class LambdaMLP(nn.Module):
 
         for k in self.feature_set:
             if k != 'ctxt':
+                print(k)
                 print(features[k])
                 features_cat.append(self.input_layer[k](features[k]))
 
