@@ -265,13 +265,13 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             if self.knn_lambda_type == 'trainable':
                 if 'freq' in self.knn_lambda_feat:
                     print('loading freq cache')
-                    freq = pickle.load(open(os.path.join(self.lambda_cache_feat, 'freq_cache_id.pickle'), 'rb'))
+                    freq = pickle.load(open(os.path.join(self.lambda_cache_feat, 'freq_cache.pickle'), 'rb'))
                 else:
                     freq = None
 
                 if 'fert' in self.knn_lambda_feat:
                     print('loading fert cache')
-                    fert = pickle.load(open(os.path.join(self.lambda_cache_feat, 'fertility_cache_id.pickle'), 'rb'))
+                    fert = pickle.load(open(os.path.join(self.lambda_cache_feat, 'fertility_cache.pickle'), 'rb'))
                 else:
                     fert = None
 
