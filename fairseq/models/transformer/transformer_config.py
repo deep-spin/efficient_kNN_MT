@@ -238,8 +238,7 @@ class TransformerConfig(FairseqDataclass):
     knn_lambda_type: str = field(default='fix')
     knn_lambda_value: float = field(default=.5)
     knn_lambda_threshold: float = field(default=0)
-    l=['freq','fert']
-    knn_lambda_feat: List = field(default_factory=l)
+    knn_lambda_feat: List = field(default_factory=list)
     lambda_cache_feat: str = field(default=None)
     knn_temperature_type: str = field(default='fix')
     knn_temperature_value: float = field(default=10)
