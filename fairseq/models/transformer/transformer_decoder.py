@@ -261,7 +261,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             tgt_index = knn_search_result['tgt_index']
 
             knn_temperature = self.knn_datastore.get_temperature()
-            self.knn_lambda_feat=['freq','fert']
+            self.knn_lambda_feat=['ctxt', 'lm_ent', 'lm_max']
             if self.knn_lambda_type == 'trainable':
                 if 'freq' in self.knn_lambda_feat:
                     print('loading freq cache')
@@ -272,7 +272,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 if 'fert' in self.knn_lambda_feat:
                     print('loading fert cache')
                     fert = pickle.load(open(os.path.join(self.lambda_cache_feat, 'fertility_cache.pickle'), 'rb'))
-                    print(fert)
                 else:
                     fert = None
 
