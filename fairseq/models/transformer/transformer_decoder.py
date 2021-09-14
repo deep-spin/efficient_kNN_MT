@@ -286,12 +286,11 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                         mt_max = None
                 
                 lambda_features = {'fert': fert, 'freq': freq, 'mt_ent': mt_ent, 'mt_max': mt_max,'ctxt': last_hidden}
-                knn_lambda = self.lambda_mlp.forward(lambda_features)[:,:,0]
+                knn_lambda = self.lambda_mlp.forward(lambda_features)[:,:,0].unsqueeze(-1)
             else:
                 knn_lambda = self.knn_datastore.get_lambda()
 
             print(knn_lambda.shape)
-            print(knn_lambda)
             decode_result = self.knn_datastore.calculate_knn_prob(knn_index, tgt_index, knn_dists, last_hidden, knn_temperature)
 
             knn_prob = decode_result['prob']
