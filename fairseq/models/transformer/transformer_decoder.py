@@ -157,7 +157,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
         print('sssssssssssss')
         if self.knn_lambda_type == 'trainable':
-            print('------------------------------')
             self.lambda_mlp = LambdaMLP
 
 

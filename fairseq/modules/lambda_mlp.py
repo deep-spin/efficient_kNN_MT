@@ -52,6 +52,9 @@ class LambdaMLP(nn.Module):
 
         self.model = nn.Sequential(*models)
 
+        print(',,,,,,,,,,,,,,')
+        print(self.model)
+
         input_layer = {}
         if non_ctxt_size != 0:
             ndim = non_ctxt_dim // non_ctxt_size
