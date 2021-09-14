@@ -19,7 +19,7 @@ class LambdaMLP(nn.Module):
         super().__init__()
 
 
-        non_ctxt_dim=len(feature_set)-1*non_ctxt_dim
+        non_ctxt_dim=(len(feature_set)-1)*non_ctxt_dim
 
         models = [nn.Linear(ctxt_dim + non_ctxt_dim, hidden_units), nn.Dropout(p=dropout)]
         if activation == 'relu':
@@ -60,7 +60,7 @@ class LambdaMLP(nn.Module):
             if k != 'ctxt':
                 features_cat.append(self.input_layer[k](features[k]))
 
-        print(torch.cat(features_cat, -1).shape)
+        print('features_cat',torch.cat(features_cat, -1).shape)
 
         return torch.softmax(self.model(torch.cat(features_cat, -1)), dim=-1)
 
