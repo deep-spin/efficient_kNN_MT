@@ -159,8 +159,8 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.lambda_cache_feat = cfg.lambda_cache_feat
 
         if self.knn_lambda_type == 'trainable':
-            feature_set = ['ctxt']
-            self.lambda_mlp = lambda_mlp.LambdaMLP(feature_set)
+            self.knn_lambda_feat = ['ctxt']
+            self.lambda_mlp = lambda_mlp.LambdaMLP(self.knn_lambda_feat)
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
         if cfg.adaptive_softmax_cutoff is not None:
@@ -261,7 +261,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             tgt_index = knn_search_result['tgt_index']
 
             knn_temperature = self.knn_datastore.get_temperature()
-            self.knn_lambda_feat=feature_set
             if self.knn_lambda_type == 'trainable':
                 if 'freq' in self.knn_lambda_feat:
                     print('loading freq cache')
