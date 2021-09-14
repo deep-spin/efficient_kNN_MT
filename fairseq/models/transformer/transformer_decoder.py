@@ -21,7 +21,7 @@ from fairseq.modules import (
     PositionalEmbedding,
     SinusoidalPositionalEmbedding,
 )
-from fairseq.modules.lambda_mlp import LambdaMLP
+from fairseq.modules import lambda_mlp
 from fairseq.modules import transformer_layer
 from fairseq.modules.checkpoint_activations import checkpoint_wrapper
 from fairseq.modules.quant_noise import quant_noise as apply_quant_noise_
@@ -158,7 +158,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         print('sssssssssssss')
         if self.knn_lambda_type == 'trainable':
             print('------------------------------')
-            self.lambda_mlp = LambdaMLP
+            self.lambda_mlp = lambda_mlp.LambdaMLP
             print(self.lambda_mlp.model)
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
