@@ -30,6 +30,8 @@ from torch import Tensor
 from fairseq.modules.knn_datastore import KNN_Dstore
 
 import pickle
+from collections import Counter, OrderedDict
+
 
 # rewrite name for backward compatibility in `make_generation_fast_`
 def module_name_fordropout(module_name: str) -> str:
@@ -157,8 +159,10 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
         print('sssssssssssss')
         if self.knn_lambda_type == 'trainable':
+            feature_set = ['ctxt', 'freq', 'lm_ent', 'lm_max', 'fert']
+            feature_size = OrderedDict({key: training_set.get_nfeature(key) for key in feature_set})
             print('------------------------------')
-            self.lambda_mlp = lambda_mlp.LambdaMLP()
+            self.lambda_mlp = lambda_mlp.LambdaMLP(feature_size)
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
         if cfg.adaptive_softmax_cutoff is not None:
