@@ -286,7 +286,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                         mt_max = None
                 
                 lambda_features = {'fert': fert, 'freq': freq, 'mt_ent': mt_ent, 'mt_max': mt_max,'ctxt': last_hidden}
-                knn_lambda = self.lambda_mlp.forward(lambda_features)[:,:,0].squeeze(-1)
+                knn_lambda = self.lambda_mlp.forward(lambda_features)[:,:,0]
             else:
                 knn_lambda = self.knn_datastore.get_lambda()
 
