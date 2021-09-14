@@ -43,9 +43,6 @@ class LambdaMLP(nn.Module):
 
         self.model = nn.Sequential(*models)
 
-        print(',,,,,,,,,,,,,,')
-        print(self.model)
-
         input_layer = {}
         for k in feature_set:
             if k != 'ctxt':
