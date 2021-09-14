@@ -261,7 +261,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             tgt_index = knn_search_result['tgt_index']
 
             knn_temperature = self.knn_datastore.get_temperature()
-            self.knn_lambda_feat=['ctxt', 'mt_ent', 'mt_max']
+            self.knn_lambda_feat=feature_set
             if self.knn_lambda_type == 'trainable':
                 if 'freq' in self.knn_lambda_feat:
                     print('loading freq cache')
@@ -275,9 +275,19 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 else:
                     fert = None
 
-                prob = torch.softmax(x,dim=-1)
-                print(prob.shape)
-                lambda_features = {'fert': fert, 'freq': freq, 'mt_ent': -(prob*torch.log(prob)).sum(dim=-1), 'mt_max': prob.max(dim=-1)[0],'ctxt': last_hidden}
+                if 'mt_ent' or 'mt_max' in self.knn_lambda_feat:
+                    prob = torch.softmax(x,dim=-1)
+                    if 'mt_ent' in self.knn_lambda_feat:
+                        mt_ent = -(prob*torch.log(prob)).sum(dim=-1)
+                    else:
+                        mt_ent = None 
+                    if 'mt_max' in self.knn_lambda_feat:
+                        mt_max = prob.max(dim=-1)[0]
+                    else:
+                        mt_max = None
+                
+                print(last_hidden.shape)
+                lambda_features = {'fert': fert, 'freq': freq, 'mt_ent': mt_ent, 'mt_max': mt_max,'ctxt': last_hidden}
                 knn_lambda = self.lambda_mlp.forward(lambda_features)
             else:
                 knn_lambda = self.knn_datastore.get_lambda()

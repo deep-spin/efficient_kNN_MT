@@ -19,7 +19,7 @@ class LambdaMLP(nn.Module):
         super().__init__()
 
 
-        non_ctxt_dim=2*non_ctxt_dim
+        non_ctxt_dim=len(feature_set)-1*non_ctxt_dim
 
         models = [nn.Linear(ctxt_dim + non_ctxt_dim, hidden_units), nn.Dropout(p=dropout)]
         if activation == 'relu':
