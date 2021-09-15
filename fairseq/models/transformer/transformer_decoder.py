@@ -483,12 +483,16 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         if f"{name}.output_projection.weight" not in state_dict:
             print('ddddddddddddddddddddddddddddddddddddd')
             if self.share_input_output_embed:
+                print('aaaaaaaaaaaaaaaaaaaaaa')
                 embed_out_key = f"{name}.embed_tokens.weight"
             else:
+                print('xxxxxxxxxxxxxxxxxxxxxxxxxx')
                 embed_out_key = f"{name}.embed_out"
-            state_dict[f"{name}.output_projection.weight"] = state_dict[embed_out_key]
-            if not self.share_input_output_embed:
-                del state_dict[embed_out_key]
+            if embed_out_key in state_dict:
+                print('----------------------------')
+                state_dict[f"{name}.output_projection.weight"] = state_dict[embed_out_key]
+                if not self.share_input_output_embed:
+                    del state_dict[embed_out_key]
 
         for i in range(self.num_layers):
             # update layer norms
