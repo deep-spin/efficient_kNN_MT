@@ -263,14 +263,20 @@ class Trainer(object):
         return self._lr_scheduler
 
     def _build_optimizer(self):
-        params = list(
-            filter(
-                lambda p[1]: p[1].requires_grad,
-                chain(self.model.named_parameters(), self.criterion.named_parameters()),
-            )
-        )
-        print('ppppppppppppppppppppppppppppppp')
-        print([p[0] for p in self.model.named_parameters()])
+        #params = list(
+        #    filter(
+        #        lambda p: p.requires_grad,
+        #        chain(self.model.parameters(), self.criterion.parameters()),
+        #    )
+        #)
+        params=[]
+        for n, p in self.model.named_parameters():
+            if 'lambda' in n and p.requires_grad:
+                params.append(p)
+        for p in self.criterion.parameters():
+            if p.requires_grad:
+                params.append(p)
+                
         if self.is_fsdp and self.cfg.common.fp16:
             # FullyShardedDataParallel always uses MemoryEfficientFP16 wrapper,
             # mostly for the grad scaling. But if we don't have the
