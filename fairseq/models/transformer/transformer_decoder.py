@@ -290,8 +290,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             else:
                 knn_lambda = self.knn_datastore.get_lambda()
 
-            print(knn_lambda)
-            print(knn_lambda.grad_fn)
             decode_result = self.knn_datastore.calculate_knn_prob(knn_index, tgt_index, knn_dists, last_hidden, knn_temperature)
 
             knn_prob = decode_result['prob']
