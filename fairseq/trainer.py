@@ -799,7 +799,7 @@ class Trainer(object):
                     and self.cfg.distributed_training.ddp_backend != "slow_mo"
                 ):
                     self._check_grad_norms(grad_norm)
-                print(grad_norm)
+                print(grad_norm.item())
                 if not torch.isfinite(grad_norm).all():
                     # in case of AMP, if gradients are Nan/Inf then
                     # optimizer step is still required
