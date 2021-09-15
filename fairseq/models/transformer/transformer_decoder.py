@@ -471,7 +471,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
     def upgrade_state_dict_named(self, state_dict, name):
         """Upgrade a (possibly old) state dict for new versions of fairseq."""
-        print('ssssssssssssssssssssssssssssssssssssssssssssssssssssssss')
         if isinstance(self.embed_positions, SinusoidalPositionalEmbedding):
             weights_key = "{}.embed_positions.weights".format(name)
             if weights_key in state_dict:
@@ -481,13 +480,11 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             ] = torch.FloatTensor(1)
 
         if f"{name}.output_projection.weight" not in state_dict:
-            print('ddddddddddddddddddddddddddddddddddddd')
             if self.share_input_output_embed:
                 embed_out_key = f"{name}.embed_tokens.weight"
             else:
                 embed_out_key = f"{name}.embed_out"
             if embed_out_key in state_dict:
-                print('----------------------------')
                 state_dict[f"{name}.output_projection.weight"] = state_dict[embed_out_key]
                 if not self.share_input_output_embed:
                     del state_dict[embed_out_key]
