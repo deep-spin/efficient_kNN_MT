@@ -98,8 +98,7 @@ class TransformerModelBase(FairseqEncoderDecoderModel):
                 param.requires_grad = False
 
             for name, param in decoder.named_parameters():
-                if "lambda" in name and cfg.knn_lambda_type == "trainable"
-                or "embed" in name:
+                if "lambda" in name and cfg.knn_lambda_type == "trainable" or "embed" in name:
                     param.requires_grad = True
 
         return cls(cfg, encoder, decoder)
