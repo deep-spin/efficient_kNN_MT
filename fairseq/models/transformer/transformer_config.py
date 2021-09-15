@@ -117,7 +117,7 @@ class TransformerConfig(FairseqDataclass):
         metadata={"help": "Maximum output length supported by the decoder"},
     )
     share_decoder_input_output_embed: bool = field(
-        default=False, metadata={"help": "share decoder input and output embeddings"}
+        default=True, metadata={"help": "share decoder input and output embeddings"}
     )
     share_all_embeddings: bool = field(
         default=False,

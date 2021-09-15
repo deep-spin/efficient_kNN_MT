@@ -486,8 +486,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 embed_out_key = f"{name}.embed_tokens.weight"
             else:
                 embed_out_key = f"{name}.embed_out"
-                print(embed_out_key)
-            print(state_dict)
             if embed_out_key in state_dict:
                 print('----------------------------')
                 state_dict[f"{name}.output_projection.weight"] = state_dict[embed_out_key]
