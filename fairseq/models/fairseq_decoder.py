@@ -102,7 +102,7 @@ class FairseqDecoder(nn.Module):
             
             if log_probs:
                     probs=torch.log(probs).clamp_(min=1e-6)
-                return 
+                return probs
             else:
                 return probs
 
