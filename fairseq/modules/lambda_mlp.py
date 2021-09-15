@@ -15,7 +15,7 @@ class LeakyReLUNet(nn.Module):
 
 
 class LambdaMLP(nn.Module):
-    def __init__(self, feature_set=None, hidden_units=128, nlayers=4, dropout=0.2,ctxt_dim=1024, non_ctxt_dim=512, activation='relu'):
+    def __init__(self, feature_set=None, hidden_units=128, nlayers=4, dropout=0.2, ctxt_dim=1024, non_ctxt_dim=512, activation='relu'):
         super().__init__()
 
 
@@ -60,5 +60,9 @@ class LambdaMLP(nn.Module):
             if k != 'ctxt':
                 features_cat.append(self.input_layer[k](features[k]))
 
-        return torch.softmax(self.model(torch.cat(features_cat, -1)), dim=-1)
+        lambdas = torch.softmax(self.model(torch.cat(features_cat, -1)), dim=-1)
+
+        print(lambdas)
+
+        return lambdas
 
