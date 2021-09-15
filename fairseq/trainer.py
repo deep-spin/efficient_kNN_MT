@@ -265,8 +265,8 @@ class Trainer(object):
     def _build_optimizer(self):
         params = list(
             filter(
-                lambda p: p.requires_grad,
-                chain(self.model.parameters(), self.criterion.parameters()),
+                lambda p[1]: p[1].requires_grad,
+                chain(self.model.named_parameters(), self.criterion.named_parameters()),
             )
         )
         print('ppppppppppppppppppppppppppppppp')
