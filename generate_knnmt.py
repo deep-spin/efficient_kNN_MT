@@ -127,8 +127,7 @@ def _main(cfg: DictConfig, output_file):
             model.cuda()
         model.prepare_for_inference_(cfg)
 
-    print(models[0])
-    print(models[0].decoder)
+    print(models[0].decoder.output_projection)
     # Load alignment dictionary for unknown word replacement
     # (None if no unknown word replacement, empty if no path to align dictionary)
     align_dict = utils.load_align_dict(cfg.generation.replace_unk)
