@@ -62,7 +62,7 @@ class LambdaMLP(nn.Module):
 
         lambdas = torch.softmax(self.model(torch.cat(features_cat, -1)), dim=-1)
 
-        torch.set_printoptions(profile="full")
+        #torch.set_printoptions(profile="full")
         print(lambdas)
 
         return lambdas
