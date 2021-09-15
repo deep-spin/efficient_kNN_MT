@@ -270,13 +270,15 @@ class Trainer(object):
         #    )
         #)
         params=[]
+        print('ppppppppppppppppppppppp')
         for n, p in self.model.named_parameters():
             if 'lambda' in n and p.requires_grad:
                 params.append(p)
+                print(n)
         for p in self.criterion.parameters():
             if p.requires_grad:
                 params.append(p)
-                
+
         if self.is_fsdp and self.cfg.common.fp16:
             # FullyShardedDataParallel always uses MemoryEfficientFP16 wrapper,
             # mostly for the grad scaling. But if we don't have the
