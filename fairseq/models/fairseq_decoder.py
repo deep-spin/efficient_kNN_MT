@@ -98,7 +98,7 @@ class FairseqDecoder(nn.Module):
 
             #print('network_probs', network_probs)
             #print('knn_probs', knn_probs)
-            knn_lambda=.7
+            
             probs = network_probs * (1 - knn_lambda) + knn_probs * knn_lambda
             
             if log_probs:
