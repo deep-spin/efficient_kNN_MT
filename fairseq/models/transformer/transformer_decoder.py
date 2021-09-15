@@ -158,9 +158,9 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.pruned_datastore = cfg.pruned_datastore
         self.lambda_cache_feat = cfg.lambda_cache_feat
 
-        if self.knn_lambda_type == 'trainable':
-            self.knn_lambda_feat = ['ctxt']
-            self.lambda_mlp = lambda_mlp.LambdaMLP(self.knn_lambda_feat)
+        #if self.knn_lambda_type == 'trainable':
+        self.knn_lambda_feat = ['ctxt']
+        self.lambda_mlp = lambda_mlp.LambdaMLP(self.knn_lambda_feat)
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
         if cfg.adaptive_softmax_cutoff is not None:
