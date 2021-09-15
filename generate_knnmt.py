@@ -129,6 +129,7 @@ def _main(cfg: DictConfig, output_file):
 
     print('ppppppppppppppppppppppp')
     print(model.named_parameters())
+    
     # Load alignment dictionary for unknown word replacement
     # (None if no unknown word replacement, empty if no path to align dictionary)
     align_dict = utils.load_align_dict(cfg.generation.replace_unk)
