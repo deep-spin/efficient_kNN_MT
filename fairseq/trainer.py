@@ -28,7 +28,7 @@ from omegaconf import OmegaConf
 
 logger = logging.getLogger(__name__)
 
-
+torch.autograd.set_detect_anomaly(True)
 class Trainer(object):
     """Main class for data parallel training.
 
