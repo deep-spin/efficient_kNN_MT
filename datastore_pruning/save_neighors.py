@@ -18,7 +18,7 @@ parser.add_argument('--starting_point', type=int, default=0, help='index to star
 
 parser.add_argument('--k', type=int, default=1024, help='the number of nearest neighbors')
 parser.add_argument('--save-dir', type=str)
-parser.add_argument('--num', type=int, default=1e6,help='number of points to traverse')
+parser.add_argument('--num', type=int, default=2e8,help='number of points to traverse')
 parser.add_argument('--batch-size', type=int, default=3072)
 
 args = parser.parse_args()
