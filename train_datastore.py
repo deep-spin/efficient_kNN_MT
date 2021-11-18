@@ -21,6 +21,8 @@ parser.add_argument('--num_keys_to_add_at_a_time', default=1000000, type=int,
                     help='can only load a certain amount of data to memory at a time.')
 parser.add_argument('--starting_point', type=int, default=0, help='index to start adding keys at')
 parser.add_argument('--use_gpu', default=False, action='store_true')
+parser.add_argument("--pca", default=0, type=int)
+
 
 args = parser.parse_args()
 
@@ -43,10 +45,18 @@ else:
 
 print('done.')
 
+# to speed up access to np.memmap
+madvise = ctypes.CDLL("libc.so.6").madvise
+madvise.argtypes = [ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int]
+madvise.restype = ctypes.c_int
+assert madvise(keys.ctypes.data, keys.size * keys.dtype.itemsize, 1) == 0, "MADVISE FAILED" # 2 means MADV_SEQUENTIAL
+
 if not os.path.exists(args.faiss_index + ".trained"):
+
+    index_dim = args.pca if args.pca > 0 else args.dimension
     # Initialize faiss index
-    quantizer = faiss.IndexFlatL2(args.dimension)
-    index = faiss.IndexIVFPQ(quantizer, args.dimension, args.ncentroids, args.code_size, 8)
+    quantizer = faiss.IndexFlatL2(index_dim)
+    index = faiss.IndexIVFPQ(quantizer, index_dim, args.ncentroids, args.code_size, 8)
     index.nprobe = args.probe
 
     if args.use_gpu:
@@ -54,6 +64,10 @@ if not os.path.exists(args.faiss_index + ".trained"):
         co = faiss.GpuClonerOptions()
         co.useFloat16 = True
         gpu_index = faiss.index_cpu_to_gpu(res, 0, index, co)
+
+    if args.pca > 0:
+        pca_matrix = faiss.PCAMatrix(args.dimension, args.pca, 0, True)
+        index = faiss.IndexPreTransform(pca_matrix, index)
 
     print('Training Index')
     np.random.seed(args.seed)
