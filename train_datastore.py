@@ -3,6 +3,7 @@ import os
 import numpy as np
 import faiss
 import time
+import ctypes
 
 # the implementation refers to knnlm
 
