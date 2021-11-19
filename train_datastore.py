@@ -72,8 +72,7 @@ if not os.path.exists(args.faiss_index + ".trained"):
 
     print('Training Index')
     np.random.seed(args.seed)
-    random_sample = np.random.choice(np.arange(vals.shape[0]), size=[min(1000000, vals.shape[0])],
-                                     replace=False)
+    random_sample = np.random.choice(np.arange(vals.shape[0]), size=[min(1000000, vals.shape[0])],replace=False)
     start = time.time()
 
     if args.use_gpu:
