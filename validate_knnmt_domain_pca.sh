@@ -5,6 +5,8 @@ dstore_size=$2
 temp=$3
 pca_dim=$4
 
+export LD_PRELOAD=/home/pam/anaconda3/lib/libmkl_core.so:/home/pam/anaconda3/lib/libmkl_sequential.so
+
 for lambda in 0.5 0.6 0.7 0.8
 do
 	for k in 8 16 32 64
