@@ -23,6 +23,9 @@ from fairseq.logging import progress_bar
 from fairseq.logging.meters import StopwatchMeter, TimeMeter
 from omegaconf import DictConfig
 
+import mkl
+
+mkl.get_max_threads()
 
 def main(cfg: DictConfig):
 
