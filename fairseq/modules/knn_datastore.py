@@ -5,7 +5,9 @@ from torch_scatter import scatter
 import time
 import math
 import faiss.contrib.torch_utils
+import mkl
 
+mkl.get_max_threads()
 
 class KNN_Dstore(object):
 
