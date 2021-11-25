@@ -137,6 +137,7 @@ class BeamSearch(Search):
 
         scores_buf = top_prediction[0]
         indices_buf = top_prediction[1]
+        print(indices_buf)
         # Project back into relative indices and beams
         beams_buf = indices_buf // vocab_size
         indices_buf = indices_buf.fmod(vocab_size)
