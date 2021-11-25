@@ -134,13 +134,15 @@ class BeamSearch(Search):
                 lprobs.view(bsz, -1).size(1) - 1,  # -1 so we never select pad
             ),
         )
-        print(top_prediction)
+
         scores_buf = top_prediction[0]
         indices_buf = top_prediction[1]
         # Project back into relative indices and beams
         beams_buf = indices_buf // vocab_size
         indices_buf = indices_buf.fmod(vocab_size)
 
+        print(beams_buf)
+        print(indices_buf)
         # At this point, beams_buf and indices_buf are single-dim and contain relative indices
         return scores_buf, indices_buf, beams_buf
 
