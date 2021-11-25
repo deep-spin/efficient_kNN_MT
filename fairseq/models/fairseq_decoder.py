@@ -101,7 +101,7 @@ class FairseqDecoder(nn.Module):
             
             probs = network_probs * (1 - knn_lambda) + knn_probs * knn_lambda
 
-            print(probs.shape)
+            #print(probs.shape)
             
             if log_probs:
                 probs=torch.log(probs.clamp(min=1e-8))

@@ -249,8 +249,8 @@ def _main(cfg: DictConfig, output_file):
                     remove_bpe=cfg.common_eval.post_process,
                     extra_symbols_to_ignore=get_symbols_to_strip_from_output(generator),)
 
-                print('--------')
-                print(hypo)
+                #print('--------')
+                #print(hypo)
 
                 detok_hypo_str = decode_fn(hypo_str)
                 if not cfg.common_eval.quiet:
