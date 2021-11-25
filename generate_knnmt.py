@@ -238,6 +238,7 @@ def _main(cfg: DictConfig, output_file):
                 if has_target:
                     print("T-{}\t{}".format(sample_id, target_str), file=output_file)
 
+            print(len(hypos))
             print('hypos', hypos)
             # Process top predictions
             for j, hypo in enumerate(hypos[i][: cfg.generation.nbest]):
