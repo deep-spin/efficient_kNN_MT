@@ -115,8 +115,6 @@ class BeamSearch(Search):
         original_batch_idxs: Optional[Tensor] = None,
     ):
         bsz, beam_size, vocab_size = lprobs.size()
-        print(lprobs.shape)
-        print(lprobs.view(bsz,-1).shape)
         if step == 0:
             # at the first step all hypotheses are equally likely, so use
             # only the first beam
@@ -143,8 +141,8 @@ class BeamSearch(Search):
         beams_buf = indices_buf // vocab_size
         indices_buf = indices_buf.fmod(vocab_size)
 
-        print(beams_buf)
-        print(indices_buf)
+        #print(beams_buf)
+        #print(indices_buf)
         # At this point, beams_buf and indices_buf are single-dim and contain relative indices
         return scores_buf, indices_buf, beams_buf
 
