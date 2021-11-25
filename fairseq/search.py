@@ -115,7 +115,7 @@ class BeamSearch(Search):
         original_batch_idxs: Optional[Tensor] = None,
     ):
         bsz, beam_size, vocab_size = lprobs.size()
-        print('-----------------------------------------------------------search')
+        print(lprobs.shape)
         if step == 0:
             # at the first step all hypotheses are equally likely, so use
             # only the first beam
@@ -134,6 +134,7 @@ class BeamSearch(Search):
                 lprobs.view(bsz, -1).size(1) - 1,  # -1 so we never select pad
             ),
         )
+        print(top_prediction)
         scores_buf = top_prediction[0]
         indices_buf = top_prediction[1]
         # Project back into relative indices and beams
