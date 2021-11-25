@@ -5,7 +5,7 @@ dstore_size=$2
 temp=$3
 pca_dim=$4
 
-for k in 64
+for k in 8 16 32 64
 do
 	for lambda in 0.5 0.6 0.7 0.8
 	do
