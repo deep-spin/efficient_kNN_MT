@@ -115,7 +115,7 @@ class BeamSearch(Search):
         original_batch_idxs: Optional[Tensor] = None,
     ):
         bsz, beam_size, vocab_size = lprobs.size()
-
+        print('-----------------------------------------------------------search')
         if step == 0:
             # at the first step all hypotheses are equally likely, so use
             # only the first beam
