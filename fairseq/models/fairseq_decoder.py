@@ -104,6 +104,9 @@ class FairseqDecoder(nn.Module):
             
             if log_probs:
                 probs=torch.log(probs.clamp(min=1e-8))
+                if analyse:
+                    network_probs=torch.log(network_probs.clamp(min=1e-8))
+                    return probs, network_probs
                 return probs
             else:
                 if analyse:
