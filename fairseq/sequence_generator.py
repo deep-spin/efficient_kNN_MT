@@ -414,7 +414,7 @@ class SequenceGenerator(nn.Module):
             print(cand_beams)
             print('without knn')
             print(cand_indices_without_knn)
-            print(cand_indices_without_knn)
+            print(cand_beams_without_knn)
 
             # cand_bbsz_idx contains beam indices for the top candidate
             # hypotheses, with a range of values: [0, bsz*beam_size),
