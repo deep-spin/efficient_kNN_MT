@@ -310,6 +310,7 @@ class SequenceGenerator(nn.Module):
 
         if self.analyse:
             self.difs=None
+            self.analyse_scores=[None for _ in range(beam_size)]
 
         for step in range(max_len + 1):  # one extra step for EOS marker
             # reorder decoder internal states based on the prev choice of beams
@@ -455,7 +456,7 @@ class SequenceGenerator(nn.Module):
             finalized_sents: List[int] = []
             if eos_bbsz_idx.numel() > 0:
                 eos_scores = torch.masked_select(cand_scores[:, :beam_size], mask=eos_mask[:, :beam_size])
-
+                print('-----', eos_scores)
                 finalized_sents = self.finalize_hypos(
                     step,
                     eos_bbsz_idx,
