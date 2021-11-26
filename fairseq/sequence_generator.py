@@ -425,8 +425,17 @@ class SequenceGenerator(nn.Module):
                         self.difs[i]=0
                     else:
                         self.difs[i]=1
+            else:
+                x=self.difs.copy()
+                self.difs={}
+                for i in range(len(cand_indices[0])):
+                    if cand_indices[0][i]==cand_indices_without_knn[0][i]:
+                        self.difs[i]=0 + x[cand_beams[0][i]]
+                    else:
+                        self.difs[i]=1 + x[cand_beams[0][i]]
+
             print(self.difs)
-            break
+            
 
             # cand_bbsz_idx contains beam indices for the top candidate
             # hypotheses, with a range of values: [0, bsz*beam_size),
