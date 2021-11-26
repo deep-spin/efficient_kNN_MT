@@ -310,6 +310,7 @@ class SequenceGenerator(nn.Module):
 
         if self.analyse:
             self.difs=None
+            self.analyse_beams_idx=[]
             self.analyse_scores=[None for _ in range(beam_size)]
 
         for step in range(max_len + 1):  # one extra step for EOS marker
@@ -452,11 +453,12 @@ class SequenceGenerator(nn.Module):
             # Now we know what beam item(s) to finish
             # Shape: 1d list of absolute-numbered
             eos_bbsz_idx = torch.masked_select(cand_bbsz_idx[:, :beam_size], mask=eos_mask[:, :beam_size])
-            print('------', eos_bbsz_idx)
+            for i in eos_bbsz_idx:
+                self.analyse_beams_idx.append(i)
             finalized_sents: List[int] = []
             if eos_bbsz_idx.numel() > 0:
                 eos_scores = torch.masked_select(cand_scores[:, :beam_size], mask=eos_mask[:, :beam_size])
-                print('-----', eos_scores)
+
                 finalized_sents = self.finalize_hypos(
                     step,
                     eos_bbsz_idx,
@@ -716,7 +718,11 @@ class SequenceGenerator(nn.Module):
                         "positional_scores": pos_scores[i],
                     }
                 )
-        print('----', finalized)
+        print('------', finalized)
+        for f in finalized[0]:
+            print(f)
+
+
         newly_finished: List[int] = []
 
         for seen in sents_seen.keys():
