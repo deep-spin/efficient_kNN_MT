@@ -414,30 +414,22 @@ class SequenceGenerator(nn.Module):
                 tokens[:, : step + 1],
                 original_batch_idxs,)
 
-            print('with knn')
-            print(cand_indices)
-            print(cand_beams)
-            print('without knn')
-            print(cand_indices_without_knn)
-            print(cand_beams_without_knn)
-            if self.difs is None:
-                self.difs={}
-                for i in range(len(cand_indices[0])):
-                    if cand_indices[0][i]==cand_indices_without_knn[0][i]:
-                        self.difs[i]=0
-                    else:
-                        self.difs[i]=1
-            else:
-                x=self.difs.copy()
-                self.difs={}
-                for i in range(len(cand_indices[0])):
-                    if cand_indices[0][i]==cand_indices_without_knn[0][i]:
-                        self.difs[i]=0 + x[cand_beams[0][i].item()]
-                    else:
-                        self.difs[i]=1 + x[cand_beams[0][i].item()]
-
-            print(self.difs)
-            
+            if self.analyse:
+                if self.difs is None:
+                    self.difs={}
+                    for i in range(len(cand_indices[0])):
+                        if cand_indices[0][i]==cand_indices_without_knn[0][i]:
+                            self.difs[i]=0
+                        else:
+                            self.difs[i]=1
+                else:
+                    x=self.difs.copy()
+                    self.difs={}
+                    for i in range(len(cand_indices[0])):
+                        if cand_indices[0][i]==cand_indices_without_knn[0][i]:
+                            self.difs[i]=0 + x[cand_beams[0][i].item()]
+                        else:
+                            self.difs[i]=1 + x[cand_beams[0][i].item()]            
 
             # cand_bbsz_idx contains beam indices for the top candidate
             # hypotheses, with a range of values: [0, bsz*beam_size),
@@ -453,8 +445,10 @@ class SequenceGenerator(nn.Module):
             # Now we know what beam item(s) to finish
             # Shape: 1d list of absolute-numbered
             eos_bbsz_idx = torch.masked_select(cand_bbsz_idx[:, :beam_size], mask=eos_mask[:, :beam_size])
+            print(eos_bbsz_idx)
             for i in eos_bbsz_idx:
                 self.analyse_beams_idx.append(i.item())
+
             finalized_sents: List[int] = []
             if eos_bbsz_idx.numel() > 0:
                 eos_scores = torch.masked_select(cand_scores[:, :beam_size], mask=eos_mask[:, :beam_size])
