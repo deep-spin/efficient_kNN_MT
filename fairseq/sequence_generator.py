@@ -486,14 +486,11 @@ class SequenceGenerator(nn.Module):
                 new_bsz = bsz - len(finalized_sents)
 
                 # construct batch_idxs which holds indices of batches to keep for the next pass
-                batch_mask = torch.ones(
-                    bsz, dtype=torch.bool, device=cand_indices.device
-                )
+                batch_mask = torch.ones(bsz, dtype=torch.bool, device=cand_indices.device)
+                
                 batch_mask[finalized_sents] = False
                 # TODO replace `nonzero(as_tuple=False)` after TorchScript supports it
-                batch_idxs = torch.arange(
-                    bsz, device=cand_indices.device
-                ).masked_select(batch_mask)
+                batch_idxs = torch.arange(bsz, device=cand_indices.device).masked_select(batch_mask)
 
                 # Choose the subset of the hypothesized constraints that will continue
                 self.search.prune_sentences(batch_idxs)
@@ -509,6 +506,8 @@ class SequenceGenerator(nn.Module):
                     prefix_tokens = prefix_tokens[batch_idxs]
                 src_lengths = src_lengths[batch_idxs]
                 cands_to_ignore = cands_to_ignore[batch_idxs]
+
+                print('-----------------',cands_to_ignore)
 
                 scores = scores.view(bsz, -1)[batch_idxs].view(new_bsz * beam_size, -1)
                 tokens = tokens.view(bsz, -1)[batch_idxs].view(new_bsz * beam_size, -1)
