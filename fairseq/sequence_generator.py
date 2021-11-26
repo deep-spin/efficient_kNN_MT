@@ -540,7 +540,12 @@ class SequenceGenerator(nn.Module):
 
             print('------------', cands_to_ignore)
             print(active_hypos)
-
+            if self.analyse:
+                x=self.difs
+                self.difs={}
+                for i in range(len(active_hypos)):
+                    self.difs[i]=x[active_hypos[i].item()]
+            print(self.difs)
             # update cands_to_ignore to ignore any finalized hypos
 
             # {active_bbsz_idx} denotes which beam number is continued for each new hypothesis (a beam
