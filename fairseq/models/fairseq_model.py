@@ -65,7 +65,6 @@ class BaseFairseqModel(nn.Module):
         log_probs: bool,
         sample: Optional[Dict[str, Tensor]] = None,
     ):  
-        print('------------------------', 'fairseq_model')
         """Get normalized probabilities (or log probs) from a net's output."""
         return self.get_normalized_probs_scriptable(net_output, log_probs, sample)
 
@@ -322,6 +321,7 @@ class FairseqEncoderDecoderModel(BaseFairseqModel):
         decoder_out = self.decoder(
             prev_output_tokens, encoder_out=encoder_out, **kwargs
         )
+        print('------------------------', 'fairseq_model')
         return decoder_out
 
     def forward_decoder(self, prev_output_tokens, **kwargs):
