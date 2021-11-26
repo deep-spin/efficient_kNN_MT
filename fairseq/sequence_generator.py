@@ -718,7 +718,7 @@ class SequenceGenerator(nn.Module):
                         "positional_scores": pos_scores[i],
                     }
                 )
-        if len(finalized)==self.beam_size:
+        if len(finalized[0])==self.beam_size:
             print('-----------------')
             print(self.analyse_beams_idx)
             for f in finalized[0]:
