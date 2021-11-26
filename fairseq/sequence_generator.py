@@ -336,12 +336,13 @@ class SequenceGenerator(nn.Module):
                     self.temperature,
                 )
 
+            print(lprobs.shape)
+
             if self.lm_model is not None:
                 lm_out = self.lm_model(tokens[:, : step + 1])
                 probs = self.lm_model.get_normalized_probs(lm_out, log_probs=True, sample=None)
                 probs = probs[:, -1, :] * self.lm_weight
                 lprobs += probs
-                print(lprobs.shape)
 
             lprobs[lprobs != lprobs] = torch.tensor(-math.inf).to(lprobs)
 
