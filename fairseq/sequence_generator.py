@@ -15,6 +15,7 @@ from fairseq.models import FairseqIncrementalDecoder
 from torch import Tensor
 from fairseq.ngram_repeat_block import NGramRepeatBlock
 
+import operator
 
 class SequenceGenerator(nn.Module):
     def __init__(
@@ -713,25 +714,26 @@ class SequenceGenerator(nn.Module):
                         "positional_scores": pos_scores[i],
                     }
                 )
-        if len(finalized[0])==self.beam_size:
-            for i in range(len(finalized[0])):
-                self.analyse_scores[i]=finalized[0][i]['score'].item()
-        
-            self.analyse_difs=self.analyse_difs[:beam_size]
+        if self.analyse:
+            if len(finalized[0])==self.beam_size:
+                for i in range(len(finalized[0])):
+                    self.analyse_scores[i]=finalized[0][i]['score'].item()
+            
+                self.analyse_difs=self.analyse_difs[:beam_size]
 
-            print(self.analyse_scores)
-            print(self.analyse_difs)
+                print(self.analyse_scores)
+                print(self.analyse_difs)
 
-            max_value = max(self.analyse_scores)
-            max_index = my_list.index(max_value)
-            print(max_value)
-            print(max_index)
+                index, value = max(enumerate(self.analyse_scores), key=operator.itemgetter(1))
 
-            print(self.analyse_difs[max_index])
-            print(len(finalized[0][max_index]['tokens']))
+                print(value)
+                print(index)
 
-            self.difs_dataset+=self.analyse_difs[max_index]
-            self.len_dataset+=len(finalized[0][max_index]['tokens'])
+                print(self.analyse_difs[max_index])
+                print(len(finalized[0][max_index]['tokens']))
+
+                self.difs_dataset+=self.analyse_difs[max_index]
+                self.len_dataset+=len(finalized[0][max_index]['tokens'])
 
         newly_finished: List[int] = []
 
