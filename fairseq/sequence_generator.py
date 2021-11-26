@@ -663,8 +663,6 @@ class SequenceGenerator(nn.Module):
         if self.normalize_scores:
             eos_scores /= (step + 1) ** self.len_penalty
 
-        print('-------------',scores.shape)
-        print(scores)
         # cum_unfin records which sentences in the batch are finished.
         # It helps match indexing between (a) the original sentences
         # in the batch and (b) the current, possibly-reduced set of
@@ -688,6 +686,8 @@ class SequenceGenerator(nn.Module):
         for i in range(bbsz_idx.size()[0]):
             idx = bbsz_idx[i]
             score = eos_scores[i]
+            print('-----', score.shape)
+            print(score)
             # sentence index in the current (possibly reduced) batch
             unfin_idx = idx // beam_size
             # sentence index in the original (unreduced) batch
