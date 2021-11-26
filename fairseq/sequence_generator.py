@@ -716,6 +716,7 @@ class SequenceGenerator(nn.Module):
                 )
         if self.analyse:
             if len(finalized[0])==self.beam_size:
+                print(len(finalized[0]))
                 for i in range(len(finalized[0])):
                     self.analyse_scores[i]=finalized[0][i]['score'].item()
             
