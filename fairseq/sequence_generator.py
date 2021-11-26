@@ -431,6 +431,9 @@ class SequenceGenerator(nn.Module):
                         else:
                             self.difs[i]=1 + x[cand_beams[0][i].item()]            
 
+            print(cand_indices)
+            print(cand_beams)
+
             # cand_bbsz_idx contains beam indices for the top candidate
             # hypotheses, with a range of values: [0, bsz*beam_size),
             # and dimensions: [bsz, cand_size]
@@ -538,7 +541,7 @@ class SequenceGenerator(nn.Module):
                 self.difs={}
                 for i in range(len(active_hypos[0])):
                     self.difs[i]=x[active_hypos[0][i].item()]
-            print(self.difs)
+
             # update cands_to_ignore to ignore any finalized hypos
 
             # {active_bbsz_idx} denotes which beam number is continued for each new hypothesis (a beam
