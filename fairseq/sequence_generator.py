@@ -538,8 +538,6 @@ class SequenceGenerator(nn.Module):
             # Make sure there is at least one active item for each sentence in the batch.
             assert (~cands_to_ignore).any(dim=1).all()
 
-            print('------------', cands_to_ignore)
-            print(active_hypos)
             if self.analyse:
                 x=self.difs
                 self.difs={}
@@ -647,16 +645,13 @@ class SequenceGenerator(nn.Module):
         # clone relevant token and attention tensors.
         # tokens is (batch * beam, max_len). So the index_select
         # gets the newly EOS rows, then selects cols 1..{step + 2}
-        tokens_clone = tokens.index_select(0, bbsz_idx)[
-            :, 1 : step + 2
-        ]  # skip the first index, which is EOS
+        tokens_clone = tokens.index_select(0, bbsz_idx)[:, 1 : step + 2]  # skip the first index, which is EOS
 
         tokens_clone[:, step] = self.eos
         attn_clone = (
             attn.index_select(0, bbsz_idx)[:, :, 1 : step + 2]
             if attn is not None
-            else None
-        )
+            else None)
 
         # compute scores per token position
         pos_scores = scores.index_select(0, bbsz_idx)[:, : step + 1]
@@ -668,6 +663,8 @@ class SequenceGenerator(nn.Module):
         if self.normalize_scores:
             eos_scores /= (step + 1) ** self.len_penalty
 
+        print('-------------',scores.shape)
+        print(scores)
         # cum_unfin records which sentences in the batch are finished.
         # It helps match indexing between (a) the original sentences
         # in the batch and (b) the current, possibly-reduced set of
