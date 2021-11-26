@@ -508,6 +508,8 @@ class SequenceGenerator(nn.Module):
                 cands_to_ignore = cands_to_ignore[batch_idxs]
 
                 print('-----------------',cands_to_ignore)
+                print(cand_indices)
+                print(cand_beams)
 
                 scores = scores.view(bsz, -1)[batch_idxs].view(new_bsz * beam_size, -1)
                 tokens = tokens.view(bsz, -1)[batch_idxs].view(new_bsz * beam_size, -1)
