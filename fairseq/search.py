@@ -141,8 +141,6 @@ class BeamSearch(Search):
         beams_buf = indices_buf // vocab_size
         indices_buf = indices_buf.fmod(vocab_size)
 
-        #print(beams_buf)
-        #print(indices_buf)
         # At this point, beams_buf and indices_buf are single-dim and contain relative indices
         return scores_buf, indices_buf, beams_buf
 
