@@ -838,6 +838,8 @@ class EnsembleModel(nn.Module):
                 probs = model.get_normalized_probs(decoder_out_tuple, log_probs=True, sample=None)
                 probs = probs[:, -1, :]
             if self.models_size == 1:
+                if self.analyse:
+                    return probs, probs_without_knn, attn
                 return probs, attn
 
             log_probs.append(probs)
@@ -853,8 +855,6 @@ class EnsembleModel(nn.Module):
 
         if avg_attn is not None:
             avg_attn.div_(self.models_size)
-        if self.analyse:
-            return avg_probs, probs_without_knn, avg_attn
         return avg_probs, avg_attn
 
     @torch.jit.export
