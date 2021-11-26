@@ -57,7 +57,7 @@ class FairseqIncrementalDecoder(FairseqDecoder):
                 - the decoder's output of shape `(batch, tgt_len, vocab)`
                 - a dictionary with any model-specific outputs
         """
-        print('------------------------', 'fairseq_model')
+        
         raise NotImplementedError
 
     def extract_features(
