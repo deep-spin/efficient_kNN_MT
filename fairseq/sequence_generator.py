@@ -101,6 +101,8 @@ class SequenceGenerator(nn.Module):
         self.analyse=True
 
         if self.analyse:
+            self.difs_dataset=0
+            self.len_dataset=0
             self.search_without_knn = (search.BeamSearch(tgt_dict) if search_strategy is None else search_strategy)    
 
         self.search = (search.BeamSearch(tgt_dict) if search_strategy is None else search_strategy)
@@ -645,10 +647,7 @@ class SequenceGenerator(nn.Module):
         tokens_clone = tokens.index_select(0, bbsz_idx)[:, 1 : step + 2]  # skip the first index, which is EOS
 
         tokens_clone[:, step] = self.eos
-        attn_clone = (
-            attn.index_select(0, bbsz_idx)[:, :, 1 : step + 2]
-            if attn is not None
-            else None)
+        attn_clone = (attn.index_select(0, bbsz_idx)[:, :, 1 : step + 2] if attn is not None else None)
 
         # compute scores per token position
         pos_scores = scores.index_select(0, bbsz_idx)[:, : step + 1]
@@ -717,11 +716,21 @@ class SequenceGenerator(nn.Module):
         if len(finalized[0])==self.beam_size:
             for i in range(len(finalized[0])):
                 self.analyse_scores[i]=finalized[0][i]['score'].item()
-
+        self.analyse_difs=self.analyse_difs[:beam_size]
 
         print(self.analyse_scores)
         print(self.analyse_difs)
 
+        max_value = max(self.analyse_scores)
+        max_index = my_list.index(max_value)
+        print(max_value)
+        print(max_index)
+
+        print(self.analyse_difs[max_index])
+        print(len(finalized[0][max_index]['tokens']))
+
+        self.difs_dataset+=self.analyse_difs[max_index]
+        self.len_dataset+=len(finalized[0][max_index]['tokens'])
 
         newly_finished: List[int] = []
 
