@@ -64,6 +64,7 @@ class FairseqDecoder(nn.Module):
         log_probs: bool,
         sample: Optional[Dict[str, Tensor]] = None,
     ):
+        print('------------------------', 'FairseqDecoder')
         """Get normalized probabilities (or log probs) from a net's output."""
         return self.get_normalized_probs_scriptable(net_output, log_probs, sample)
 
