@@ -309,8 +309,8 @@ class SequenceGenerator(nn.Module):
             original_batch_idxs = torch.arange(0, bsz).type_as(tokens)
 
         if self.analyse:
-            self.difs=[None for _ in range(bsz)]
-            print(self.difs)
+            self.difs=None
+
         for step in range(max_len + 1):  # one extra step for EOS marker
             # reorder decoder internal states based on the prev choice of beams
             if reorder_state is not None:
@@ -412,14 +412,21 @@ class SequenceGenerator(nn.Module):
                 tokens[:, : step + 1],
                 original_batch_idxs,)
 
-            #print('with knn')
-            #print(cand_indices)
-            #print(cand_beams)
-            #print('without knn')
-            #print(cand_indices_without_knn)
-            #print(cand_beams_without_knn)
-
-
+            print('with knn')
+            print(cand_indices)
+            print(cand_beams)
+            print('without knn')
+            print(cand_indices_without_knn)
+            print(cand_beams_without_knn)
+            if self.difs is None:
+                self.difs={}
+                for i in range(len(cand_indices)):
+                    if cand_indices[i]==cand_indices_without_knn[ĩ]:
+                        self.difs[i]=0
+                    else:
+                        self.difs[i]=1
+            print(self.difs)
+            break
 
             # cand_bbsz_idx contains beam indices for the top candidate
             # hypotheses, with a range of values: [0, bsz*beam_size),
