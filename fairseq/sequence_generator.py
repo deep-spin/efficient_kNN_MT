@@ -395,7 +395,8 @@ class SequenceGenerator(nn.Module):
                 tokens[:, : step + 1],
                 original_batch_idxs,
             )
-
+            print(cand_indices)
+            print(cand_beams)
             # cand_bbsz_idx contains beam indices for the top candidate
             # hypotheses, with a range of values: [0, bsz*beam_size),
             # and dimensions: [bsz, cand_size]
@@ -815,7 +816,7 @@ class EnsembleModel(nn.Module):
                 None if decoder_len <= 5 else decoder_out[5],  # knn index
                 None if decoder_len <= 6 else decoder_out[6],  # knn label counts
             )
-            print('-----','SequenceGenerator')
+
             probs = model.get_normalized_probs(decoder_out_tuple, log_probs=True, sample=None)
             probs = probs[:, -1, :]
             if self.models_size == 1:
