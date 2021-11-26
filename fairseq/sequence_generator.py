@@ -506,19 +506,14 @@ class SequenceGenerator(nn.Module):
             # Rewrite the operator since the element wise or is not supported in torchscript.
 
             eos_mask[:, :beam_size] = ~((~cands_to_ignore) & (~eos_mask[:, :beam_size]))
-            active_mask = torch.add(
-                eos_mask.type_as(cand_offsets) * cand_size,
-                cand_offsets[: eos_mask.size(1)],
-            )
+            active_mask = torch.add(eos_mask.type_as(cand_offsets) * cand_size, cand_offsets[: eos_mask.size(1)],)
 
             # get the top beam_size active hypotheses, which are just
             # the hypos with the smallest values in active_mask.
             # {active_hypos} indicates which {beam_size} hypotheses
             # from the list of {2 * beam_size} candidates were
             # selected. Shapes: (batch size, beam size)
-            new_cands_to_ignore, active_hypos = torch.topk(
-                active_mask, k=beam_size, dim=1, largest=False
-            )
+            new_cands_to_ignore, active_hypos = torch.topk(active_mask, k=beam_size, dim=1, largest=False)
 
             # update cands_to_ignore to ignore any finalized hypos.
             cands_to_ignore = new_cands_to_ignore.ge(cand_size)[:, :beam_size]
@@ -544,9 +539,7 @@ class SequenceGenerator(nn.Module):
             tokens.view(bsz, beam_size, -1)[:, :, step + 1] = torch.gather(cand_indices, dim=1, index=active_hypos)
 
             if step > 0:
-                scores[:, :step] = torch.index_select(
-                    scores[:, :step], dim=0, index=active_bbsz_idx
-                )
+                scores[:, :step] = torch.index_select(scores[:, :step], dim=0, index=active_bbsz_idx)
             scores.view(bsz, beam_size, -1)[:, :, step] = torch.gather(cand_scores, dim=1, index=active_hypos)
 
             # Update constraints based on which candidates were selected for the next beam
@@ -554,23 +547,17 @@ class SequenceGenerator(nn.Module):
 
             # copy attention for active hypotheses
             if attn is not None:
-                attn[:, :, : step + 2] = torch.index_select(
-                    attn[:, :, : step + 2], dim=0, index=active_bbsz_idx
-                )
+                attn[:, :, : step + 2] = torch.index_select(attn[:, :, : step + 2], dim=0, index=active_bbsz_idx)
 
             # reorder incremental state in decoder
             reorder_state = active_bbsz_idx
 
         # sort by score descending
         for sent in range(len(finalized)):
-            scores = torch.tensor(
-                [float(elem["score"].item()) for elem in finalized[sent]]
-            )
+            scores = torch.tensor([float(elem["score"].item()) for elem in finalized[sent]])
             _, sorted_scores_indices = torch.sort(scores, descending=True)
             finalized[sent] = [finalized[sent][ssi] for ssi in sorted_scores_indices]
-            finalized[sent] = torch.jit.annotate(
-                List[Dict[str, Tensor]], finalized[sent]
-            )
+            finalized[sent] = torch.jit.annotate(List[Dict[str, Tensor]], finalized[sent])
         return finalized
 
     def _prefix_tokens(
@@ -760,6 +747,8 @@ class EnsembleModel(nn.Module):
             for m in models
         ):
             self.has_incremental = True
+
+        self.analyse=True
 
     def forward(self):
         pass
