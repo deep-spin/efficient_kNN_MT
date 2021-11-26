@@ -686,8 +686,6 @@ class SequenceGenerator(nn.Module):
         for i in range(bbsz_idx.size()[0]):
             idx = bbsz_idx[i]
             score = eos_scores[i]
-            print('-----', score.shape)
-            print(score)
             # sentence index in the current (possibly reduced) batch
             unfin_idx = idx // beam_size
             # sentence index in the original (unreduced) batch
@@ -719,7 +717,7 @@ class SequenceGenerator(nn.Module):
                         "positional_scores": pos_scores[i],
                     }
                 )
-
+        print('----', finalized)
         newly_finished: List[int] = []
 
         for seen in sents_seen.keys():
