@@ -838,7 +838,7 @@ class EnsembleModel(nn.Module):
                 probs = model.get_normalized_probs(decoder_out_tuple, log_probs=True, sample=None)
                 probs = probs[:, -1, :]
             if self.models_size == 1:
-                if self.analyse:
+                if analyse:
                     return probs, probs_without_knn, attn
                 return probs, attn
 
