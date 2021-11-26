@@ -729,11 +729,11 @@ class SequenceGenerator(nn.Module):
                 print(value)
                 print(index)
 
-                print(self.analyse_difs[max_index])
-                print(len(finalized[0][max_index]['tokens']))
+                print(self.analyse_difs[index])
+                print(len(finalized[0][index]['tokens']))
 
-                self.difs_dataset+=self.analyse_difs[max_index]
-                self.len_dataset+=len(finalized[0][max_index]['tokens'])
+                self.difs_dataset+=self.analyse_difs[index]
+                self.len_dataset+=len(finalized[0][index]['tokens'])
 
         newly_finished: List[int] = []
 
