@@ -451,12 +451,10 @@ class SequenceGenerator(nn.Module):
             # Now we know what beam item(s) to finish
             # Shape: 1d list of absolute-numbered
             eos_bbsz_idx = torch.masked_select(cand_bbsz_idx[:, :beam_size], mask=eos_mask[:, :beam_size])
-
+            print('------', eos_bbsz_idx)
             finalized_sents: List[int] = []
             if eos_bbsz_idx.numel() > 0:
-                eos_scores = torch.masked_select(
-                    cand_scores[:, :beam_size], mask=eos_mask[:, :beam_size]
-                )
+                eos_scores = torch.masked_select(cand_scores[:, :beam_size], mask=eos_mask[:, :beam_size])
 
                 finalized_sents = self.finalize_hypos(
                     step,
