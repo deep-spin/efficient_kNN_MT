@@ -507,10 +507,6 @@ class SequenceGenerator(nn.Module):
                 src_lengths = src_lengths[batch_idxs]
                 cands_to_ignore = cands_to_ignore[batch_idxs]
 
-                print('-----------------',cands_to_ignore)
-                print(cand_indices)
-                print(cand_beams)
-
                 scores = scores.view(bsz, -1)[batch_idxs].view(new_bsz * beam_size, -1)
                 tokens = tokens.view(bsz, -1)[batch_idxs].view(new_bsz * beam_size, -1)
                 if attn is not None:
@@ -541,6 +537,9 @@ class SequenceGenerator(nn.Module):
             cands_to_ignore = new_cands_to_ignore.ge(cand_size)[:, :beam_size]
             # Make sure there is at least one active item for each sentence in the batch.
             assert (~cands_to_ignore).any(dim=1).all()
+
+            print('------------', cands_to_ignore)
+            print(active_hypos)
 
             # update cands_to_ignore to ignore any finalized hypos
 
