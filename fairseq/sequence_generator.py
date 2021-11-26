@@ -421,7 +421,7 @@ class SequenceGenerator(nn.Module):
             if self.difs is None:
                 self.difs={}
                 for i in range(len(cand_indices)):
-                    if cand_indices[i]==cand_indices_without_knn[ĩ]:
+                    if cand_indices[i]==cand_indices_without_knn[i]:
                         self.difs[i]=0
                     else:
                         self.difs[i]=1
