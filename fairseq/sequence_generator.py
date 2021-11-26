@@ -543,8 +543,8 @@ class SequenceGenerator(nn.Module):
             if self.analyse:
                 x=self.difs
                 self.difs={}
-                for i in range(len(active_hypos)):
-                    self.difs[i]=x[active_hypos[i].item()]
+                for i in range(len(active_hypos[0])):
+                    self.difs[i]=x[active_hypos[0][i].item()]
             print(self.difs)
             # update cands_to_ignore to ignore any finalized hypos
 
