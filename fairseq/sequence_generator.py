@@ -716,21 +716,22 @@ class SequenceGenerator(nn.Module):
         if len(finalized[0])==self.beam_size:
             for i in range(len(finalized[0])):
                 self.analyse_scores[i]=finalized[0][i]['score'].item()
-        self.analyse_difs=self.analyse_difs[:beam_size]
+        
+            self.analyse_difs=self.analyse_difs[:beam_size]
 
-        print(self.analyse_scores)
-        print(self.analyse_difs)
+            print(self.analyse_scores)
+            print(self.analyse_difs)
 
-        max_value = max(self.analyse_scores)
-        max_index = my_list.index(max_value)
-        print(max_value)
-        print(max_index)
+            max_value = max(self.analyse_scores)
+            max_index = my_list.index(max_value)
+            print(max_value)
+            print(max_index)
 
-        print(self.analyse_difs[max_index])
-        print(len(finalized[0][max_index]['tokens']))
+            print(self.analyse_difs[max_index])
+            print(len(finalized[0][max_index]['tokens']))
 
-        self.difs_dataset+=self.analyse_difs[max_index]
-        self.len_dataset+=len(finalized[0][max_index]['tokens'])
+            self.difs_dataset+=self.analyse_difs[max_index]
+            self.len_dataset+=len(finalized[0][max_index]['tokens'])
 
         newly_finished: List[int] = []
 
