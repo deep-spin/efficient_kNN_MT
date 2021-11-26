@@ -171,7 +171,6 @@ class TransformerModelBase(FairseqEncoderDecoderModel):
         sample: Optional[Dict[str, Tensor]] = None,
     ):
         """Get normalized probabilities (or log probs) from a net's output."""
-        print('------------------------', 'transformer_base')
         return self.get_normalized_probs_scriptable(net_output, log_probs, sample)
 
 

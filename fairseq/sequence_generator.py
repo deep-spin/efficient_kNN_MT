@@ -98,15 +98,17 @@ class SequenceGenerator(nn.Module):
 
         assert temperature > 0, "--temperature must be greater than 0"
 
-        self.search = (
-            search.BeamSearch(tgt_dict) if search_strategy is None else search_strategy
-        )
+        self.analyse=True
+
+        if self.analyse:
+            self.search_without_knn = (search.BeamSearch(tgt_dict) if search_strategy is None else search_strategy)    
+
+        self.search = (search.BeamSearch(tgt_dict) if search_strategy is None else search_strategy)
+
         # We only need to set src_lengths in LengthConstrainedBeamSearch.
         # As a module attribute, setting it would break in multithread
         # settings when the model is shared.
-        self.should_set_src_lengths = (
-            hasattr(self.search, "needs_src_lengths") and self.search.needs_src_lengths
-        )
+        self.should_set_src_lengths = (hasattr(self.search, "needs_src_lengths") and self.search.needs_src_lengths)
 
         self.model.eval()
 
@@ -236,6 +238,9 @@ class SequenceGenerator(nn.Module):
             )
 
         # Initialize constraints, when active
+        if self.analyse:
+            self.search_without_knn.init_constraints(constraints, beam_size)
+
         self.search.init_constraints(constraints, beam_size)
 
         max_len: int = -1
@@ -261,15 +266,8 @@ class SequenceGenerator(nn.Module):
         assert encoder_outs is not None
 
         # initialize buffers
-        scores = (
-            torch.zeros(bsz * beam_size, max_len + 1).to(src_tokens).float()
-        )  # +1 for eos; pad is never chosen for scoring
-        tokens = (
-            torch.zeros(bsz * beam_size, max_len + 2)
-            .to(src_tokens)
-            .long()
-            .fill_(self.pad)
-        )  # +2 for eos and pad
+        scores = (torch.zeros(bsz * beam_size, max_len + 1).to(src_tokens).float())  # +1 for eos; pad is never chosen for scoring
+        tokens = (torch.zeros(bsz * beam_size, max_len + 2).to(src_tokens).long().fill_(self.pad))  # +2 for eos and pad
         tokens[:, 0] = self.eos if bos_token is None else bos_token
         attn: Optional[Tensor] = None
 
@@ -277,9 +275,7 @@ class SequenceGenerator(nn.Module):
         # For example, suppose we're sampling and have already finalized 2/5
         # samples. Then cands_to_ignore would mark 2 positions as being ignored,
         # so that we only finalize the remaining 3 samples.
-        cands_to_ignore = (
-            torch.zeros(bsz, beam_size).to(src_tokens).eq(-1)
-        )  # forward and backward-compatible False mask
+        cands_to_ignore = (torch.zeros(bsz, beam_size).to(src_tokens).eq(-1))  # forward and backward-compatible False mask
 
         # list of completed sentences
         finalized = torch.jit.annotate(
@@ -312,25 +308,19 @@ class SequenceGenerator(nn.Module):
         else:
             original_batch_idxs = torch.arange(0, bsz).type_as(tokens)
 
-        analyse=True
         for step in range(max_len + 1):  # one extra step for EOS marker
             # reorder decoder internal states based on the prev choice of beams
             if reorder_state is not None:
                 if batch_idxs is not None:
                     # update beam indices to take into account removed sentences
-                    corr = batch_idxs - torch.arange(batch_idxs.numel()).type_as(
-                        batch_idxs
-                    )
-                    reorder_state.view(-1, beam_size).add_(
-                        corr.unsqueeze(-1) * beam_size
-                    )
+                    corr = batch_idxs - torch.arange(batch_idxs.numel()).type_as(batch_idxs)
+                    reorder_state.view(-1, beam_size).add_(corr.unsqueeze(-1) * beam_size)
                     original_batch_idxs = original_batch_idxs[batch_idxs]
                 self.model.reorder_incremental_state(incremental_states, reorder_state)
-                encoder_outs = self.model.reorder_encoder_out(
-                    encoder_outs, reorder_state
-                )
+                encoder_outs = self.model.reorder_encoder_out(encoder_outs, reorder_state)
+            
             with torch.autograd.profiler.record_function("EnsembleModel: forward_decoder"):
-                if analyse:
+                if self.analyse:
                     lprobs, lprobs_without_knn, avg_attn_scores = self.model.forward_decoder(
                         tokens[:, : step + 1],
                         encoder_outs,
@@ -345,9 +335,6 @@ class SequenceGenerator(nn.Module):
                         self.temperature,
                     )
 
-            print(lprobs.shape)
-            print(lprobs_without_knn.shape)
-
             if self.lm_model is not None:
                 lm_out = self.lm_model(tokens[:, : step + 1])
                 probs = self.lm_model.get_normalized_probs(lm_out, log_probs=True, sample=None)
@@ -359,45 +346,51 @@ class SequenceGenerator(nn.Module):
             lprobs[:, self.pad] = -math.inf  # never select pad
             lprobs[:, self.unk] -= self.unk_penalty  # apply unk penalty
 
+            if self.analyse:
+                lprobs_without_knn[lprobs_without_knn != lprobs_without_knn] = torch.tensor(-math.inf).to(lprobs_without_knn)
+                lprobs_without_knn[:, self.pad] = -math.inf  # never select pad
+                lprobs_without_knn[:, self.unk] -= self.unk_penalty  # apply unk penalty
+
+
             # handle max length constraint
             if step >= max_len:
                 lprobs[:, : self.eos] = -math.inf
                 lprobs[:, self.eos + 1 :] = -math.inf
+                if self.analyse:
+                    lprobs_without_knn[:, : self.eos] = -math.inf
+                    lprobs_without_knn[:, self.eos + 1 :] = -math.inf
 
             # handle prefix tokens (possibly with different lengths)
-            if (
-                prefix_tokens is not None
-                and step < prefix_tokens.size(1)
-                and step < max_len
-            ):
-                lprobs, tokens, scores = self._prefix_tokens(
-                    step, lprobs, scores, tokens, prefix_tokens, beam_size
-                )
+            if (prefix_tokens is not None and step < prefix_tokens.size(1) and step < max_len):
+                lprobs, tokens, scores = self._prefix_tokens(step, lprobs, scores, tokens, prefix_tokens, beam_size)
+                if self.analyse:
+                    lprobs_without_knn, tokens, scores = self._prefix_tokens(step, lprobs_without_knn, scores, tokens, prefix_tokens, beam_size)
+
             elif step < self.min_len:
                 # minimum length constraint (does not apply if using prefix_tokens)
                 lprobs[:, self.eos] = -math.inf
+                if self.analyse:
+                    lprobs_without_knn[:, self.eos] = -math.inf
 
             # Record attention scores, only support avg_attn_scores is a Tensor
             if avg_attn_scores is not None:
                 if attn is None:
-                    attn = torch.empty(
-                        bsz * beam_size, avg_attn_scores.size(1), max_len + 2
-                    ).to(scores)
+                    attn = torch.empty(bsz * beam_size, avg_attn_scores.size(1), max_len + 2).to(scores)
                 attn[:, :, step + 1].copy_(avg_attn_scores)
 
             scores = scores.type_as(lprobs)
-            eos_bbsz_idx = torch.empty(0).to(
-                tokens
-            )  # indices of hypothesis ending with eos (finished sentences)
-            eos_scores = torch.empty(0).to(
-                scores
-            )  # scores of hypothesis ending with eos (finished sentences)
+            eos_bbsz_idx = torch.empty(0).to(tokens)  # indices of hypothesis ending with eos (finished sentences)
+            eos_scores = torch.empty(0).to(scores)  # scores of hypothesis ending with eos (finished sentences)
 
             if self.should_set_src_lengths:
+                if self.analyse:
+                    self.search_without_knn.set_src_lengths(src_lengths)
                 self.search.set_src_lengths(src_lengths)
 
             if self.repeat_ngram_blocker is not None:
                 lprobs = self.repeat_ngram_blocker(tokens, lprobs, bsz, beam_size, step)
+                if self.analyse:
+                    lprobs_without_knn = self.repeat_ngram_blocker(tokens, lprobs, bsz, beam_size, step)
 
             # Shape: (batch, cand_size)
             cand_scores, cand_indices, cand_beams = self.search.step(
@@ -407,8 +400,22 @@ class SequenceGenerator(nn.Module):
                 tokens[:, : step + 1],
                 original_batch_idxs,
             )
-            #print(cand_indices)
-            #print(cand_beams)
+
+            if self.analyse:
+                cand_scores_without_knn, cand_indices_without_knn, cand_beams_without_knn = self.search_without_knn.step(
+                step,
+                lprobs_without_knn.view(bsz, -1, self.vocab_size),
+                scores.view(bsz, beam_size, -1)[:, :, :step],
+                tokens[:, : step + 1],
+                original_batch_idxs,)
+
+            print('with knn')
+            print(cand_indices)
+            print(cand_beams)
+            print('without knn')
+            print(cand_indices_without_knn)
+            print(cand_indices_without_knn)
+
             # cand_bbsz_idx contains beam indices for the top candidate
             # hypotheses, with a range of values: [0, bsz*beam_size),
             # and dimensions: [bsz, cand_size]
@@ -422,9 +429,7 @@ class SequenceGenerator(nn.Module):
             # only consider eos when it's among the top beam_size indices
             # Now we know what beam item(s) to finish
             # Shape: 1d list of absolute-numbered
-            eos_bbsz_idx = torch.masked_select(
-                cand_bbsz_idx[:, :beam_size], mask=eos_mask[:, :beam_size]
-            )
+            eos_bbsz_idx = torch.masked_select(cand_bbsz_idx[:, :beam_size], mask=eos_mask[:, :beam_size])
 
             finalized_sents: List[int] = []
             if eos_bbsz_idx.numel() > 0:
@@ -533,20 +538,16 @@ class SequenceGenerator(nn.Module):
             # copy tokens and scores for active hypotheses
 
             # Set the tokens for each beam (can select the same row more than once)
-            tokens[:, : step + 1] = torch.index_select(
-                tokens[:, : step + 1], dim=0, index=active_bbsz_idx
-            )
+            tokens[:, : step + 1] = torch.index_select(tokens[:, : step + 1], dim=0, index=active_bbsz_idx)
+
             # Select the next token for each of them
-            tokens.view(bsz, beam_size, -1)[:, :, step + 1] = torch.gather(
-                cand_indices, dim=1, index=active_hypos
-            )
+            tokens.view(bsz, beam_size, -1)[:, :, step + 1] = torch.gather(cand_indices, dim=1, index=active_hypos)
+
             if step > 0:
                 scores[:, :step] = torch.index_select(
                     scores[:, :step], dim=0, index=active_bbsz_idx
                 )
-            scores.view(bsz, beam_size, -1)[:, :, step] = torch.gather(
-                cand_scores, dim=1, index=active_hypos
-            )
+            scores.view(bsz, beam_size, -1)[:, :, step] = torch.gather(cand_scores, dim=1, index=active_hypos)
 
             # Update constraints based on which candidates were selected for the next beam
             self.search.update_constraints(active_hypos)
@@ -828,8 +829,8 @@ class EnsembleModel(nn.Module):
                 None if decoder_len <= 5 else decoder_out[5],  # knn index
                 None if decoder_len <= 6 else decoder_out[6],  # knn label counts
             )
-            analyse=True
-            if analyse:
+
+            if self.analyse:
                 probs, probs_without_knn = model.get_normalized_probs(decoder_out_tuple, log_probs=True, sample=None)
                 probs = probs[:, -1, :]
                 probs_without_knn = probs_without_knn[:, -1, :]
@@ -838,7 +839,7 @@ class EnsembleModel(nn.Module):
                 probs = model.get_normalized_probs(decoder_out_tuple, log_probs=True, sample=None)
                 probs = probs[:, -1, :]
             if self.models_size == 1:
-                if analyse:
+                if self.analyse:
                     return probs, probs_without_knn, attn
                 return probs, attn
 
