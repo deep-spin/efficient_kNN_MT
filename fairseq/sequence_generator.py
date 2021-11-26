@@ -454,7 +454,7 @@ class SequenceGenerator(nn.Module):
             # Shape: 1d list of absolute-numbered
             eos_bbsz_idx = torch.masked_select(cand_bbsz_idx[:, :beam_size], mask=eos_mask[:, :beam_size])
             for i in eos_bbsz_idx:
-                self.analyse_beams_idx.append(i)
+                self.analyse_beams_idx.append(i.item())
             finalized_sents: List[int] = []
             if eos_bbsz_idx.numel() > 0:
                 eos_scores = torch.masked_select(cand_scores[:, :beam_size], mask=eos_mask[:, :beam_size])
@@ -721,8 +721,12 @@ class SequenceGenerator(nn.Module):
         if len(finalized[0])==self.beam_size:
             print('-----------------')
             print(self.analyse_beams_idx)
-            for f in finalized[0]:
-                print(f)
+            for i in range(len(finalized[0])):
+                print(finalized[0][i])
+                self.analyse_scores[self.analyse_beams_idx[i]]=finalized[0][i]['score'].item()
+
+
+        print(self.analyse_scores)
 
 
         newly_finished: List[int] = []
