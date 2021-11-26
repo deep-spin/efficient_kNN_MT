@@ -430,9 +430,9 @@ class SequenceGenerator(nn.Module):
                 self.difs={}
                 for i in range(len(cand_indices[0])):
                     if cand_indices[0][i]==cand_indices_without_knn[0][i]:
-                        self.difs[i]=0 + x[cand_beams[0][i]]
+                        self.difs[i]=0 + x[cand_beams[0][i].item()]
                     else:
-                        self.difs[i]=1 + x[cand_beams[0][i]]
+                        self.difs[i]=1 + x[cand_beams[0][i].item()]
 
             print(self.difs)
             
