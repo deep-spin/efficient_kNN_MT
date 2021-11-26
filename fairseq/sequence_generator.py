@@ -312,7 +312,7 @@ class SequenceGenerator(nn.Module):
         else:
             original_batch_idxs = torch.arange(0, bsz).type_as(tokens)
 
-        analyse=Trye
+        analyse=True
         for step in range(max_len + 1):  # one extra step for EOS marker
             # reorder decoder internal states based on the prev choice of beams
             if reorder_state is not None:
