@@ -90,6 +90,7 @@ class FairseqDecoder(nn.Module):
 
         logits = net_output[0]
 
+        analyse=True
         if self.use_knn_datastore:
 
             knn_probs = net_output[2]  # [batch, seq len, vocab size]
@@ -98,13 +99,15 @@ class FairseqDecoder(nn.Module):
 
             #print('network_probs', network_probs.shape)
             #print('knn_probs', knn_probs.shape)
-            
+
             probs = network_probs * (1 - knn_lambda) + knn_probs * knn_lambda
             
             if log_probs:
                 probs=torch.log(probs.clamp(min=1e-8))
                 return probs
             else:
+                if analyse:
+                    return probs, network_probs
                 return probs
 
 

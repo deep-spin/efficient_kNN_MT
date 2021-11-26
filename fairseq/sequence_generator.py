@@ -312,6 +312,7 @@ class SequenceGenerator(nn.Module):
         else:
             original_batch_idxs = torch.arange(0, bsz).type_as(tokens)
 
+        analyse=Trye
         for step in range(max_len + 1):  # one extra step for EOS marker
             # reorder decoder internal states based on the prev choice of beams
             if reorder_state is not None:
@@ -329,14 +330,23 @@ class SequenceGenerator(nn.Module):
                     encoder_outs, reorder_state
                 )
             with torch.autograd.profiler.record_function("EnsembleModel: forward_decoder"):
-                lprobs, avg_attn_scores = self.model.forward_decoder(
-                    tokens[:, : step + 1],
-                    encoder_outs,
-                    incremental_states,
-                    self.temperature,
-                )
+                if analyse:
+                    lprobs, lprobs_without_knn, avg_attn_scores = self.model.forward_decoder(
+                        tokens[:, : step + 1],
+                        encoder_outs,
+                        incremental_states,
+                        self.temperature,
+                    )
+                else:
+                    lprobs, avg_attn_scores = self.model.forward_decoder(
+                        tokens[:, : step + 1],
+                        encoder_outs,
+                        incremental_states,
+                        self.temperature,
+                    )
 
             print(lprobs.shape)
+            print(lprobs_without_knn.shape)
 
             if self.lm_model is not None:
                 lm_out = self.lm_model(tokens[:, : step + 1])
@@ -397,8 +407,8 @@ class SequenceGenerator(nn.Module):
                 tokens[:, : step + 1],
                 original_batch_idxs,
             )
-            print(cand_indices)
-            print(cand_beams)
+            #print(cand_indices)
+            #print(cand_beams)
             # cand_bbsz_idx contains beam indices for the top candidate
             # hypotheses, with a range of values: [0, bsz*beam_size),
             # and dimensions: [bsz, cand_size]
@@ -818,9 +828,15 @@ class EnsembleModel(nn.Module):
                 None if decoder_len <= 5 else decoder_out[5],  # knn index
                 None if decoder_len <= 6 else decoder_out[6],  # knn label counts
             )
+            analyse=True
+            if analyse:
+                probs, probs_without_knn = model.get_normalized_probs(decoder_out_tuple, log_probs=True, sample=None)
+                probs = probs[:, -1, :]
+                probs_without_knn = probs_without_knn[:, -1, :]
 
-            probs = model.get_normalized_probs(decoder_out_tuple, log_probs=True, sample=None)
-            probs = probs[:, -1, :]
+            else:    
+                probs = model.get_normalized_probs(decoder_out_tuple, log_probs=True, sample=None)
+                probs = probs[:, -1, :]
             if self.models_size == 1:
                 return probs, attn
 
@@ -837,6 +853,8 @@ class EnsembleModel(nn.Module):
 
         if avg_attn is not None:
             avg_attn.div_(self.models_size)
+        if self.analyse:
+            return avg_probs, probs_without_knn, avg_attn
         return avg_probs, avg_attn
 
     @torch.jit.export
