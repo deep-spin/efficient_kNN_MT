@@ -432,10 +432,7 @@ class SequenceGenerator(nn.Module):
                         if cand_indices[0][i]==cand_indices_without_knn[0][i]:
                             self.difs[i]=0 + x[cand_beams[0][i].item()]
                         else:
-                            self.difs[i]=1 + x[cand_beams[0][i].item()]            
-
-            print(cand_indices)
-            print(cand_beams)
+                            self.difs[i]=1 + x[cand_beams[0][i].item()]     
 
             # cand_bbsz_idx contains beam indices for the top candidate
             # hypotheses, with a range of values: [0, bsz*beam_size),
@@ -716,25 +713,18 @@ class SequenceGenerator(nn.Module):
                 )
         if self.analyse:
             if len(finalized[0])==self.beam_size:
-                print(finalized[0])
                 for i in range(len(finalized[0])):
                     self.analyse_scores[i]=finalized[0][i]['score'].item()
             
                 self.analyse_difs=self.analyse_difs[:beam_size]
 
-                print(self.analyse_scores)
-                print(self.analyse_difs)
-
                 index, value = max(enumerate(self.analyse_scores), key=operator.itemgetter(1))
-
-                print(value)
-                print(index)
-
-                print(self.analyse_difs[index])
-                print(len(finalized[0][index]['tokens']))
 
                 self.difs_dataset+=self.analyse_difs[index]
                 self.len_dataset+=len(finalized[0][index]['tokens'])
+
+                print(self.difs_dataset)
+                print(self.len_dataset)
 
         newly_finished: List[int] = []
 
