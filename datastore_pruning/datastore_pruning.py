@@ -36,7 +36,7 @@ def parse_retrieve_fname(fname):
     offset = size = nk = None
     x = fname.split('_')
     for s in x:
-        if s.startswith('start'):\
+        if s.startswith('start'):
             offset = int(s.split('start')[-1])
 
         if s.startswith('size'):
@@ -51,7 +51,7 @@ def parse_retrieve_fname(fname):
 
     raise ValueError(f"parsing error for {fname}")
 
-weights = np.ones(args.dstore_size, dtype=int)
+weights = np.ones(args.dstore_size, dtype=np.int)
 
 def merge_knn(fname):
     print(f'start processing {fname}', flush=True)
@@ -59,10 +59,10 @@ def merge_knn(fname):
     print(f'offset: {offset}, size{size}, k{nk}', flush=True)
     scores = np.zeros(args.dstore_size, dtype=np.float32)
 
-    ret = np.memmap(os.path.join(args.retrieval_dir, fname), dtype=int, mode='r', shape=(size, nk))
+    ret = np.memmap(os.path.join(args.retrieval_dir, fname), dtype=np.int32, mode='r', shape=(size, nk))
 
     t = time.time()
-    ret_mem = np.zeros((size, args.k+1), dtype=int)
+    ret_mem = np.zeros((size, args.k+1), dtype=np.int32)
     ret_mem[:] = ret[:, :args.k+1]
     print(f'reading index into memory costs {time.time() - t} seconds', flush=True)
 
@@ -113,16 +113,16 @@ if args.dstore_fp16:
     new_key = np.memmap(os.path.join(args.save_dir,
             f'dstore_merge{args.k}_size{num}_keys.npy'), mode='w+', dtype=np.float16, shape=(num, args.dimension))
     new_val = np.memmap(os.path.join(args.save_dir,
-            f'dstore_merge{args.k}_size{num}_vals.npy'), mode='w+', dtype=int, shape=(num, 1))
+            f'dstore_merge{args.k}_size{num}_vals.npy'), mode='w+', dtype=np.int, shape=(num, 1))
     new_weight = np.memmap(os.path.join(args.save_dir,
-            f'dstore_merge{args.k}_size{num}_weights.npy'), mode='w+', dtype=int, shape=(num, 1))
+            f'dstore_merge{args.k}_size{num}_weights.npy'), mode='w+', dtype=np.int, shape=(num, 1))
 else:
     new_key = np.memmap(os.path.join(args.save_dir,
             f'dstore_merge{args.k}_size{num}_keys.npy'), mode='w+', dtype=np.float32, shape=(num, args.dimension))
     new_val = np.memmap(os.path.join(args.save_dir,
-            f'dstore_merge{args.k}_size{num}_vals.npy'), mode='w+', dtype=int, shape=(num, 1))
+            f'dstore_merge{args.k}_size{num}_vals.npy'), mode='w+', dtype=np.int, shape=(num, 1))
     new_weight = np.memmap(os.path.join(args.save_dir,
-            f'dstore_merge{args.k}_size{num}_weights.npy'), mode='w+', dtype=int, shape=(num, 1))
+            f'dstore_merge{args.k}_size{num}_weights.npy'), mode='w+', dtype=np.int, shape=(num, 1))
 
 cnt = 0
 for i, v in enumerate(weights):
