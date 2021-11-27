@@ -36,7 +36,7 @@ def parse_retrieve_fname(fname):
     offset = size = nk = None
     x = fname.split('_')
     for s in x:
-        if s.startswith('start'):
+        if s.startswith('start'):\
             offset = int(s.split('start')[-1])
 
         if s.startswith('size'):
@@ -59,10 +59,10 @@ def merge_knn(fname):
     print(f'offset: {offset}, size{size}, k{nk}', flush=True)
     scores = np.zeros(args.dstore_size, dtype=np.float32)
 
-    ret = np.memmap(os.path.join(args.retrieval_dir, fname), dtype=int32, mode='r', shape=(size, nk))
+    ret = np.memmap(os.path.join(args.retrieval_dir, fname), dtype=int, mode='r', shape=(size, nk))
 
     t = time.time()
-    ret_mem = np.zeros((size, args.k+1), dtype=int32)
+    ret_mem = np.zeros((size, args.k+1), dtype=int)
     ret_mem[:] = ret[:, :args.k+1]
     print(f'reading index into memory costs {time.time() - t} seconds', flush=True)
 
