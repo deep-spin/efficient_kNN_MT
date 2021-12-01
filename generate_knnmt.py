@@ -175,6 +175,7 @@ def _main(cfg: DictConfig, output_file):
     num_sentences = 0
     has_target = True
     wps_meter = TimeMeter()
+    f_medical=open('knn_mt_medical_test','w')
     for sample in progress:
         sample = utils.move_to_cuda(sample) if use_cuda else sample
         if "net_input" not in sample:
@@ -199,7 +200,7 @@ def _main(cfg: DictConfig, output_file):
         num_generated_tokens = sum(len(h[0]["tokens"]) for h in hypos)
         gen_timer.stop(num_generated_tokens)
 
-        f_medical=open('knn_mt_medical_test','w')
+        
         for i, sample_id in enumerate(sample["id"].tolist()):
             has_target = sample["target"] is not None
 
