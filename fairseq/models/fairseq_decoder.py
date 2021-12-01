@@ -36,7 +36,7 @@ class FairseqDecoder(nn.Module):
         """
         x, extra = self.extract_features(prev_output_tokens, encoder_out=encoder_out, **kwargs)
         x = self.output_layer(x)
-        print('------------------')
+        
         return x, extra
 
     def extract_features(self, prev_output_tokens, encoder_out=None, **kwargs):
