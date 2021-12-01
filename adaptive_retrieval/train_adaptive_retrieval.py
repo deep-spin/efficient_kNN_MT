@@ -165,7 +165,7 @@ for epoch in tqdm(range(args.n_epochs)):
     report_loss = running_loss / nsamples
     print(f'epoch: {epoch}, step: {i},  training loss: {report_loss:.3f}')
 
-    val_loss, prediction_dict = validate(val_dataloader, model, args)
+    val_loss = validate(val_dataloader, model, args)
     
     if val_loss < best_loss:
         best_loss = val_loss
