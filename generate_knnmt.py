@@ -176,6 +176,7 @@ def _main(cfg: DictConfig, output_file):
     has_target = True
     wps_meter = TimeMeter()
     for sample in progress:
+        print(sample)
         sample = utils.move_to_cuda(sample) if use_cuda else sample
         if "net_input" not in sample:
             continue
