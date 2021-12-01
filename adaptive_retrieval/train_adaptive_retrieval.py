@@ -51,7 +51,7 @@ def validate(val_dataloader, model, args):
         if args.l1 > 0:
             loss = loss + args.l1 * torch.abs(log_weight.exp()[:,1]).sum() / log_weight.size(0)
 
-        bsz = next(iter(features.values())).size(0)
+        bsz = features.size(0)
 
         running_loss += ent_loss.item() * bsz
         nsamples += bsz
@@ -158,7 +158,7 @@ for epoch in tqdm(range(args.n_epochs)):
         loss.backward()
         optimizer.step()
 
-        bsz = next(iter(features.values())).size(0)
+        bsz = features.size(0)
         running_loss += loss.item() * bsz
         nsamples += bsz
 
