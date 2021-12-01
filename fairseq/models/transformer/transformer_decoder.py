@@ -295,8 +295,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
             if features_only:
                 prob = utils.log_softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
-                print('----------------------------')
-                print(prob.shape)
+                return x, extra, knn_prob, prob
 
             return x, extra, knn_prob, knn_lambda, knn_dists, knn_index
 

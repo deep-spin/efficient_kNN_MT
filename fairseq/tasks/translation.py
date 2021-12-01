@@ -403,12 +403,12 @@ class TranslationTask(FairseqTask):
                                       features_only=True)
             return decoder_output
         else:
-            decoder_output, extra, knn_prob, _, _, _ = model(src_tokens=sample['net_input']['src_tokens'],
+            decoder_output, extra, knn_prob, network_prob = model(src_tokens=sample['net_input']['src_tokens'],
                                       src_lengths=sample['net_input']['src_lengths'],
                                       prev_output_tokens=sample['net_input']['prev_output_tokens'],
                                       return_all_hiddens=False,
                                       features_only=True)
-            return decoder_output, knn_prob
+            return decoder_output, knn_prob, network_prob
 
     def reduce_metrics(self, logging_outputs, criterion):
         super().reduce_metrics(logging_outputs, criterion)
