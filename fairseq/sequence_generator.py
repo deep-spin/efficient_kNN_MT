@@ -448,8 +448,9 @@ class SequenceGenerator(nn.Module):
             # Now we know what beam item(s) to finish
             # Shape: 1d list of absolute-numbered
             eos_bbsz_idx = torch.masked_select(cand_bbsz_idx[:, :beam_size], mask=eos_mask[:, :beam_size])
-            for i in eos_bbsz_idx:
-                self.analyse_difs.append(self.difs[i.item()])
+            if self.analyse:
+                for i in eos_bbsz_idx:
+                    self.analyse_difs.append(self.difs[i.item()])
 
             finalized_sents: List[int] = []
             if eos_bbsz_idx.numel() > 0:
