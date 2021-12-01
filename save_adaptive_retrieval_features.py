@@ -87,9 +87,7 @@ def main(args, override_args=None):
                 features, knn_prob = task.forward_and_get_hidden_state_step(sample, model, use_knn_datastore=True)  # [B, T, H]
                 target = sample['target']  # [B, T]
 
-                print(target.shape)
-                print(knn_prob.shape)
-
+                
                 # get useful parameters
                 batch_size = target.size(0)
                 seq_len = target.size(1)

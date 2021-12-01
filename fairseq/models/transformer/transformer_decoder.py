@@ -292,6 +292,10 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             decode_result = self.knn_datastore.calculate_knn_prob(knn_index, tgt_index, knn_dists, last_hidden, knn_temperature)
 
             knn_prob = decode_result['prob']
+
+            prob = utils.log_softmax(x, dim=-1, onnx_trace=self.onnx_trace)
+            print(prob.shape)
+
             return x, extra, knn_prob, knn_lambda, knn_dists, knn_index
 
         else:
