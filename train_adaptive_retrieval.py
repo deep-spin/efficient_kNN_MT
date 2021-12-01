@@ -86,6 +86,9 @@ def main(args, override_args=None):
                 sample = utils.move_to_cuda(sample) if use_cuda else sample
                 features = task.forward_and_get_hidden_state_step(sample, model)  # [B, T, H]
                 target = sample['target']  # [B, T]
+
+                print(target.shape)
+                print(features.shape)
                 
                 # get useful parameters
                 batch_size = target.size(0)
