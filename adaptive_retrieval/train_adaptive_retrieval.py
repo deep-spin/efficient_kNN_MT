@@ -138,8 +138,6 @@ for epoch in tqdm(range(args.n_epochs)):
     running_loss = 0.
     nsamples = 0
 
-    model.epoch_update()
-
     for i, sample in enumerate(tqdm(train_dataloader)):
         features, targets, network_scores, knn_scores = sample[0], sample[1], sample[2], sample[3]
         
