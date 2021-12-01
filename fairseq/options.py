@@ -321,7 +321,7 @@ def add_datastore_args(parser):
 
 def add_train_adaptive_retrieval_args(parser):
     group = parser.add_argument_group("adaptive_retrieval")
-    group.add_argument("lr", default=.0001, type=float)
+    group.add_argument("--lr", default=.0001, type=float)
     return parser
 
 def add_dataset_args(parser, train=False, gen=False):
