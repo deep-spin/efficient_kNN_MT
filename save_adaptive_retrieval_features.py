@@ -87,11 +87,6 @@ def main(args, override_args=None):
                 features, knn_prob, network_prob = task.forward_and_get_hidden_state_step(sample, model, use_knn_datastore=True)  # [B, T, H]
                 target = sample['target']  # [B, T]
 
-                print(target.shape)
-                print(features.shape)
-                print(knn_prob.shape)
-                print(network_prob.shape)
-                
                 # get useful parameters
                 batch_size = target.size(0)
                 seq_len = target.size(1)
@@ -107,6 +102,12 @@ def main(args, override_args=None):
 
                 features = features.contiguous().view(batch_size * seq_len, -1)
                 features = features.index_select(dim=0, index=non_pad_index)  # [n_count, feature size]
+
+                print(target.shape)
+                print(features.shape)
+                print(knn_prob.shape)
+                print(network_prob.shape)
+                
 
 
 def cli_main():
