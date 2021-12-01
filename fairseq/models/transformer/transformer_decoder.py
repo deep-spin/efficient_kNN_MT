@@ -252,7 +252,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         if not features_only:
             x = self.output_layer(x)
 
-        print('..................')
         if self.use_knn_datastore:
             knn_search_result = self.knn_datastore.retrieve(last_hidden)
 

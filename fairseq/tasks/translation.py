@@ -393,13 +393,22 @@ class TranslationTask(FairseqTask):
                 logging_output["_bleu_totals_" + str(i)] = bleu.totals[i]
         return loss, sample_size, logging_output
 
-    def forward_and_get_hidden_state_step(self, sample, model):
-        decoder_output, extra = model(src_tokens=sample['net_input']['src_tokens'],
+    def forward_and_get_hidden_state_step(self, sample, model, use_knn_datastore=False):
+
+        if not use_knn_datastore:
+            decoder_output, extra = model(src_tokens=sample['net_input']['src_tokens'],
                                       src_lengths=sample['net_input']['src_lengths'],
                                       prev_output_tokens=sample['net_input']['prev_output_tokens'],
                                       return_all_hiddens=False,
                                       features_only=True)
-        return decoder_output
+            return decoder_output
+        else:
+            decoder_output, extra, knn_prob, _, _, _ = model(src_tokens=sample['net_input']['src_tokens'],
+                                      src_lengths=sample['net_input']['src_lengths'],
+                                      prev_output_tokens=sample['net_input']['prev_output_tokens'],
+                                      return_all_hiddens=False,
+                                      features_only=True)
+            return decoder_output, knn_prob
 
     def reduce_metrics(self, logging_outputs, criterion):
         super().reduce_metrics(logging_outputs, criterion)
