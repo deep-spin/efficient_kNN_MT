@@ -105,7 +105,7 @@ def main(args, override_args=None):
 
 
 def cli_main():
-    parser = options.get_save_datastore_parser()
+    parser = options.get_train_adaptive_retrieval_parser()
     args = options.parse_args_and_arch(parser)
 
     print(args)
