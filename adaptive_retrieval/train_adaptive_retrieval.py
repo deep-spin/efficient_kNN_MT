@@ -22,10 +22,10 @@ def validate(val_dataloader, model, args):
     nsamples = 0
     prediction_dict = {}
     for i, sample in enumerate(val_dataloader, 0):
-        inputs, lm_scores, knn_scores= sample['feature'], sample['lm_scores'], sample['knn_scores']
-        
+        inputs, network_scores, knn_scores= sample['feature'], sample['network_score'], sample['knn_score'], sample['target']
+
         log_weight = model(inputs)
-        cross_entropy = log_weight + torch.stack((lm_scores, knn_scores), dim=-1)
+        cross_entropy = log_weight + torch.stack((network_scores[:,target.item()], knn_scores[:,target.item()]), dim=-1)
 
         # (B,)
         cross_entropy = -torch.logsumexp(cross_entropy, dim=-1)
@@ -37,7 +37,6 @@ def validate(val_dataloader, model, args):
 
         # (batch)
         preds = log_weight[:, 0]
-#         import pdb; pdb.set_trace()
 
         for id_, p in zip(sample['id'], preds):
             prediction_dict[id_.item()] = p.item()
@@ -49,190 +48,38 @@ def validate(val_dataloader, model, args):
 
     val_loss = running_loss / nsamples
 
-    print(f"val loss: {val_loss:.3f}, ppl: {np.exp(val_loss)}")
+    print(f"val loss: {val_loss:.3f}")
 
     return val_loss, prediction_dict
-
-def interpolation(hypos, predictions, lambda_=0.75):
-    scores = 0
-    cnt = 0
-    ndict = 267744
-    assert len(predictions) == len(hypos)
-    for i, (hypo, pred) in enumerate(zip(hypos, predictions)):
-        # if i % 1000 == 0:
-        #     print(f'interpolation processed {i} tokens')
-        knn_weight = pred * np.log(1-lambda_) + (1 - pred) * (-1e5)
-        lm_weight = pred * np.log(lambda_)
-
-        knn_scores = hypo['knn_s']
-        lm_scores = hypo['lm_s']
-        combine = logsumexp(np.stack((knn_scores + knn_weight, lm_scores+lm_weight), axis=-1), axis=-1)
-        scores += combine.sum()
-        cnt += 1
-
-    return np.exp(-scores / cnt)
-
-
-def moe_interpolation(hypos, predictions, cutoff=None, random_mask=None, constant_weight=None, threshold=None):
-    """perform interpolation while weights are output from a
-    gating network. only perform retrieval in a certain portion
-    of tokens when cutoff is not None
-    """
-    scores = 0
-    cnt = 0
-    ts = None
-    # ndict = 267744
-    assert len(predictions) == len(hypos)
-    predictions_copy = predictions
-
-    if constant_weight is not None:
-        predictions = [constant_weight] * len(predictions_copy)
-
-    if cutoff is not None:
-        if random_mask is None:
-            if threshold is not None:
-                ts = threshold[cutoff * 100]
-                mask = (predictions_copy >= ts).astype('float')
-                print(f'actual cutoff {mask.sum() / len(mask)}')
-            else:
-                ts = np.sort(predictions_copy)[int(len(predictions_copy) * (1. - cutoff))]
-                mask = (predictions_copy >= ts).astype('float')
-        else:
-            # mask = np.zeros(len(predictions))
-            # mask[int(len(predictions) * (1. - cutoff)):] = 1
-            # np.random.shuffle(mask)
-            # mask = mask.astype('float')
-            ts = None
-            mask = random_mask
-
-        lm_weights = (1-mask) * predictions + mask * 0.
-        knn_prob = 1. - np.exp(predictions)
-        overflow = (knn_prob <= 0)
-        knn_prob = np.clip(knn_prob, 1e-5, 1)
-        knn_weights = np.log(knn_prob)
-        knn_weights[overflow] = -1e5
-        knn_weights = (1-mask) * knn_weights + mask * (-1e5)
-    else:
-        lm_weights = predictions
-        knn_prob = 1. - np.exp(predictions)
-        overflow = (knn_prob <= 0)
-        knn_prob = np.clip(knn_prob, 1e-5, 1)
-        knn_weights = np.log(knn_prob)
-        knn_weights[overflow] = -1e5
-
-    for hypo, lm_weight, knn_weight in zip(hypos, lm_weights, knn_weights):
-
-        knn_scores = hypo['knn_s']
-        lm_scores = hypo['lm_s']
-        combine = logsumexp(np.stack((knn_scores + knn_weight, lm_scores+lm_weight), axis=-1), axis=-1)
-        scores += combine.sum()
-        cnt += 1
-
-    return np.exp(-scores / cnt), ts
-
-
-def train_test_split(x, y, test_size=0.2):
-    assert len(x) == len(y)
-    indexes = np.arange(len(x))
-    np.random.shuffle(indexes)
-
-    boundary = int(len(x) * test_size)
-    test_indexes = indexes[:boundary]
-    train_indexes = indexes[boundary:]
-
-    x_train = [x[i] for i in train_indexes]
-    y_train = [y[i] for i in train_indexes]
-
-    x_test = [x[i] for i in test_indexes]
-    y_test = [y[i] for i in test_indexes]
-
-    return x_train, x_test, y_train, y_test, train_indexes, test_indexes
-
-def save_val_pred(hypos, predictions, path):
-    new_hypos = []
-    predictions = predictions.astype('float')
-    start = 0
-
-    assert len(hypos) == len(predictions)
-
-    for hypo, pred in zip(hypos, predictions):
-        hypo['pred'] = pred
-
-        new_hypos.append(hypo)
-
-    with open(path, 'w') as fout:
-        for hypo in new_hypos:
-            fout.write(json.dumps(hypo, ensure_ascii=False))
-            fout.write('\n')
-            fout.flush()
-
-def read_input(input, debug=False):
-    hypos = []
-    fname = 'features_small.jsonl' if args.debug else input
-
-    dataset = load_dataset('json', data_files=fname, cache_dir='hf_cache', use_threads=True)
-
-    return dataset['train']
 
 
 parser = argparse.ArgumentParser(description='')
 
-parser.add_argument('--train', type=str, default=None,
-    help='the input feature file (jsonl)')
-parser.add_argument('--val', type=str, default=None,
-    help='the input feature file (jsonl)')
-parser.add_argument('--train-others', type=str, default=None,
-    help='use a specified jsonl file for others feature if specified')
-parser.add_argument('--val-others', type=str, default=None,
-    help='use a specified jsonl file for others feature if specified')
-parser.add_argument('--input', type=str, default=None,
-    help='the input feature file (jsonl). Multiple files are separated with comma')
-parser.add_argument('--negative-weight', type=float, default=1,
-        help='weight of the loss from negative examples, range [0,1]')
-parser.add_argument('--feature-type', type=str, default='all',
-    help='the features to use, splitted with commas')
-parser.add_argument('--seed', type=int, default=22,
-    help='the random seed')
-parser.add_argument('--debug', action='store_true', default=False,
-    help='debug mode')
+parser.add_argument('--train_file', type=str, default=None)
+parser.add_argument('--val_file', type=str, default=None)
+parser.add_argument('--train-others', type=str, default=None,help='use a specified file for other features if specified')
+parser.add_argument('--val-others', type=str, default=None,help='use a specified file for other features if specified')
+parser.add_argument('--negative-weight', type=float, default=1,help='weight of the loss from negative examples, range [0,1]')
+parser.add_argument('--seed', type=int, default=1,help='the random seed')
 
-
-# interpolation with ngram kenlm instead of knnlm
-parser.add_argument('--train-kenlm', type=str, default=None,
-    help='the output score file from kenlm querying, note that the scores in this kenlm output \
-    is in log base 10 by default')
-parser.add_argument('--val-kenlm', type=str, default=None,
-    help='the output score file from kenlm querying, note that the scores in this kenlm output \
-    is in log base 10 by default')
 
 # training arguments
 parser.add_argument('--lr', type=float, default=5e-4, help='learning rate')
-parser.add_argument('--l1', type=float, default=0.,
-    help='l1 regularization coefficient')
+parser.add_argument('--l1', type=float, default=0., help='l1 regularization coefficient')
 parser.add_argument('--batch-size', type=int, default=64, help='batch size')
 parser.add_argument('--ngram', type=int, default=0, help='the ngram features to use')
 
 
 # model hyperparameters
-parser.add_argument('--arch', type=str, choices=['mlp', 'lstm'], default='mlp',
-    help='architectures of the expert model')
-parser.add_argument('--activation', type=str, choices=['linear', 'relu'], default='relu',
-    help='the activation function in mlp')
+parser.add_argument('--arch', type=str, choices=['mlp'], default='mlp',help='architectures of the expert model')
 parser.add_argument('--hidden-units', type=int, default=32, help='hidden units')
 parser.add_argument('--nlayers', type=int, default=3, help='number of layerss')
 parser.add_argument('--dropout', type=float, default=0, help='dropout')
 
-
 parser.add_argument('--output-dir', type=str)
 parser.add_argument('--move-to-mem', action='store_true', default=False)
-parser.add_argument('--load-model', type=str, default=None,
-    help='load model checkpoint')
-parser.add_argument('--eval', action='store_true', default=False,
-    help='perform evaluation')
-parser.add_argument('--save-pred', type=str, default=None,
-    help='save predictions for analysis')
-parser.add_argument('--validate-loss', action='store_true', default=False,
-    help='save predictions for analysis')
+parser.add_argument('--load-model', type=str, default=None, help='load model checkpoint')
+parser.add_argument('--eval', action='store_true', default=False, help='perform evaluation')
 
 args = parser.parse_args()
 
@@ -241,102 +88,31 @@ print(args)
 np.random.seed(args.seed)
 torch.manual_seed(args.seed)
 
-if args.input is not None:
-    hypos = []
-    if args.debug:
-        hypos = read_input(None, debug=args.debug)
-    else:
-        for fname in args.input.split(','):
-            hypos.extend(read_input(fname, debug=args.debug))
-
-    test_size = 0.2
-    indexes = np.arange(len(hypos))
-    # np.random.shuffle(indexes)
-    boundary = int(len(hypos) * test_size)
-    test_indexes = indexes[:boundary]
-    train_indexes = indexes[boundary:]
-
-    train_hypos = [hypos[x] for x in train_indexes]
-    val_hypos = [hypos[x] for x in test_indexes]
-else:
-    train_ctxt_hypos = read_input(args.train + '_ctxt.jsonl', debug=args.debug)
-
-    if args.train_others is None:
-        train_other_hypos = read_input(args.train + '_others.jsonl', debug=args.debug)
-    else:
-        train_other_hypos = read_input(args.train_others)
-
-    val_ctxt_hypos = read_input(args.val + '_ctxt.jsonl', debug=args.debug)
-
-    if args.val_others is None:
-        val_other_hypos = read_input(args.val + '_others.jsonl', debug=args.debug)
-    else:
-        val_ctxt_hypos = read_input(args.val_others)
-
-    if args.train_kenlm is not None:
-        train_kenlm = read_input(args.train_kenlm)
-        val_kenlm = read_input(args.val_kenlm)
-    else:
-        train_kenlm = None
-        val_kenlm = None
-
-    if args.move_to_mem:
-        train_ctxt_hypos = [train_ctxt_hypos[i] for i in range(len(train_ctxt_hypos))]
-        train_other_hypos = [train_other_hypos[i] for i in range(len(train_other_hypos))]
-        val_ctxt_hypos = [val_ctxt_hypos[i] for i in range(len(val_ctxt_hypos))]
-        val_other_hypos = [val_other_hypos[i] for i in range(len(val_other_hypos))]
-
-print('complete reading jsonl files')
+train_data = torch.load(args.train_file)
+valid_data = torch.load(args.valid_file)
 
 
 training_set = TokenFeatureDataset(train_ctxt_hypos, train_other_hypos, train_kenlm, ngram=args.ngram)
 val_set = TokenFeatureDataset(val_ctxt_hypos, val_other_hypos, val_kenlm, ngram=args.ngram)
 
-train_sampler = torch.utils.data.SequentialSampler(training_set) if args.arch == 'lstm' else None
-val_sampler = torch.utils.data.SequentialSampler(val_set) if args.arch == 'lstm' else None
-
 train_dataloader = torch.utils.data.DataLoader(training_set,
                                                batch_size=args.batch_size,
-                                               shuffle=False if args.arch == 'lstm' else True,
-                                               sampler=train_sampler,
-                                               collate_fn=training_set.collater)
+                                               shuffle=True,)
 
 val_dataloader = torch.utils.data.DataLoader(val_set,
                                              batch_size=args.batch_size,
-                                             shuffle=False,
-                                             sampler=val_sampler,
-                                             collate_fn=val_set.collater)
-
-nepochs = 10
-
-extra_feature_size = None
+                                             shuffle=False,)
 
 
-feature_set = ['ctxt', 'freq', 'lm_ent', 'lm_max', 'fert']
 
-if args.feature_type == 'all':
-    feature_size = OrderedDict({key: training_set.get_nfeature(key) for key in feature_set})
-else:
-    feature_size = OrderedDict({key: training_set.get_nfeature(key) for key in args.feature_type.split(',')})
-
-args.feature_size = feature_size
 
 if args.arch == 'mlp':
-    model = MLPMOE(
-                feature_size=feature_size,
-                hidden_units=args.hidden_units,
-                nlayers=args.nlayers,
-                dropout=args.dropout,
-                activation=args.activation,
-                )
-elif args.arch == 'lstm':
-    model = LSTMMOE(
+    model = LambdaMLP(
                 feature_size=feature_size,
                 hidden_units=args.hidden_units,
                 nlayers=args.nlayers,
                 dropout=args.dropout,
                 )
-# criterion = nn.CrossEntropyLoss(weight=torch.tensor([args.negative_weight, 1]))
 
 if args.load_model:
     ckpt_path = os.path.join(args.load_model, 'checkpoint_best.pt')
