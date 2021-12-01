@@ -399,6 +399,8 @@ class TranslationTask(FairseqTask):
                                       prev_output_tokens=sample['net_input']['prev_output_tokens'],
                                       return_all_hiddens=False,
                                       features_only=True)
+
+        print(extra)
         return decoder_output
 
     def reduce_metrics(self, logging_outputs, criterion):
