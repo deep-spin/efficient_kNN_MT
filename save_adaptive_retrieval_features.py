@@ -33,13 +33,13 @@ def main(args, override_args=None):
     if use_cuda:
         torch.cuda.set_device(args.device_id)
 
-    print('-----------', override_args)
     if override_args is not None:
         overrides = vars(override_args)
         overrides.update(eval(getattr(override_args, "model_overrides", "{}")))
     else:
         overrides = None
 
+    print('-------------', overrides)
 
     # Load ensemble
     # the task is build based on the checkpoint
