@@ -90,6 +90,7 @@ class FairseqDecoder(nn.Module):
 
         logits = net_output[0]
 
+        print('-------------------------------------')
         analyse=False
         if self.use_knn_datastore:
 
