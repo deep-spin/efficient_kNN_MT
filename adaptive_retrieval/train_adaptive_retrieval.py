@@ -39,7 +39,7 @@ def validate(val_dataloader, model, args):
     for i, sample in enumerate(val_dataloader, 0):
         features, targets, network_scores, knn_scores = sample[0], sample[1], sample[2], sample[3]
 
-        log_weight = model(inputs)
+        log_weight = model(features)
         cross_entropy = log_weight + torch.stack((network_scores[:,target.item()], knn_scores[:,target.item()]), dim=-1)
 
         # (B,)
@@ -50,13 +50,7 @@ def validate(val_dataloader, model, args):
         if args.l1 > 0:
             loss = loss + args.l1 * torch.abs(log_weight.exp()[:,1]).sum() / log_weight.size(0)
 
-        # (batch)
-        preds = log_weight[:, 0]
-
-        for id_, p in zip(sample['id'], preds):
-            prediction_dict[id_.item()] = p.item()
-
-        bsz = next(iter(inputs.values())).size(0)
+        bsz = next(iter(features.values())).size(0)
 
         running_loss += ent_loss.item() * bsz
         nsamples += bsz
@@ -65,15 +59,15 @@ def validate(val_dataloader, model, args):
 
     print(f"val loss: {val_loss:.3f}")
 
-    return val_loss, prediction_dict
+    return val_loss
 
 
 parser = argparse.ArgumentParser(description='')
 
 parser.add_argument('--train_file', type=str, default=None)
 parser.add_argument('--val_file', type=str, default=None)
-parser.add_argument('--train-others', type=str, default=None,help='use a specified file for other features if specified')
-parser.add_argument('--val-others', type=str, default=None,help='use a specified file for other features if specified')
+parser.add_argument('--train_others', type=str, default=None,help='use a specified file for other features if specified')
+parser.add_argument('--val_others', type=str, default=None,help='use a specified file for other features if specified')
 parser.add_argument('--negative-weight', type=float, default=1,help='weight of the loss from negative examples, range [0,1]')
 parser.add_argument('--seed', type=int, default=1,help='the random seed')
 
@@ -149,12 +143,12 @@ for epoch in range(args.n_epochs):
     model.epoch_update()
 
     for i, sample in enumerate(train_dataloader, 0):
-        inputs, network_scores, knn_scores = sample['feature'], sample['network_scores'], sample['knn_scores']
+        features, targets, network_scores, knn_scores = sample[0], sample[1], sample[2], sample[3]
         
         optimizer.zero_grad()
 
         # (B x 2): log probability
-        log_weight = model(inputs)
+        log_weight = model(features)
 
         cross_entropy = log_weight + torch.stack((network_scores, knn_scores), dim=-1)
 
@@ -168,7 +162,7 @@ for epoch in range(args.n_epochs):
         loss.backward()
         optimizer.step()
 
-        bsz = next(iter(inputs.values())).size(0)
+        bsz = next(iter(features.values())).size(0)
         running_loss += loss.item() * bsz
         nsamples += bsz
 
