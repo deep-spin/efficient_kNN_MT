@@ -99,7 +99,6 @@ def main(args, override_args=None):
 
                 non_pad_index = target_mask.nonzero().squeeze(-1)  # [n_count]
                 target = target.index_select(dim=0, index=non_pad_index)  # [n_count]
-                print(target)
 
                 features = features.contiguous().view(batch_size * seq_len, -1)
                 features = features.index_select(dim=0, index=non_pad_index)  # [n_count, feature size]
