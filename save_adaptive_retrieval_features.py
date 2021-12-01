@@ -87,9 +87,6 @@ def main(args, override_args=None):
                 features, knn_score, network_score = task.forward_and_get_hidden_state_step(sample, model, use_knn_datastore=True)  # [B, T, H]
                 target = sample['target']  # [B, T]
 
-                print(knn_score.shape)
-                print(network_score.shape)
-
                 # get useful parameters
                 batch_size = target.size(0)
                 seq_len = target.size(1)
