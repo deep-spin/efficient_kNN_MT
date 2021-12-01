@@ -15,7 +15,6 @@ parser.add_argument('--dstore-fp16', default=False, action='store_true')
 parser.add_argument('--probe', type=int, default=32, help='number of clusters to query')
 parser.add_argument('--faiss_index', type=str)
 parser.add_argument('--starting_point', type=int, default=0, help='index to start adding keys at')
-
 parser.add_argument('--k', type=int, default=1024, help='the number of nearest neighbors')
 parser.add_argument('--save-dir', type=str)
 parser.add_argument('--num', type=int, default=1e12,help='number of points to traverse')
