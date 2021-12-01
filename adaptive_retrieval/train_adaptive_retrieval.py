@@ -161,10 +161,9 @@ for epoch in tqdm(range(args.n_epochs)):
         running_loss += loss.item() * bsz
         nsamples += bsz
 
-        if (i+1) % 500 == 0:
-            report_loss = running_loss / nsamples
-            print(f'epoch: {epoch}, step: {i},  training loss: {report_loss:.3f}')
-
+    
+    report_loss = running_loss / nsamples
+    print(f'epoch: {epoch}, step: {i},  training loss: {report_loss:.3f}')
 
     val_loss, prediction_dict = validate(val_dataloader, model, args)
     
