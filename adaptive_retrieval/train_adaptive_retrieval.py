@@ -9,6 +9,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 import torch.utils.data as data
 import numpy as np
+from tqdm import tqdm
 
 from collections import Counter, OrderedDict
 
@@ -36,7 +37,7 @@ def validate(val_dataloader, model, args):
     running_loss = 0.
     nsamples = 0
     prediction_dict = {}
-    for i, sample in enumerate(val_dataloader, 0):
+    for i, sample in enumerate(tqdm(val_dataloader)):
         features, targets, network_scores, knn_scores = sample[0], sample[1], sample[2], sample[3]
 
         log_weight = model(features)
@@ -68,7 +69,6 @@ parser.add_argument('--train_file', type=str, default=None)
 parser.add_argument('--val_file', type=str, default=None)
 parser.add_argument('--train_others', type=str, default=None,help='use a specified file for other features if specified')
 parser.add_argument('--val_others', type=str, default=None,help='use a specified file for other features if specified')
-parser.add_argument('--negative-weight', type=float, default=1,help='weight of the loss from negative examples, range [0,1]')
 parser.add_argument('--seed', type=int, default=1,help='the random seed')
 
 
@@ -87,9 +87,7 @@ parser.add_argument('--nlayers', type=int, default=3, help='number of layerss')
 parser.add_argument('--dropout', type=float, default=0, help='dropout')
 
 parser.add_argument('--output-dir', type=str)
-parser.add_argument('--move-to-mem', action='store_true', default=False)
 parser.add_argument('--load-model', type=str, default=None, help='load model checkpoint')
-parser.add_argument('--eval', action='store_true', default=False, help='perform evaluation')
 
 args = parser.parse_args()
 
@@ -136,13 +134,13 @@ model.train()
 
 
 best_loss = 1e5
-for epoch in range(args.n_epochs):
+for epoch in tqdm(range(args.n_epochs)):
     running_loss = 0.
     nsamples = 0
 
     model.epoch_update()
 
-    for i, sample in enumerate(train_dataloader, 0):
+    for i, sample in enumerate(tqdm(train_dataloader)):
         features, targets, network_scores, knn_scores = sample[0], sample[1], sample[2], sample[3]
         
         optimizer.zero_grad()
