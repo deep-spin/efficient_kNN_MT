@@ -34,10 +34,9 @@ class FairseqDecoder(nn.Module):
                 - the decoder's output of shape `(batch, tgt_len, vocab)`
                 - a dictionary with any model-specific outputs
         """
-        x, extra = self.extract_features(
-            prev_output_tokens, encoder_out=encoder_out, **kwargs
-        )
+        x, extra = self.extract_features(prev_output_tokens, encoder_out=encoder_out, **kwargs)
         x = self.output_layer(x)
+        print('------------------')
         return x, extra
 
     def extract_features(self, prev_output_tokens, encoder_out=None, **kwargs):
@@ -90,7 +89,6 @@ class FairseqDecoder(nn.Module):
 
         logits = net_output[0]
 
-        print('-------------------------------------')
         analyse=False
         if self.use_knn_datastore:
 
