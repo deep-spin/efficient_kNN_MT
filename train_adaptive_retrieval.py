@@ -57,7 +57,7 @@ def main(args, override_args=None):
     # Print args
     logger.info(model_args)
 
-
+    data_idx = 1
     for subset in args.valid_subset.split(","):
         try:
             model_args.dataset.required_seq_len_multiple = 1
