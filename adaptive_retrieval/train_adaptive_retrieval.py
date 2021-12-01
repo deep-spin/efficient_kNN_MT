@@ -33,7 +33,6 @@ class FeatureDataset(data.Dataset):
 
 def validate(val_dataloader, model, args):
     model.eval()
-    model.epoch_update()
     running_loss = 0.
     nsamples = 0
     prediction_dict = {}
