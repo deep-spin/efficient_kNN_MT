@@ -146,7 +146,7 @@ for epoch in tqdm(range(args.n_epochs)):
         # (B x 2): log probability
         log_weight = model(features)
 
-        cross_entropy = log_weight + torch.stack((network_scores[:,target], knn_scores[:,target]), dim=-1)
+        cross_entropy = log_weight + torch.stack((network_scores[:,targets], knn_scores[:,targets]), dim=-1)
 
         # (B,)
         cross_entropy = -torch.logsumexp(cross_entropy, dim=-1)
