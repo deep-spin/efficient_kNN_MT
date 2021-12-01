@@ -251,8 +251,8 @@ def _main(cfg: DictConfig, output_file):
                     extra_symbols_to_ignore=get_symbols_to_strip_from_output(generator),)
 
                 detok_hypo_str = decode_fn(hypo_str)
-                
-                f_medical.write(src_str +'\t' + detok_hypo_str)
+
+                f_medical.write(src_str +'\t' + detok_hypo_str +'\n')
                 if not cfg.common_eval.quiet:
                     score = hypo["score"] / math.log(2)  # convert to base 2
                     # original hypothesis (after tokenization and BPE)
