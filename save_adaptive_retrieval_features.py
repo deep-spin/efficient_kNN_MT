@@ -114,7 +114,7 @@ def main(args, override_args=None):
                 	knn_prob_save = torch.cat([knn_prob_save, knn_prob.squeeze(0).cpu().data],0)
                 	network_prob = torch.cat([network_prob_save, network_prob.squeeze(0).cpu().data],0)
 
-                print(target_save.shape)
+                print(targets_save.shape)
                 print(features_save.shape)
                 print(knn_prob_save.shape)
                 print(network_prob_save.shape)
