@@ -94,17 +94,6 @@ def get_save_datastore_parser(default_task=None):
     gen_parser_from_dataclass(group, CommonEvalConfig())
     return parser
 
-def get_train_adaptive_retrieval_parser(default_task="translation"):
-    parser = get_parser("Validation", default_task)
-    add_dataset_args(parser, train=True)
-    add_distributed_training_args(parser, default_world_size=1)
-    add_train_adaptive_retrieval_args(parser)
-    add_datastore_args(parser)
-    add_model_args(parser)
-    group = parser.add_argument_group("Evaluation")
-    gen_parser_from_dataclass(group, CommonEvalConfig())
-    return parser
-
 def parse_args_and_arch(
     parser: argparse.ArgumentParser,
     input_args: List[str] = None,
@@ -275,27 +264,49 @@ def get_parser(desc, default_task="translation"):
 def add_preprocess_args(parser):
     group = parser.add_argument_group("Preprocessing")
     # fmt: off
-    group.add_argument("-s", "--source-lang", default=None, metavar="SRC", help="source language")
-    group.add_argument("-t", "--target-lang", default=None, metavar="TARGET", help="target language")
-    group.add_argument("--trainpref", metavar="FP", default=None, help="train file prefix (also used to build dictionaries)")
-    group.add_argument("--validpref", metavar="FP", default=None, help="comma separated, valid file prefixes (words missing from train set are replaced with <unk>)")
-    group.add_argument("--testpref", metavar="FP", default=None, help="comma separated, test file prefixes (words missing from train set are replaced with <unk>)")
-    group.add_argument("--align-suffix", metavar="FP", default=None, help="alignment file suffix")
-    group.add_argument("--destdir", metavar="DIR", default="data-bin", help="destination dir")
-    group.add_argument("--thresholdtgt", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown")
-    group.add_argument("--thresholdsrc", metavar="N", default=0, type=int, help="map words appearing less than threshold times to unknown")
-    group.add_argument("--tgtdict", metavar="FP", help="reuse given target dictionary")
-    group.add_argument("--srcdict", metavar="FP", help="reuse given source dictionary")
-    group.add_argument("--nwordstgt", metavar="N", default=-1, type=int, help="number of target words to retain")
-    group.add_argument("--nwordssrc", metavar="N", default=-1, type=int, help="number of source words to retain")
-    group.add_argument("--alignfile", metavar="ALIGN", default=None, help="an alignment file (optional)")
-    parser.add_argument('--dataset-impl', metavar='FORMAT', default='mmap', choices=get_available_dataset_impl(),
+    group.add_argument("-s", "--source-lang", default=None, metavar="SRC",
+                       help="source language")
+    group.add_argument("-t", "--target-lang", default=None, metavar="TARGET",
+                       help="target language")
+    group.add_argument("--trainpref", metavar="FP", default=None,
+                       help="train file prefix (also used to build dictionaries)")
+    group.add_argument("--validpref", metavar="FP", default=None,
+                       help="comma separated, valid file prefixes "
+                            "(words missing from train set are replaced with <unk>)")
+    group.add_argument("--testpref", metavar="FP", default=None,
+                       help="comma separated, test file prefixes "
+                            "(words missing from train set are replaced with <unk>)")
+    group.add_argument("--align-suffix", metavar="FP", default=None,
+                       help="alignment file suffix")
+    group.add_argument("--destdir", metavar="DIR", default="data-bin",
+                       help="destination dir")
+    group.add_argument("--thresholdtgt", metavar="N", default=0, type=int,
+                       help="map words appearing less than threshold times to unknown")
+    group.add_argument("--thresholdsrc", metavar="N", default=0, type=int,
+                       help="map words appearing less than threshold times to unknown")
+    group.add_argument("--tgtdict", metavar="FP",
+                       help="reuse given target dictionary")
+    group.add_argument("--srcdict", metavar="FP",
+                       help="reuse given source dictionary")
+    group.add_argument("--nwordstgt", metavar="N", default=-1, type=int,
+                       help="number of target words to retain")
+    group.add_argument("--nwordssrc", metavar="N", default=-1, type=int,
+                       help="number of source words to retain")
+    group.add_argument("--alignfile", metavar="ALIGN", default=None,
+                       help="an alignment file (optional)")
+    parser.add_argument('--dataset-impl', metavar='FORMAT', default='mmap',
+                        choices=get_available_dataset_impl(),
                         help='output dataset implementation')
-    group.add_argument("--joined-dictionary", action="store_true", help="Generate joined dictionary")
-    group.add_argument("--only-source", action="store_true", help="Only process the source language")
-    group.add_argument("--padding-factor", metavar="N", default=8, type=int, help="Pad dictionary size to be multiple of N")
-    group.add_argument("--workers", metavar="N", default=1, type=int, help="number of parallel workers")
-    group.add_argument("--dict-only", action='store_true',help="if true, only builds a dictionary and then exits")
+    group.add_argument("--joined-dictionary", action="store_true",
+                       help="Generate joined dictionary")
+    group.add_argument("--only-source", action="store_true",
+                       help="Only process the source language")
+    group.add_argument("--padding-factor", metavar="N", default=8, type=int,
+                       help="Pad dictionary size to be multiple of N")
+    group.add_argument("--workers", metavar="N", default=1, type=int,
+                       help="number of parallel workers")
+    group.add_argument("--dict-only", action='store_true',
+                       help="if true, only builds a dictionary and then exits")
     # fmt: on
     return parser
 
@@ -317,11 +328,6 @@ def add_datastore_args(parser):
     group.add_argument("--multiple_dstores", action='store_true')
     group.add_argument("--multiple_dstores_paths", default=None, type=int)
     group.add_argument("--multiple_dstores_sizes", default=None, type=int)
-    return parser
-
-def add_train_adaptive_retrieval_args(parser):
-    group = parser.add_argument_group("adaptive_retrieval")
-    group.add_argument("--lr", default=.0001, type=float)
     return parser
 
 def add_dataset_args(parser, train=False, gen=False):
