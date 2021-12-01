@@ -328,6 +328,7 @@ def add_datastore_args(parser):
     group.add_argument("--multiple_dstores", action='store_true')
     group.add_argument("--multiple_dstores_paths", default=None, type=int)
     group.add_argument("--multiple_dstores_sizes", default=None, type=int)
+    group.add_argument("--adaptive_retrieval_features_path", default=None, type=str)
     return parser
 
 def add_dataset_args(parser, train=False, gen=False):

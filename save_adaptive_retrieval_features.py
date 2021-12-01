@@ -99,6 +99,7 @@ def main(args, override_args=None):
 
                 non_pad_index = target_mask.nonzero().squeeze(-1)  # [n_count]
                 target = target.index_select(dim=0, index=non_pad_index)  # [n_count]
+                print(target)
 
                 features = features.contiguous().view(batch_size * seq_len, -1)
                 features = features.index_select(dim=0, index=non_pad_index)  # [n_count, feature size]
@@ -114,11 +115,9 @@ def main(args, override_args=None):
                 	knn_prob_save = torch.cat([knn_prob_save, knn_prob.squeeze(0).cpu().data],0)
                 	network_prob_save = torch.cat([network_prob_save, network_prob.squeeze(0).cpu().data],0)
 
-                print(targets_save.shape)
-                print(features_save.shape)
-                print(knn_prob_save.shape)
-                print(network_prob_save.shape)
-                
+
+        feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save}
+        torch.save(feats, args.adaptive_retrieval_features_path+'features')
 
 
 def cli_main():
