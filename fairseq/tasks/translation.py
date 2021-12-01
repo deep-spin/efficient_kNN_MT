@@ -407,8 +407,7 @@ class TranslationTask(FairseqTask):
                                       src_lengths=sample['net_input']['src_lengths'],
                                       prev_output_tokens=sample['net_input']['prev_output_tokens'],
                                       return_all_hiddens=False,
-                                      features_only=True,
-                                      saving_adaptive_retrieval_data=True)
+                                      features_only=True)
             return decoder_output, knn_prob
 
     def reduce_metrics(self, logging_outputs, criterion):
