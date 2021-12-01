@@ -140,18 +140,13 @@ for epoch in tqdm(range(args.n_epochs)):
 
     for i, sample in enumerate(tqdm(train_dataloader)):
         features, targets, network_scores, knn_scores = sample[0], sample[1], sample[2], sample[3]
-        
-        print('features', features.shape)
-        print('targets', targets.shape)
-        print('network_scores', network_scores.shape)
-        print('knn_scores', knn_scores.shape)
 
         optimizer.zero_grad()
 
         # (B x 2): log probability
         log_weight = model(features)
 
-        cross_entropy = log_weight + torch.stack((network_scores, knn_scores), dim=-1)
+        cross_entropy = log_weight + torch.stack((network_scores[:,target], knn_scores[:,target]), dim=-1)
 
         # (B,)
         cross_entropy = -torch.logsumexp(cross_entropy, dim=-1)
