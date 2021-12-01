@@ -217,6 +217,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         alignment_heads: Optional[int] = None,
         src_lengths: Optional[Any] = None,
         return_all_hiddens: bool = False,
+        saving_adaptive_retrieval_data: bool=False
     ):
         """
         Args:
@@ -293,9 +294,10 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
             knn_prob = decode_result['prob']
 
-            prob = utils.log_softmax(x, dim=-1, onnx_trace=self.onnx_trace)
-            print('----------------------------')
-            print(prob.shape)
+            if saving_adaptive_retrieval_data:
+                prob = utils.log_softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
+                print('----------------------------')
+                print(prob.shape)
 
             return x, extra, knn_prob, knn_lambda, knn_dists, knn_index
 
