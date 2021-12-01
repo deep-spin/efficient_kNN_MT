@@ -112,7 +112,7 @@ def main(args, override_args=None):
                 	targets_save = torch.cat([targets_save, target.cpu().data],0)
                 	features_save = torch.cat([features_save, features.cpu().data],0)
                 	knn_prob_save = torch.cat([knn_prob_save, knn_prob.squeeze(0).cpu().data],0)
-                	network_prob = torch.cat([network_prob_save, network_prob.squeeze(0).cpu().data],0)
+                	network_prob_save = torch.cat([network_prob_save, network_prob.squeeze(0).cpu().data],0)
 
                 print(targets_save.shape)
                 print(features_save.shape)
