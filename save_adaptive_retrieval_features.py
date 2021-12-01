@@ -85,8 +85,8 @@ def main(args, override_args=None):
                 sample = utils.move_to_cuda(sample) if use_cuda else sample
                 features, knn_score, network_score = task.forward_and_get_hidden_state_step(sample, model, use_knn_datastore=True)  # [B, T, H]
                 target = sample['target']  # [B, T]
-                print(overrides.adaptive_retrieval_features_path)
-                print(overrides.k)
+                print(override_args.adaptive_retrieval_features_path)
+                print(override_args.k)
                 # get useful parameters
                 batch_size = target.size(0)
                 seq_len = target.size(1)
