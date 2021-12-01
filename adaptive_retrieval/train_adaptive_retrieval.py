@@ -141,6 +141,11 @@ for epoch in tqdm(range(args.n_epochs)):
     for i, sample in enumerate(tqdm(train_dataloader)):
         features, targets, network_scores, knn_scores = sample[0], sample[1], sample[2], sample[3]
         
+        print('features', features.shape)
+        print('targets', targets.shape)
+        print('network_scores', network_scores.shape)
+        print('knn_scores', knn_scores.shape)
+
         optimizer.zero_grad()
 
         # (B x 2): log probability
