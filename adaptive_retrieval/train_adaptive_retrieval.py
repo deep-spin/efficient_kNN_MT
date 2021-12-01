@@ -97,7 +97,7 @@ np.random.seed(args.seed)
 torch.manual_seed(args.seed)
 
 train_data = torch.load(args.train_file)
-valid_data = torch.load(args.valid_file)
+valid_data = torch.load(args.val_file)
 
 
 training_set = FeatureDataset(train_data)
