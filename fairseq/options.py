@@ -95,7 +95,7 @@ def get_save_datastore_parser(default_task=None):
     return parser
 
 def get_train_adaptive_retrieval_parser(default_task="translation"):
-    parser = get_parser("Trainer", default_task)
+    parser = get_parser("Validation", default_task)
     add_dataset_args(parser, train=True)
     add_distributed_training_args(parser, default_world_size=1)
     add_train_adaptive_retrieval_args(parser)
