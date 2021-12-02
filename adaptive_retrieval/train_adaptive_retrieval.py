@@ -39,6 +39,7 @@ def validate(val_dataloader, model, args):
         features, targets, network_probs, knn_probs = sample[0], sample[1], sample[2], sample[3]
 
         print(network_probs.shape)
+        print(targets.shape)
         for v in range(len(targets)):
         	network_probs[v] = network_probs[v][targets[v]]
         	knn_probs[v] = knn_probs[v][targets[v]]
