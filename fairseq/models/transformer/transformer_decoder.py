@@ -166,6 +166,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             
             self.lambda_mlp = lambda_mlp.LambdaMLP()
             print(self.lambda_mlp.state_dict().keys())
+            print(ckpt.keys())
             self.lambda_mlp.load_state_dict(ckpt)
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
