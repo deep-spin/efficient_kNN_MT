@@ -80,7 +80,7 @@ parser.add_argument('--seed', type=int, default=1,help='the random seed')
 
 
 # training arguments
-parser.add_argument('--lr', type=float, default=5e-4, help='learning rate')
+parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
 parser.add_argument('--l1', type=float, default=.05, help='l1 regularization coefficient')
 parser.add_argument('--n_epochs', type=int, default=10)
 parser.add_argument('--batch-size', type=int, default=64, help='batch size')
