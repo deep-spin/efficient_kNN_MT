@@ -35,7 +35,7 @@ def validate(val_dataloader, model, args):
     model.eval()
     running_loss = 0.
     nsamples = 0
-    for i, sample in enumerate(tqdm(val_dataloader)):
+    for i, sample in enumerate(val_dataloader):
         features, targets, network_probs, knn_probs = sample[0], sample[1], sample[2], sample[3]
 
         for v in range(len(targets)):
