@@ -67,7 +67,7 @@ def validate(val_dataloader, model, args):
 
     val_loss = running_loss / nsamples
 
-    print(f"val loss: {val_loss:.3f}")
+    print(f"\n val loss: {val_loss:.3f}")
 
     return val_loss
 
@@ -188,7 +188,7 @@ for epoch in tqdm(range(args.n_epochs)):
         	model.train()
     
     report_loss = running_loss / nsamples
-    print(f'epoch: {epoch}, step: {i},  training loss: {report_loss:.3f}')
+    print(f'\n epoch: {epoch}, step: {i},  training loss: {report_loss:.3f}')
 
     val_loss = validate(val_dataloader, model, args)
     
