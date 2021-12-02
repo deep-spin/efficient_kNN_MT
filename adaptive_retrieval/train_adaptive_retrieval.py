@@ -38,12 +38,15 @@ def validate(val_dataloader, model, args):
     for i, sample in enumerate(tqdm(val_dataloader)):
         features, targets, network_probs, knn_probs = sample[0], sample[1], sample[2], sample[3]
 
+        network_prob = torch.index_select(network_probs, 1, targets)
+        knn_prob = torch.index_select(knn_probs, 1, targets)
+
         log_weight = model(features)
-        cross_entropy = log_weight + torch.stack((torch.log(network_probs[:,targets]), torch.log(knn_probs[:,targets])), dim=-1)
+        cross_entropy = log_weight + torch.stack((torch.log(network_prob), torch.log(knn_prob)), dim=-1)
 
         print(log_weight.shape)
-        print(torch.log(network_probs[:,targets]).shape)
-        print(torch.log(knn_probs[:,targets]).shape)
+        print(torch.log(network_prob).shape)
+        print(torch.log(knn_prob).shape)
 
 
         # (B,)
