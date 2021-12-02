@@ -148,12 +148,21 @@ for epoch in tqdm(range(args.n_epochs)):
     for i, sample in enumerate(tqdm(train_dataloader)):
         features, targets, network_probs, knn_probs = sample[0], sample[1], sample[2], sample[3]
 
+        for v in range(len(targets)):
+        	if v==0:
+        		network_prob = network_probs[v][targets[v]].unsqueeze(0)
+        		knn_prob = knn_probs[v][targets[v]].unsqueeze(0)
+        	else:
+        		network_prob = torch.cat([network_prob, network_probs[v][targets[v]].unsqueeze(0)],0)
+        		knn_prob = torch.cat([knn_prob, knn_probs[v][targets[v]].unsqueeze(0)],0)
+
+
         optimizer.zero_grad()
 
         # (B x 2): log probability
         log_weight = model(features)
 
-        cross_entropy = log_weight + torch.stack((torch.log(network_probs[:,targets]), torch.log(knn_probs[:,targets])), dim=-1)
+        cross_entropy = log_weight + torch.stack((torch.log(network_prob), torch.log(knn_prob)), dim=-1)
 
         # (B,)
         cross_entropy = -torch.logsumexp(cross_entropy, dim=-1)
