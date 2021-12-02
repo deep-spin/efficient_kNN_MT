@@ -445,9 +445,7 @@ def load_model_ensemble_and_task(
             else:
                 # model parallel checkpoint or unsharded checkpoint
                 model = task.build_model(cfg.model)
-                model.load_state_dict(
-                    state["model"], strict=strict, model_cfg=cfg.model
-                )
+                model.load_state_dict(state["model"], strict=False, model_cfg=cfg.model)
 
             # reset state so it gets loaded for the next model in ensemble
             state = None

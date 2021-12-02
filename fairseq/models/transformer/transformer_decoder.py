@@ -158,15 +158,13 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         if self.knn_lambda_type == 'trainable':
             ckpt_path = os.path.join(cfg.knn_lambda_mlp_path, 'checkpoint_best.pt')
             ckpt = torch.load(ckpt_path)
-            new_state_dict = OrderedDict()
 
-            for key, value in ckpt.items():
-                new_key = 'decoder.lambda_mlp.' + key
-                new_state_dict[new_key] = value
+            #new_state_dict = OrderedDict()
+            #for key, value in ckpt.items():
+            #    new_key = 'decoder.lambda_mlp.' + key
+            #    new_state_dict[new_key] = value
             
             self.lambda_mlp = lambda_mlp.LambdaMLP()
-            print(self.lambda_mlp.state_dict().keys())
-            print(ckpt.keys())
             self.lambda_mlp.load_state_dict(ckpt)
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
