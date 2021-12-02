@@ -165,7 +165,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 new_state_dict[new_key] = value
             
             self.lambda_mlp = lambda_mlp.LambdaMLP()
-            self.lambda_mlp.load_state_dict(new_state_dict)
+            self.lambda_mlp.load_state_dict(ckpt)
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
         if cfg.adaptive_softmax_cutoff is not None:
