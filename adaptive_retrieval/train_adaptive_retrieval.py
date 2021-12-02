@@ -47,8 +47,9 @@ def validate(val_dataloader, model, args):
         		knn_prob = torch.cat([knn_prob, knn_probs[v][targets[v]].unsqueeze(0)],0)
 
 
-        #log_weight = model(features)
-        log_weight = torch.log(torch.FloatTensor([.4,.6])).cuda().unsqueeze(0)
+        log_weight = model(features)
+        #log_weight = torch.log(torch.FloatTensor([.4,.6])).cuda().unsqueeze(0)
+        
         cross_entropy = log_weight + torch.stack((torch.log(network_prob), torch.log(knn_prob)), dim=-1)
 
         # (B,)
@@ -91,7 +92,7 @@ parser.add_argument('--ngram', type=int, default=0, help='the ngram features to 
 # model hyperparameters
 parser.add_argument('--arch', type=str, choices=['mlp'], default='mlp',help='architectures of the expert model')
 parser.add_argument('--hidden-units', type=int, default=128, help='hidden units')
-parser.add_argument('--nlayers', type=int, default=4, help='number of layerss')
+parser.add_argument('--nlayers', type=int, default=5, help='number of layers')
 parser.add_argument('--dropout', type=float, default=.5, help='dropout')
 
 parser.add_argument('--output-dir', type=str)
