@@ -39,8 +39,12 @@ def validate(val_dataloader, model, args):
         features, targets, network_probs, knn_probs = sample[0], sample[1], sample[2], sample[3]
 
         log_weight = model(features)
-        print(torch.exp(log_weight[0]))
         cross_entropy = log_weight + torch.stack((torch.log(network_probs[:,targets]), torch.log(knn_probs[:,targets])), dim=-1)
+
+        print(log_weight.shape)
+        print(torch.log(network_probs[:,targets]).shape)
+        print(torch.log(knn_probs[:,targets]).shape)
+
 
         # (B,)
         cross_entropy = -torch.logsumexp(cross_entropy, dim=-1)
