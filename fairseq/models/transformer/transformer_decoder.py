@@ -162,7 +162,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
             for key, value in ckpt.items():
                 new_key = 'decoder.lambda_mlp.' + key
-                new_state_dict[new_key] = value
+                ckpt[new_key] = value
             
             self.lambda_mlp = lambda_mlp.LambdaMLP()
             self.lambda_mlp.load_state_dict(ckpt)
