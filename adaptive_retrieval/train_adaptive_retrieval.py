@@ -48,7 +48,7 @@ def validate(val_dataloader, model, args):
 
 
         #log_weight = model(features)
-        log_weight = torch.log(torch.FloatTensor([.4,.6]))
+        log_weight = torch.log(torch.FloatTensor([.4,.6])).cuda()
         cross_entropy = log_weight + torch.stack((torch.log(network_prob), torch.log(knn_prob)), dim=-1)
 
         # (B,)
