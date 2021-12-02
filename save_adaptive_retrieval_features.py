@@ -83,7 +83,7 @@ def main(args, override_args=None):
             model.eval()
             for i, sample in enumerate(progress):
                 sample = utils.move_to_cuda(sample) if use_cuda else sample
-                features, knn_score, network_score = task.forward_and_get_hidden_state_step(sample, model, use_knn_datastore=True)  # [B, T, H]
+                features, knn_prob, network_prob = task.forward_and_get_hidden_state_step(sample, model, use_knn_datastore=True)  # [B, T, H]
                 target = sample['target']  # [B, T]
 
                 # get useful parameters
@@ -105,16 +105,16 @@ def main(args, override_args=None):
                 if i==0:
                 	targets_save = target.cpu().data
                 	features_save = features.cpu().data
-                	knn_score_save = knn_score.squeeze(0).cpu().data
-                	network_score_save = network_score.squeeze(0).cpu().data
+                	knn_prob_save = knn_prob.squeeze(0).cpu().data
+                	network_prob_save = network_prob.squeeze(0).cpu().data
                 else:
                 	targets_save = torch.cat([targets_save, target.cpu().data],0)
                 	features_save = torch.cat([features_save, features.cpu().data],0)
-                	knn_score_save = torch.cat([knn_score_save, knn_score.squeeze(0).cpu().data],0)
-                	network_score_save = torch.cat([network_score_save, network_score.squeeze(0).cpu().data],0)
+                	knn_prob_save = torch.cat([knn_prob_save, knn_prob.squeeze(0).cpu().data],0)
+                	network_prob_save = torch.cat([network_prob_save, network_prob.squeeze(0).cpu().data],0)
 
 
-        feats = {'features': features_save, 'targets': targets_save, 'knn_scores': knn_score_save, 'network_scores': network_score_save}
+        feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save}
         torch.save(feats, override_args.adaptive_retrieval_features_path+'features_val')
 
 

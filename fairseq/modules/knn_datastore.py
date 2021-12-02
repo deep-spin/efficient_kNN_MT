@@ -313,11 +313,6 @@ class KNN_Dstore(object):
 
         prob = knn_tgt_prob.sum(dim=-2)  # [Batch Size, seq len, vocab size]
 
-        if True:
-            knn_tgt_scores = torch.zeros(bsz, seq_len, self.k, self.vocab_size).to(queries.device)  # [B, S, K, Vocab Size]
-            scatter(src=scaled_dists.float().unsqueeze(-1), out=knn_tgt_scores, index=tgt_index, dim=-1)            
-            scores = knn_tgt_scores.sum(dim=-2)
-            return {'prob': prob}
 
         return {'prob': prob}
 
