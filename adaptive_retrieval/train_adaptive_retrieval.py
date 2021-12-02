@@ -39,10 +39,10 @@ def validate(val_dataloader, model, args):
         features, targets, network_probs, knn_probs = sample[0], sample[1], sample[2], sample[3]
 
         for v in range(len(targets)):
-        	network_prob = network_probs[v][targets[v]]
-        	knn_prob = knn_probs[v][targets[v]]
-        	print(network_prob)
-        	print(knn_prob)
+        	network_prob = network_probs[v][targets[v]].unsqueeze(0)
+        	knn_prob = knn_probs[v][targets[v]].unsqueeze(0)
+        	print(network_prob.shape)
+        	print(knn_prob.shape)
 
         log_weight = model(features)
 
