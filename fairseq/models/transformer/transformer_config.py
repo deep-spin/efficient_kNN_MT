@@ -241,6 +241,7 @@ class TransformerConfig(FairseqDataclass):
     knn_lambda_mlp_path: str = field(default=None)
     knn_temperature_type: str = field(default='fix')
     knn_temperature_value: float = field(default=10)
+    only_train_knn_parameters: bool = field(default=False)
     pruned_datastore: bool = field(default=False)
     multiple_dstores: bool = field(default=False)
     
