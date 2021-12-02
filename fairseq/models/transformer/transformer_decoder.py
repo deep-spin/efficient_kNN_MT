@@ -153,7 +153,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.use_knn_datastore = cfg.use_knn_datastore
         self.knn_lambda_type = cfg.knn_lambda_type
         self.knn_lambda_threshold = cfg.knn_lambda_threshold
-        self.knn_lambda_feat = cfg.knn_lambda_feat
         self.knn_temperature_type = cfg.knn_temperature_type
 
         if self.knn_lambda_type == 'trainable':
