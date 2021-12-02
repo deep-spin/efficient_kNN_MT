@@ -83,7 +83,7 @@ parser.add_argument('--seed', type=int, default=1,help='the random seed')
 
 # training arguments
 parser.add_argument('--lr', type=float, default=5e-4, help='learning rate')
-parser.add_argument('--l1', type=float, default=1., help='l1 regularization coefficient')
+parser.add_argument('--l1', type=float, default=.05, help='l1 regularization coefficient')
 parser.add_argument('--n_epochs', type=int, default=10)
 parser.add_argument('--batch-size', type=int, default=64, help='batch size')
 parser.add_argument('--ngram', type=int, default=0, help='the ngram features to use')
@@ -91,9 +91,9 @@ parser.add_argument('--ngram', type=int, default=0, help='the ngram features to 
 
 # model hyperparameters
 parser.add_argument('--arch', type=str, choices=['mlp'], default='mlp',help='architectures of the expert model')
-parser.add_argument('--hidden-units', type=int, default=32, help='hidden units')
-parser.add_argument('--nlayers', type=int, default=3, help='number of layerss')
-parser.add_argument('--dropout', type=float, default=0, help='dropout')
+parser.add_argument('--hidden-units', type=int, default=128, help='hidden units')
+parser.add_argument('--nlayers', type=int, default=4, help='number of layerss')
+parser.add_argument('--dropout', type=float, default=.2, help='dropout')
 
 parser.add_argument('--output-dir', type=str)
 parser.add_argument('--load-model', type=str, default=None, help='load model checkpoint')
