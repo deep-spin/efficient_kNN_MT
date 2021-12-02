@@ -41,8 +41,8 @@ def validate(val_dataloader, model, args):
         for v in range(len(targets)):
         	network_prob = network_probs[v][targets[v]]
         	knn_prob = knn_probs[v][targets[v]]
-        	print(network_prob.shape)
-        	print(knn_prob.shape)
+        	print(network_prob)
+        	print(knn_prob)
 
         log_weight = model(features)
 
