@@ -267,8 +267,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             knn_temperature = self.knn_datastore.get_temperature()
             if self.knn_lambda_type == 'trainable':
                 knn_lambda = self.lambda_mlp.forward(last_hidden)
-                print(knn_lambda.shape)
-                knn_lambda = torch.exp(knn_lambda[1])
+                knn_lambda = torch.exp(knn_lambda[:,:,1])
                 print(knn_lambda.shape)
             else:
                 knn_lambda = self.knn_datastore.get_lambda()
