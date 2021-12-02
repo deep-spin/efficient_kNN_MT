@@ -21,7 +21,7 @@ from fairseq.modules import (
     PositionalEmbedding,
     SinusoidalPositionalEmbedding,
 )
-from fairseq.modules import lambda_mlp
+from adaptive_retrieval import lambda_mlp
 from fairseq.modules import transformer_layer
 from fairseq.modules.checkpoint_activations import checkpoint_wrapper
 from fairseq.modules.quant_noise import quant_noise as apply_quant_noise_
@@ -155,12 +155,12 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.knn_lambda_threshold = cfg.knn_lambda_threshold
         self.knn_lambda_feat = cfg.knn_lambda_feat
         self.knn_temperature_type = cfg.knn_temperature_type
-        self.pruned_datastore = cfg.pruned_datastore
-        self.lambda_cache_feat = cfg.lambda_cache_feat
 
         if self.knn_lambda_type == 'trainable':
-            self.knn_lambda_feat = ['ctxt']
+            ckpt_path = os.path.join(args.load_model, 'checkpoint_best.pt')
+            ckpt = torch.load(cfg.knn_lambda_mlp_path)
             self.lambda_mlp = lambda_mlp.LambdaMLP(self.knn_lambda_feat)
+            self.lambda_mlp.load_state_dict(ckpt)
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
         if cfg.adaptive_softmax_cutoff is not None:
@@ -261,31 +261,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
             knn_temperature = self.knn_datastore.get_temperature()
             if self.knn_lambda_type == 'trainable':
-                if 'freq' in self.knn_lambda_feat:
-                    print('loading freq cache')
-                    freq = pickle.load(open(os.path.join(self.lambda_cache_feat, 'freq_cache.pickle'), 'rb'))
-                else:
-                    freq = None
-
-                if 'fert' in self.knn_lambda_feat:
-                    print('loading fert cache')
-                    fert = pickle.load(open(os.path.join(self.lambda_cache_feat, 'fertility_cache.pickle'), 'rb'))
-                else:
-                    fert = None
-
-                if 'mt_ent' or 'mt_max' in self.knn_lambda_feat:
-                    prob = torch.softmax(x,dim=-1)
-                    if 'mt_ent' in self.knn_lambda_feat:
-                        mt_ent = -(prob*torch.log(prob)).sum(dim=-1)
-                    else:
-                        mt_ent = None 
-                    if 'mt_max' in self.knn_lambda_feat:
-                        mt_max = prob.max(dim=-1)[0]
-                    else:
-                        mt_max = None
-                
-                lambda_features = {'fert': fert, 'freq': freq, 'mt_ent': mt_ent, 'mt_max': mt_max,'ctxt': last_hidden}
-                knn_lambda = self.lambda_mlp.forward(lambda_features)[:,:,0].unsqueeze(-1)
+                knn_lambda = self.lambda_mlp.forward(last_hidden)
             else:
                 knn_lambda = self.knn_datastore.get_lambda()
 
