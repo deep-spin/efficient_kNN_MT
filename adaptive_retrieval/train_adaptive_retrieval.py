@@ -199,5 +199,6 @@ for epoch in tqdm(range(args.n_epochs)):
     model.train()
 
 
+torch.save(model.state_dict(), os.path.join(args.output_dir, 'checkpoint_best.pt'))
 
 
