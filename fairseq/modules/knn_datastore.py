@@ -276,7 +276,7 @@ class KNN_Dstore(object):
         
         tgt_idx = torch.from_numpy(self.vals[knns]).to(queries.device).squeeze(-1)  # [Batch size * Seq len, K]
         #tgt_idx = self.vals[knns].to(queries.device).squeeze(-1)
-        print(tgt_idx.shape)
+        
         tgt_idx = tgt_idx.view(bsz, seq_len, -1)  # [B, S, K]
 
         dists = dists.view(bsz, seq_len, -1).cuda()  # [Batch, Seq len, k]
