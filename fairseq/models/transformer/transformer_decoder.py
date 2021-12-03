@@ -277,6 +277,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     self.need_to_search+= knn_lambda.size(0) - indices.size(0)
                     self.total_possible_searches+=knn_lambda.size(0)
 
+                    print(self.need_to_search, self.total_possible_searches)
                 
             else:
                 knn_lambda = self.knn_datastore.get_lambda()
@@ -293,15 +294,17 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 decode_result = self.knn_datastore.calculate_knn_prob(knn_index, tgt_index, knn_dists, last_hidden, knn_temperature)
                 knn_prob = decode_result['prob']
 
+                if self.knn_lambda_threshold > 0:    
+                    knn_probs=torch.zeros(knn_lambda.size(0), knn_prob.size(1), knn_prob.size(2)).cuda()
+                    knn_probs[mask]=knn_prob
+
             else:
                 knn_dists = 0
                 knn_index = 0
                 tgt_index = 0
-            
-            if self.knn_lambda_threshold > 0:
+                
                 knn_probs=torch.zeros(knn_lambda.size(0), knn_prob.size(1), knn_prob.size(2)).cuda()
-                knn_probs[mask]=knn_prob
-
+            
                 return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
 
             if features_only:
