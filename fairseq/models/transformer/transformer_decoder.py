@@ -265,7 +265,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         if self.use_knn_datastore:
             if self.knn_lambda_type == 'trainable':
                 knn_lambda = self.lambda_mlp.forward(last_hidden)
-                knn_lambda = torch.exp(knn_lambda[:,:,1])
+                knn_lambda = torch.exp(knn_lambda[:,:,0])
 
                 if self.knn_lambda_threshold>0:
                     indices = (knn_lambda < self.knn_lambda_threshold).nonzero()[:,0]
@@ -277,7 +277,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     self.need_to_search+= knn_lambda.size(0) - indices.size(0)
                     self.total_possible_searches+=knn_lambda.size(0)
 
-                    print(self.need_to_search, self.total_possible_searches)
+                    #print(self.need_to_search, self.total_possible_searches)
                 
             else:
                 knn_lambda = self.knn_datastore.get_lambda()
