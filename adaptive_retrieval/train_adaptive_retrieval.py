@@ -83,7 +83,7 @@ parser.add_argument('--seed', type=int, default=1,help='the random seed')
 
 # training arguments
 parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
-parser.add_argument('--l1', type=float, default=.0, help='l1 regularization coefficient')
+parser.add_argument('--l1', type=float, default=.05, help='l1 regularization coefficient')
 parser.add_argument('--n_epochs', type=int, default=10)
 parser.add_argument('--batch-size', type=int, default=16, help='batch size')
 parser.add_argument('--ngram', type=int, default=0, help='the ngram features to use')
@@ -199,6 +199,5 @@ for epoch in tqdm(range(args.n_epochs)):
     model.train()
 
 
-torch.save(model.state_dict(), os.path.join(args.output_dir, 'checkpoint_best.pt'))
 
 
