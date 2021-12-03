@@ -262,33 +262,30 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             if self.knn_lambda_type == 'trainable':
                 knn_lambda = self.lambda_mlp.forward(last_hidden)
                 knn_lambda = torch.exp(knn_lambda[:,:,0])
-                if self.knn_lambda_threshold>0:
-                    if knn_lambda<self.knn_lambda_threshold:
-                        knn_lambda=0
+                #if self.knn_lambda_threshold>0:
+                #    if knn_lambda<self.knn_lambda_threshold:
+                #        knn_lambda=0
             else:
                 knn_lambda = self.knn_datastore.get_lambda()
 
-            if knn_lambda>0:
-                knn_search_result = self.knn_datastore.retrieve(last_hidden)
+            knn_search_result = self.knn_datastore.retrieve(last_hidden)
 
-                knn_dists = knn_search_result['distance']  # [batch, seq len, k]  # we need do sort
-                knn_index = knn_search_result['knn_index']
-                tgt_index = knn_search_result['tgt_index']
+            knn_dists = knn_search_result['distance']  # [batch, seq len, k]  # we need do sort
+            knn_index = knn_search_result['knn_index']
+            tgt_index = knn_search_result['tgt_index']
 
-                knn_temperature = self.knn_datastore.get_temperature()
+            knn_temperature = self.knn_datastore.get_temperature()
 
 
-                decode_result = self.knn_datastore.calculate_knn_prob(knn_index, tgt_index, knn_dists, last_hidden, knn_temperature)
+            decode_result = self.knn_datastore.calculate_knn_prob(knn_index, tgt_index, knn_dists, last_hidden, knn_temperature)
 
-                knn_prob = decode_result['prob']
+            knn_prob = decode_result['prob']
 
-                if features_only:
-                    prob = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
-                    return x, extra, knn_prob, prob
+            if features_only:
+                prob = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
+                return x, extra, knn_prob, prob
 
-                return x, extra, knn_prob, knn_lambda, knn_dists, knn_index
-            else:
-                return x, extra
+            return x, extra, knn_prob, knn_lambda, knn_dists, knn_index
 
         else:
             return x, extra
