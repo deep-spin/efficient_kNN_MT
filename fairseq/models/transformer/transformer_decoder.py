@@ -263,7 +263,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 knn_lambda = self.lambda_mlp.forward(last_hidden)
                 knn_lambda = torch.exp(knn_lambda[:,:,0])
                 if self.knn_lambda_threshold>0:
-                    indices = (knn_lambda < self.knn_lambda_threshold).nonzero()
+                    indices = (knn_lambda < self.knn_lambda_threshold).nonzero()[:,0]
                     print(indices.shape)
 
                     knn_lambda[indices]=0
