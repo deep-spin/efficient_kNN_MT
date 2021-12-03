@@ -287,7 +287,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             knn_prob = decode_result['prob']
             
             if self.knn_lambda_threshold > 0:
-                knn_probs=torch.zeros(knn_lambda.size(0), knn_prob.size(1), knn_prob.size(2))
+                knn_probs=torch.zeros(knn_lambda.size(0), knn_prob.size(1), knn_prob.size(2)).cuda()
                 print(knn_prob.shape)
                 print(knn_probs.shape)
                 knn_probs[mask]=knn_prob
