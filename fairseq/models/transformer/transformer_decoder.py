@@ -267,7 +267,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     print(indices)
 
                     knn_lambda[indices]=0
-                    mask = torch.ones(last_hidden.numel(), dtype=torch.bool)
+                    mask = torch.ones(last_hidden.size(0), dtype=torch.bool)
                     mask[indices] = False
                     print(mask.shape)
                     print(last_hidden.shape)
