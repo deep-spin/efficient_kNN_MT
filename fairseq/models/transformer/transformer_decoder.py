@@ -166,7 +166,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             
             self.lambda_mlp = lambda_mlp.LambdaMLP()
             self.lambda_mlp.load_state_dict(ckpt)
-            print(self.lambda_mlp.state_dict())
+
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
         if cfg.adaptive_softmax_cutoff is not None:
@@ -267,9 +267,9 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
             knn_temperature = self.knn_datastore.get_temperature()
             if self.knn_lambda_type == 'trainable':
+                print(last_hidden.shape)
                 knn_lambda = self.lambda_mlp.forward(last_hidden)
-                knn_lambda = torch.exp(knn_lambda[:,:,1])
-                print(self.lambda_mlp.state_dict())
+                knn_lambda = torch.exp(knn_lambda[:,:,0])
             else:
                 knn_lambda = self.knn_datastore.get_lambda()
 
