@@ -261,10 +261,16 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         if self.use_knn_datastore:
             if self.knn_lambda_type == 'trainable':
                 knn_lambda = self.lambda_mlp.forward(last_hidden)
-                knn_lambda = torch.exp(knn_lambda[:,:,0])
-                #if self.knn_lambda_threshold>0:
-                #    if knn_lambda<self.knn_lambda_threshold:
-                #        knn_lambda=0
+                knn_lambda = torch.exp(knn_lambda[:,:,1])
+                if self.knn_lambda_threshold>0:
+                    indices = (knn_lambda < self.knn_lambda_threshold).nonzero()
+                    print(indices)
+
+                    knn_lambda[indices]=0
+                    mask = torch.ones(last_hidden.numel(), dtype=torch.bool)
+                    mask[indices] = False
+                    last_hidden=last_hidden[mask]
+                
             else:
                 knn_lambda = self.knn_datastore.get_lambda()
 
@@ -280,6 +286,14 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             decode_result = self.knn_datastore.calculate_knn_prob(knn_index, tgt_index, knn_dists, last_hidden, knn_temperature)
 
             knn_prob = decode_result['prob']
+            
+            if self.knn_lambda_threshold > 0:
+                knn_probs=torch.zeros(knn_lambda, knn_prob.shape[1:])
+                print(knn_prob.shape)
+                print(knn_probs.shape)
+                knn_probs[mask]=knn_prob
+
+                return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
 
             if features_only:
                 prob = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
