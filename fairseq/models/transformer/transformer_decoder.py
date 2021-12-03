@@ -262,15 +262,12 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             if self.knn_lambda_type == 'trainable':
                 knn_lambda = self.lambda_mlp.forward(last_hidden)
                 knn_lambda = torch.exp(knn_lambda[:,:,0])
+
                 if self.knn_lambda_threshold>0:
                     indices = (knn_lambda < self.knn_lambda_threshold).nonzero()[:,0]
-                    print(indices)
-
                     knn_lambda[indices]=0
                     mask = torch.ones(last_hidden.size(0), dtype=torch.bool)
                     mask[indices] = False
-                    print(mask.shape)
-                    print(last_hidden.shape)
                     last_hidden=last_hidden[mask]
                 
             else:
@@ -290,7 +287,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             knn_prob = decode_result['prob']
             
             if self.knn_lambda_threshold > 0:
-                knn_probs=torch.zeros(knn_lambda, knn_prob.shape[1:])
+                knn_probs=torch.zeros(knn_lambda.size(0), knn_prob.size(1), knn_prob.size(2))
                 print(knn_prob.shape)
                 print(knn_probs.shape)
                 knn_probs[mask]=knn_prob
