@@ -294,11 +294,11 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 decode_result = self.knn_datastore.calculate_knn_prob(knn_index, tgt_index, knn_dists, last_hidden, knn_temperature)
                 knn_prob = decode_result['prob']
 
-                print('...')
                 if self.knn_lambda_threshold > 0:    
-                    print('-----')
                     knn_probs=torch.zeros(knn_lambda.size(0), knn_prob.size(1), knn_prob.size(2)).cuda()
                     knn_probs[mask]=knn_prob
+
+                    return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
 
             else:
                 knn_dists = 0
