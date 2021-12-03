@@ -274,7 +274,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     mask[indices] = False
                     last_hidden=last_hidden[mask]
 
-                    self.need_to_search+=indices.size(0)
+                    self.need_to_search+= knn_lambda.size(0) - indices.size(0)
                     self.total_possible_searches+=knn_lambda.size(0)
 
                     print(self.need_to_search, self.total_possible_searches)
