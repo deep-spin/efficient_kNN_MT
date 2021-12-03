@@ -155,6 +155,10 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.knn_lambda_threshold = cfg.knn_lambda_threshold
         self.knn_temperature_type = cfg.knn_temperature_type
 
+        if self.knn_lambda_threshold>0:
+            self.need_to_search=0
+            self.total_possible_searches=0
+
         if self.knn_lambda_type == 'trainable':
             ckpt_path = os.path.join(cfg.knn_lambda_mlp_path, 'checkpoint_best.pt')
             ckpt = torch.load(ckpt_path)
@@ -269,6 +273,11 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     mask = torch.ones(last_hidden.size(0), dtype=torch.bool)
                     mask[indices] = False
                     last_hidden=last_hidden[mask]
+
+                    self.need_to_search+=indices.size(0)
+                    self.total_possible_searches+=knn_lambda.size(0)
+
+                    print(self.need_to_search, self.total_possible_searches)
                 
             else:
                 knn_lambda = self.knn_datastore.get_lambda()
@@ -288,8 +297,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             
             if self.knn_lambda_threshold > 0:
                 knn_probs=torch.zeros(knn_lambda.size(0), knn_prob.size(1), knn_prob.size(2)).cuda()
-                print(knn_prob.shape)
-                print(knn_probs.shape)
                 knn_probs[mask]=knn_prob
 
                 return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
