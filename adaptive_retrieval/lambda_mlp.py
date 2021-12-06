@@ -44,7 +44,7 @@ class LambdaMLP(nn.Module):
             for k in ['conf','ent']:
                 input_layer[k] = LeakyReLUNet(1, ndim)
 
-        self.input_layer = nn.ModuleDict(input_layer)
+            self.input_layer = nn.ModuleDict(input_layer)
 
 
     def forward(self, features):
