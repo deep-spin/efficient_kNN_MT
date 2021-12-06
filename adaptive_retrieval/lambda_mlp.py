@@ -17,7 +17,7 @@ class LeakyReLUNet(nn.Module):
 
 
 class LambdaMLP(nn.Module):
-    def __init__(self, hidden_units=128, nlayers=4, dropout=0.6, ctxt_dim=1024, activation='relu', use_conf_ent=False):
+    def __init__(self, hidden_units=128, nlayers=5, dropout=0.6, ctxt_dim=1024, activation='relu', use_conf_ent=False):
         super().__init__()
 
         self.use_conf_ent = use_conf_ent 
