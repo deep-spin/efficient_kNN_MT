@@ -47,7 +47,15 @@ def validate(val_dataloader, model, args):
         		knn_prob = torch.cat([knn_prob, knn_probs[v][targets[v]].unsqueeze(0)],0)
 
 
-        log_weight = model(features)
+
+
+        if not args.use_conf_ent:
+        	log_weight = model(features)
+        else:
+        	conf=torch.max(network_probs, -1).values
+        	ent=torch.distributions.Categorical(network_probs).entropy()
+        	log_weight = model(features, conf, ent)
+        
         #log_weight = torch.log(torch.FloatTensor([.4,.6])).cuda().unsqueeze(0)
         
         cross_entropy = log_weight + torch.stack((torch.log(network_prob), torch.log(knn_prob)), dim=-1)
@@ -173,8 +181,6 @@ for epoch in tqdm(range(args.n_epochs)):
         else:
         	conf=torch.max(network_probs, -1).values
         	ent=torch.distributions.Categorical(network_probs).entropy()
-        	print(conf)
-        	print(ent)
         	log_weight = model(features, conf, ent)
 
         cross_entropy = log_weight + torch.stack((torch.log(network_prob), torch.log(knn_prob)), dim=-1)
