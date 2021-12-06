@@ -97,7 +97,7 @@ parser.add_argument('--ngram', type=int, default=0, help='the ngram features to 
 # model hyperparameters
 parser.add_argument('--arch', type=str, choices=['mlp'], default='mlp',help='architectures of the expert model')
 parser.add_argument('--hidden-units', type=int, default=128, help='hidden units')
-parser.add_argument('--nlayers', type=int, default=5, help='number of layers')
+parser.add_argument('--nlayers', type=int, default=4, help='number of layers')
 parser.add_argument('--dropout', type=float, default=.2, help='dropout')
 
 parser.add_argument('--output-dir', type=str)
@@ -168,7 +168,15 @@ for epoch in tqdm(range(args.n_epochs)):
         optimizer.zero_grad()
 
         # (B x 2): log probability
-        log_weight = model(features)
+        if not args.use_conf_ent:
+        	log_weight = model(features)
+        else:
+        	conf=torch.max(network_probs, -1)
+        	ent=torch.distributions.Categorical(network_probs).entropy()
+        	print(network_probs.shape)
+        	print(conf.shape)
+        	print(ent.shape)
+        	log_weight = model(features, conf, ent)
 
         cross_entropy = log_weight + torch.stack((torch.log(network_prob), torch.log(knn_prob)), dim=-1)
 

@@ -17,7 +17,7 @@ class LeakyReLUNet(nn.Module):
 
 
 class LambdaMLP(nn.Module):
-    def __init__(self, hidden_units=128, nlayers=5, dropout=0.6, ctxt_dim=1024, activation='relu', use_conf_ent=False):
+    def __init__(self, hidden_units=128, nlayers=4, dropout=0.6, ctxt_dim=1024, activation='relu', use_conf_ent=False):
         super().__init__()
 
         self.use_conf_ent = use_conf_ent 
@@ -47,8 +47,11 @@ class LambdaMLP(nn.Module):
             self.input_layer = nn.ModuleDict(input_layer)
 
 
-    def forward(self, features):
+    def forward(self, features, conf=None, ent=None):
 
-        #if 
+        if self.use_conf_ent:
+            features = [features]
+            features.append(self.input_layer['conf'](conf))
+            features.append(self.input_layer['ent'](ent))
   
         return self.model(features)
