@@ -52,8 +52,8 @@ def validate(val_dataloader, model, args):
         if not args.use_conf_ent:
         	log_weight = model(features)
         else:
-        	conf=torch.max(network_probs, -1).values
-        	ent=torch.distributions.Categorical(network_probs).entropy()
+        	conf=torch.max(network_probs, -1).values.unsqueeze(-1)
+        	ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
         	log_weight = model(features, conf, ent)
         
         #log_weight = torch.log(torch.FloatTensor([.4,.6])).cuda().unsqueeze(0)
