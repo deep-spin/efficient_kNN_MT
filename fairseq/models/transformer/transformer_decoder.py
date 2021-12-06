@@ -153,6 +153,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.use_knn_datastore = cfg.use_knn_datastore
         self.knn_lambda_type = cfg.knn_lambda_type
         self.knn_lambda_threshold = cfg.knn_lambda_threshold
+        self.knn_lambda_use_conf_ent = cfg.knn_lambda_use_conf_ent
         self.knn_temperature_type = cfg.knn_temperature_type
 
         if self.knn_lambda_threshold>0:
@@ -172,7 +173,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 self.lambda_mlp = lambda_mlp.LambdaMLP(use_conf_ent=True)
             else:
                 self.lambda_mlp = lambda_mlp.LambdaMLP()
-                
+
             self.lambda_mlp.load_state_dict(ckpt)
 
 
