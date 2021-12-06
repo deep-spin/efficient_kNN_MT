@@ -53,5 +53,6 @@ class LambdaMLP(nn.Module):
             features = [features]
             features.append(self.input_layer['conf'](conf))
             features.append(self.input_layer['ent'](ent))
+            features = torch.cat(features,-1)
   
         return self.model(features)

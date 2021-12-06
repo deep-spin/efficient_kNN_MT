@@ -173,10 +173,8 @@ for epoch in tqdm(range(args.n_epochs)):
         else:
         	conf=torch.max(network_probs, -1).values
         	ent=torch.distributions.Categorical(network_probs).entropy()
-        	print(network_probs.shape)
         	print(conf)
-        	print(conf.shape)
-        	print(ent.shape)
+        	print(ent)
         	log_weight = model(features, conf, ent)
 
         cross_entropy = log_weight + torch.stack((torch.log(network_prob), torch.log(knn_prob)), dim=-1)
