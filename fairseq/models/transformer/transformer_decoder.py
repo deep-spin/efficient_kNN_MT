@@ -168,7 +168,11 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             #    new_key = 'decoder.lambda_mlp.' + key
             #    new_state_dict[new_key] = value
             
-            self.lambda_mlp = lambda_mlp.LambdaMLP()
+            if cfg.knn_lambda_use_conf_ent:
+                self.lambda_mlp = lambda_mlp.LambdaMLP(use_conf_ent=True)
+            else:
+                self.lambda_mlp = lambda_mlp.LambdaMLP()
+                
             self.lambda_mlp.load_state_dict(ckpt)
 
 
@@ -264,7 +268,15 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
         if self.use_knn_datastore:
             if self.knn_lambda_type == 'trainable':
-                knn_lambda = self.lambda_mlp.forward(last_hidden)
+                if self.knn_lambda_use_conf_ent:
+                    network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
+                    conf=torch.max(network_probs, -1).values.unsqueeze(-1)
+                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
+                    
+                    knn_lambda = self.lambda_mlp.forward(last_hidden, conf, ent)
+                else:
+                    knn_lambda = self.lambda_mlp.forward(last_hidden)
+                
                 knn_lambda = torch.exp(knn_lambda[:,:,1])
 
                 if self.knn_lambda_threshold>0:
