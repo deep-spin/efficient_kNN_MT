@@ -80,6 +80,7 @@ parser = argparse.ArgumentParser(description='')
 
 parser.add_argument('--train_file', type=str, default=None)
 parser.add_argument('--val_file', type=str, default=None)
+parser.add_argument('--use_conf_ent', action='store_true')
 parser.add_argument('--train_others', type=str, default=None,help='use a specified file for other features if specified')
 parser.add_argument('--val_others', type=str, default=None,help='use a specified file for other features if specified')
 parser.add_argument('--seed', type=int, default=1,help='the random seed')
@@ -87,7 +88,7 @@ parser.add_argument('--seed', type=int, default=1,help='the random seed')
 
 # training arguments
 parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
-parser.add_argument('--l1', type=float, default=.05, help='l1 regularization coefficient')
+parser.add_argument('--l1', type=float, default=0, help='l1 regularization coefficient')
 parser.add_argument('--n_epochs', type=int, default=10)
 parser.add_argument('--batch-size', type=int, default=16, help='batch size')
 parser.add_argument('--ngram', type=int, default=0, help='the ngram features to use')
@@ -96,7 +97,7 @@ parser.add_argument('--ngram', type=int, default=0, help='the ngram features to 
 # model hyperparameters
 parser.add_argument('--arch', type=str, choices=['mlp'], default='mlp',help='architectures of the expert model')
 parser.add_argument('--hidden-units', type=int, default=128, help='hidden units')
-parser.add_argument('--nlayers', type=int, default=4, help='number of layers')
+parser.add_argument('--nlayers', type=int, default=5, help='number of layers')
 parser.add_argument('--dropout', type=float, default=.2, help='dropout')
 
 parser.add_argument('--output-dir', type=str)
@@ -130,7 +131,8 @@ if args.arch == 'mlp':
     model = LambdaMLP(
                 hidden_units=args.hidden_units,
                 nlayers=args.nlayers,
-                dropout=args.dropout,)
+                dropout=args.dropout,
+                use_conf_ent=args.use_conf_ent)
 
 if args.load_model:
     ckpt_path = os.path.join(args.load_model, 'checkpoint_best.pt')

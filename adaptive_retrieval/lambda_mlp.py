@@ -2,10 +2,25 @@ import torch
 import torch.nn as nn
 
 
-class LambdaMLP(nn.Module):
-    def __init__(self, hidden_units=128, nlayers=4, dropout=0.6, ctxt_dim=1024, activation='relu'):
+class LeakyReLUNet(nn.Module):
+    def __init__(self, in_feat, out_feat):
         super().__init__()
 
+        self.model = nn.Sequential(
+            nn.Linear(in_feat, out_feat),
+            nn.LeakyReLU(),
+            nn.Linear(out_feat, out_feat),
+        )
+
+    def forward(self, features):
+        return self.model(features)
+
+
+class LambdaMLP(nn.Module):
+    def __init__(self, hidden_units=128, nlayers=4, dropout=0.6, ctxt_dim=1024, activation='relu', use_conf_ent=False):
+        super().__init__()
+
+        self.use_conf_ent = use_conf_ent 
 
         models = [nn.Linear(ctxt_dim, hidden_units), nn.Dropout(p=dropout)]
         if activation == 'relu':
@@ -23,6 +38,17 @@ class LambdaMLP(nn.Module):
         self.model = nn.Sequential(*models)
 
 
+        if use_conf_ent:
+            input_layer = {}
+            ndim = int(ctxt_dim / 2)
+            for k in ['conf','ent']:
+                input_layer[k] = LeakyReLUNet(1, ndim)
+
+        self.input_layer = nn.ModuleDict(input_layer)
+
+
     def forward(self, features):
+
+        if 
   
         return self.model(features)
