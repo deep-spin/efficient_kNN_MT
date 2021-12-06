@@ -22,7 +22,12 @@ class LambdaMLP(nn.Module):
 
         self.use_conf_ent = use_conf_ent 
 
-        models = [nn.Linear(ctxt_dim, hidden_units), nn.Dropout(p=dropout)]
+        if use_conf_ent:    
+            input_dim=int(ctxt_dim*2)
+        else:
+            input_dim=ctxt_dim
+
+        models = [nn.Linear(input_dim, hidden_units), nn.Dropout(p=dropout)]
         if activation == 'relu':
             models.append(nn.ReLU())
 
@@ -54,6 +59,7 @@ class LambdaMLP(nn.Module):
             features_cat.append(self.input_layer['conf'](conf))
             features_cat.append(self.input_layer['ent'](ent))
             features = torch.cat(features_cat,-1)
+
             return self.model(features_cat)
   
         return self.model(features)
