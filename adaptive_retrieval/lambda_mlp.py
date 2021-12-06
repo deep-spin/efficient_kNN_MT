@@ -3,7 +3,7 @@ import torch.nn as nn
 
 
 class LambdaMLP(nn.Module):
-    def __init__(self, hidden_units=128, nlayers=5, dropout=0.6, ctxt_dim=1024, activation='relu'):
+    def __init__(self, hidden_units=128, nlayers=4, dropout=0.6, ctxt_dim=1024, activation='relu'):
         super().__init__()
 
 
