@@ -49,6 +49,6 @@ class LambdaMLP(nn.Module):
 
     def forward(self, features):
 
-        if 
+        #if 
   
         return self.model(features)
