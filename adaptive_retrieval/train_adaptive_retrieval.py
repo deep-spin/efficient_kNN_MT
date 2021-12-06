@@ -174,6 +174,7 @@ for epoch in tqdm(range(args.n_epochs)):
         	conf=torch.max(network_probs, -1)
         	ent=torch.distributions.Categorical(network_probs).entropy()
         	print(network_probs.shape)
+        	print(conf)
         	print(conf.shape)
         	print(ent.shape)
         	log_weight = model(features, conf, ent)
