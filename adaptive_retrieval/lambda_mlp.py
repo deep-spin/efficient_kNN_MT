@@ -50,9 +50,10 @@ class LambdaMLP(nn.Module):
     def forward(self, features, conf=None, ent=None):
 
         if self.use_conf_ent:
-            features = [features]
-            features.append(self.input_layer['conf'](conf))
-            features.append(self.input_layer['ent'](ent))
-            features = torch.cat(features,-1)
+            features_cat = [features]
+            features_cat.append(self.input_layer['conf'](conf))
+            features_cat.append(self.input_layer['ent'](ent))
+            features = torch.cat(features_cat,-1)
+            return self.model(features_cat)
   
         return self.model(features)
