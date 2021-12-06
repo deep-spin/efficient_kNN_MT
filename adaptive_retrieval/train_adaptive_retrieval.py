@@ -36,7 +36,7 @@ def validate(val_dataloader, model, args):
     running_loss = 0.
     nsamples = 0
     for i, sample in enumerate(val_dataloader):
-        features, targets, network_probs, knn_probs = sample[0], sample[1], sample[2], sample[3]
+        features, targets, knn_probs, network_probs = sample[0], sample[1], sample[2], sample[3]
 
         for v in range(len(targets)):
         	if v==0:
@@ -53,8 +53,8 @@ def validate(val_dataloader, model, args):
         cross_entropy = log_weight + torch.stack((torch.log(network_prob), torch.log(knn_prob)), dim=-1)
 
         print('lambda', torch.exp(log_weight))
-        print('network_prob', network_prob)
-        print('knn_prob', knn_prob)
+        #print('network_prob', network_prob)
+        #print('knn_prob', knn_prob)
 
         # (B,)
         cross_entropy = -torch.logsumexp(cross_entropy, dim=-1)
@@ -87,7 +87,7 @@ parser.add_argument('--seed', type=int, default=1,help='the random seed')
 
 # training arguments
 parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
-parser.add_argument('--l1', type=float, default=0, help='l1 regularization coefficient')
+parser.add_argument('--l1', type=float, default=.05, help='l1 regularization coefficient')
 parser.add_argument('--n_epochs', type=int, default=10)
 parser.add_argument('--batch-size', type=int, default=16, help='batch size')
 parser.add_argument('--ngram', type=int, default=0, help='the ngram features to use')
@@ -152,7 +152,7 @@ for epoch in tqdm(range(args.n_epochs)):
     nsamples = 0
 
     for i, sample in enumerate(tqdm(train_dataloader)):
-        features, targets, network_probs, knn_probs = sample[0], sample[1], sample[2], sample[3]
+        features, targets, knn_probs, network_probs = sample[0], sample[1], sample[2], sample[3]
 
         for v in range(len(targets)):
         	if v==0:
