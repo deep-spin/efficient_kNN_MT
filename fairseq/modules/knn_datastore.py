@@ -234,7 +234,10 @@ class KNN_Dstore(object):
             # Default behavior for IP metric is to return faiss distances.
             qsize = q.shape
             if self.metric_type == 'l2':
-                knns_vecs = torch.from_numpy(self.keys[k]).cuda().view(qsize[0], self.k, -1)
+                if torch.cuda.is_available():
+                    knns_vecs = torch.from_numpy(self.keys[k]).cuda().view(qsize[0], self.k, -1)
+                else:
+                    knns_vecs = torch.from_numpy(self.keys[k]).view(qsize[0], self.k, -1)
                 if self.half:
                     knns_vecs = knns_vecs.half()
                 query_vecs = q.view(qsize[0], 1, qsize[1]).repeat(1, self.k, 1)
@@ -244,7 +247,10 @@ class KNN_Dstore(object):
 
         if function == 'dot':
             qsize = q.shape
-            return (torch.from_numpy(self.keys[k]).cuda() * q.view(qsize[0], 1, qsize[1])).sum(dim=-1)
+            if torch.cuda.is_available():
+                return (torch.from_numpy(self.keys[k]).cuda() * q.view(qsize[0], 1, qsize[1])).sum(dim=-1)
+            else:
+                return (torch.from_numpy(self.keys[k]) * q.view(qsize[0], 1, qsize[1])).sum(dim=-1)
 
         if function == 'do_not_recomp_l2':
             return -1 * d
