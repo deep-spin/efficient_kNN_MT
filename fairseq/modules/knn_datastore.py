@@ -285,8 +285,12 @@ class KNN_Dstore(object):
         
         tgt_idx = tgt_idx.view(bsz, seq_len, -1)  # [B, S, K]
 
-        dists = dists.view(bsz, seq_len, -1).cuda()  # [Batch, Seq len, k]
-        knns = knns.view(bsz, seq_len, -1).cuda()
+        if torch.cuda.is_available():
+            dists = dists.view(bsz, seq_len, -1).cuda()  # [Batch, Seq len, k]
+            knns = knns.view(bsz, seq_len, -1).cuda()
+        else:
+            dists = dists.view(bsz, seq_len, -1)  # [Batch, Seq len, k]
+            knns = knns.view(bsz, seq_len, -1)
 
         return {'distance': dists, 'knn_index': knns, 'tgt_index': tgt_idx}
 
