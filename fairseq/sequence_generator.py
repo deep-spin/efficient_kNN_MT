@@ -329,19 +329,19 @@ class SequenceGenerator(nn.Module):
             
             with torch.autograd.profiler.record_function("EnsembleModel: forward_decoder"):
                 if self.analyse:
-                    lprobs, lprobs_without_knn, avg_attn_scores = self.model.forward_decoder(
+                    lprobs, lprobs_without_knn, avg_attn_scores, features = self.model.forward_decoder(
                         tokens[:, : step + 1],
                         encoder_outs,
                         incremental_states,
-                        self.temperature,
-                    )
+                        self.temperature,)
+                    print(features.shape)
                 else:
                     lprobs, avg_attn_scores = self.model.forward_decoder(
                         tokens[:, : step + 1],
                         encoder_outs,
                         incremental_states,
-                        self.temperature,
-                    )
+                        self.temperature,)
+
 
             if self.lm_model is not None:
                 lm_out = self.lm_model(tokens[:, : step + 1])
@@ -849,16 +849,17 @@ class EnsembleModel(nn.Module):
             )
 
             if self.analyse:
-                probs, probs_without_knn = model.get_normalized_probs(decoder_out_tuple, log_probs=True, sample=None)
+                probs, probs_without_knn, logits = model.get_normalized_probs(decoder_out_tuple, log_probs=True, sample=None)
                 probs = probs[:, -1, :]
                 probs_without_knn = probs_without_knn[:, -1, :]
-
+                features = logits[:, -1, :]
             else:    
                 probs = model.get_normalized_probs(decoder_out_tuple, log_probs=True, sample=None)
                 probs = probs[:, -1, :]
+
             if self.models_size == 1:
                 if self.analyse:
-                    return probs, probs_without_knn, attn
+                    return probs, probs_without_knn, attn, features
                 return probs, attn
 
             log_probs.append(probs)
