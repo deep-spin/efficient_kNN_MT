@@ -25,6 +25,8 @@ if [ ! -d "$SCRIPTS" ]; then
   exit
 fi
 
+mkdir ${DATADIR}/processed
+
 filede=${DATADIR}/train.de
 fileen=${DATADIR}/train.en
 
