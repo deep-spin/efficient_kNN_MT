@@ -20,7 +20,7 @@ lines_de = file_de.readlines()
 lines_en = file_en.readlines()
 
 data_size = len(lines_de)
-train_size = int(.5*data_size)
+train_size = int(.1*data_size)
 train_datastore_size = data_size-train_size
 
 train_lines = np.random.choice(data_size,size=train_size,replace=False).tolist()
