@@ -106,6 +106,9 @@ def main(args, override_args=None):
                 features = features.contiguous().view(batch_size * seq_len, -1)
                 features = features.index_select(dim=0, index=non_pad_index)  # [n_count, feature size]
 
+                print(target.shape)
+                print(features.shape)
+
                 if i==0:
                 	targets_save = target.cpu().data
                 	features_save = features.cpu().data
