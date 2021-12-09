@@ -109,10 +109,10 @@ def main(args, override_args=None):
                 network_prob = network_prob.index_select(dim=0, index=non_pad_index)
 
                 if i==0:
-                	targets_save = target.cpu().data.tolist()
-                	features_save = features.cpu().data.tolist()
-                	knn_prob_save = knn_prob.squeeze(0).cpu().data.tolist()
-                	network_prob_save = network_prob.squeeze(0).cpu().data.tolist()
+                	targets_save = target.cpu().data
+                	features_save = features.cpu().data
+                	knn_prob_save = knn_prob.squeeze(0).cpu().data
+                	network_prob_save = network_prob.squeeze(0).cpu().data
                 else:
                 	targets_save = torch.cat([targets_save, target.cpu().data],0)
                 	features_save = torch.cat([features_save, features.cpu().data],0)
