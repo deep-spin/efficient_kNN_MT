@@ -199,21 +199,21 @@ for epoch in tqdm(range(args.n_epochs)):
         running_loss += loss.item() * bsz
         nsamples += bsz
 
-        if i%500==0:
-        	val_loss = validate(val_dataloader, model, args)
-        	if val_loss <= best_loss:
-        		best_loss = val_loss
-        		torch.save(model.state_dict(), os.path.join(args.output_dir, 'checkpoint_best.pt'))
-        	model.train()
+        #if i%500==0:
+        #	val_loss = validate(val_dataloader, model, args)
+        #	if val_loss <= best_loss:
+        #		best_loss = val_loss
+        #		torch.save(model.state_dict(), os.path.join(args.output_dir, 'checkpoint_best.pt'))
+        #	model.train()
     
     report_loss = running_loss / nsamples
     print(f'\n epoch: {epoch}, step: {i},  training loss: {report_loss:.3f}')
 
     val_loss = validate(val_dataloader, model, args)
     
-    if val_loss <= best_loss:
-        best_loss = val_loss
-        torch.save(model.state_dict(), os.path.join(args.output_dir, 'checkpoint_best.pt'))
+    #if val_loss <= best_loss:
+    #    best_loss = val_loss
+    torch.save(model.state_dict(), os.path.join(args.output_dir, 'checkpoint_'+str(epoch)+'.pt'))
 
     model.train()
 

@@ -162,7 +162,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             self.total_possible_searches=0
 
         if self.knn_lambda_type == 'trainable':
-            ckpt_path = os.path.join(cfg.knn_lambda_mlp_path, 'checkpoint_best.pt')
+            ckpt_path = os.path.join(cfg.knn_lambda_mlp_path)
             ckpt = torch.load(ckpt_path)
 
             #new_state_dict = OrderedDict()
