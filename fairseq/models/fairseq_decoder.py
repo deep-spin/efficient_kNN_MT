@@ -108,6 +108,8 @@ class FairseqDecoder(nn.Module):
                 return probs
             else:
                 if analyse:
+                    print(len(net_output))
+                    print('-------', net_output[6].shape)
                     return probs, network_probs, net_output[6]
                 return probs
 
