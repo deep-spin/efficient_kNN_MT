@@ -104,12 +104,10 @@ class FairseqDecoder(nn.Module):
                 probs=torch.log(probs.clamp(min=1e-8))
                 if analyse:
                     network_probs=torch.log(network_probs.clamp(min=1e-8))
-                    return probs, network_probs, logits
+                    return probs, network_probs, net_output[6]
                 return probs
             else:
                 if analyse:
-                    print(len(net_output))
-                    print('-------', net_output[6].shape)
                     return probs, network_probs, net_output[6]
                 return probs
 
