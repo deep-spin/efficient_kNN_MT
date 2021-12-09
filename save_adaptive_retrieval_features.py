@@ -108,6 +108,8 @@ def main(args, override_args=None):
                 network_prob = network_prob.contiguous().view(batch_size * seq_len, -1)
                 network_prob = network_prob.index_select(dim=0, index=non_pad_index)
 
+                print(target.shape)
+                
                 if i==0:
                 	targets_save = target.cpu().data.tolist()
                 	features_save = features.cpu().data.tolist()
