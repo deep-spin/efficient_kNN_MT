@@ -124,8 +124,7 @@ def main(args, override_args=None):
                     features_save.extend(features.cpu().data.tolist())
                     knn_prob_save.extend(knn_prob.squeeze(0).cpu().data.tolist())
                     network_prob_save.extend(network_prob.squeeze(0).cpu().data.tolist())
-
-                print(len(targets_save))
+                    break
 
         feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save}
         torch.save(feats, override_args.adaptive_retrieval_features_path)
