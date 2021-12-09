@@ -106,8 +106,16 @@ def main(args, override_args=None):
                 features = features.contiguous().view(batch_size * seq_len, -1)
                 features = features.index_select(dim=0, index=non_pad_index)  # [n_count, feature size]
 
+                knn_prob = knn_prob.contiguous().view(batch_size * seq_len, -1)
+                knn_prob = knn_prob.index_select(dim=0, index=non_pad_index)
+
+                network_prob = network_prob.contiguous().view(batch_size * seq_len, -1)
+                network_prob = network_prob.index_select(dim=0, index=non_pad_index)
+
                 print(target.shape)
                 print(features.shape)
+                print(knn_prob.shape)
+                print(network_prob.shape)
 
                 if i==0:
                 	targets_save = target.cpu().data
