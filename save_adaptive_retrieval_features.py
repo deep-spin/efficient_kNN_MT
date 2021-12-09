@@ -108,8 +108,6 @@ def main(args, override_args=None):
                 network_prob = network_prob.contiguous().view(batch_size * seq_len, -1)
                 network_prob = network_prob.index_select(dim=0, index=non_pad_index)
 
-                print(target.shape)
-
                 if i==0:
                 	targets_save = target.cpu().data.tolist()
                 	features_save = features.cpu().data.tolist()
@@ -124,7 +122,6 @@ def main(args, override_args=None):
                     features_save.extend(features.cpu().data.tolist())
                     knn_prob_save.extend(knn_prob.squeeze(0).cpu().data.tolist())
                     network_prob_save.extend(network_prob.squeeze(0).cpu().data.tolist())
-                    break
 
         feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save}
         torch.save(feats, override_args.adaptive_retrieval_features_path)
