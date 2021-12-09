@@ -155,6 +155,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.knn_lambda_threshold = cfg.knn_lambda_threshold
         self.knn_lambda_use_conf_ent = cfg.knn_lambda_use_conf_ent
         self.knn_temperature_type = cfg.knn_temperature_type
+        self.analyse=True
 
         if self.knn_lambda_threshold>0:
             self.need_to_search=0
@@ -325,6 +326,9 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             if features_only:
                 prob = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
                 return x, extra, knn_prob, prob
+
+            if self.analyse:
+                return x, extra, knn_prob, knn_lambda, knn_dists, knn_index, last_hidden
 
             return x, extra, knn_prob, knn_lambda, knn_dists, knn_index
 

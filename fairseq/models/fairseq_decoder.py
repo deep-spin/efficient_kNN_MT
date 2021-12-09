@@ -108,7 +108,7 @@ class FairseqDecoder(nn.Module):
                 return probs
             else:
                 if analyse:
-                    return probs, network_probs, logits
+                    return probs, network_probs, net_output[6]
                 return probs
 
 
