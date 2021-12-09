@@ -114,14 +114,10 @@ def main(args, override_args=None):
                 	knn_prob_save = knn_prob.squeeze(0).cpu().data.tolist()
                 	network_prob_save = network_prob.squeeze(0).cpu().data.tolist()
                 else:
-                	#targets_save = torch.cat([targets_save, target.cpu().data],0)
-                	#features_save = torch.cat([features_save, features.cpu().data],0)
-                	#knn_prob_save = torch.cat([knn_prob_save, knn_prob.squeeze(0).cpu().data],0)
-                	#network_prob_save = torch.cat([network_prob_save, network_prob.squeeze(0).cpu().data],0)
-                    targets_save.extend(target.cpu().data.tolist())
-                    features_save.extend(features.cpu().data.tolist())
-                    knn_prob_save.extend(knn_prob.squeeze(0).cpu().data.tolist())
-                    network_prob_save.extend(network_prob.squeeze(0).cpu().data.tolist())
+                	targets_save = torch.cat([targets_save, target.cpu().data],0)
+                	features_save = torch.cat([features_save, features.cpu().data],0)
+                	knn_prob_save = torch.cat([knn_prob_save, knn_prob.squeeze(0).cpu().data],0)
+                	network_prob_save = torch.cat([network_prob_save, network_prob.squeeze(0).cpu().data],0)
 
         feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save}
         torch.save(feats, override_args.adaptive_retrieval_features_path)
