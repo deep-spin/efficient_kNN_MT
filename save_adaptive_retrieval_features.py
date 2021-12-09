@@ -119,7 +119,7 @@ def main(args, override_args=None):
                 	#knn_prob_save = torch.cat([knn_prob_save, knn_prob.squeeze(0).cpu().data],0)
                 	#network_prob_save = torch.cat([network_prob_save, network_prob.squeeze(0).cpu().data],0)
 
-                print(targets.shape)
+                print(targets_save.shape)
 
         feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save}
         torch.save(feats, override_args.adaptive_retrieval_features_path)
