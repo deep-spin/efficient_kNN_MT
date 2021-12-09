@@ -99,7 +99,7 @@ class SequenceGenerator(nn.Module):
 
         assert temperature > 0, "--temperature must be greater than 0"
 
-        self.analyse=True
+        self.analyse=False
 
         if self.analyse:
             self.difs_dataset=0
@@ -334,7 +334,7 @@ class SequenceGenerator(nn.Module):
                         encoder_outs,
                         incremental_states,
                         self.temperature,)
-                    print(features.shape)
+                    
                 else:
                     lprobs, avg_attn_scores = self.model.forward_decoder(
                         tokens[:, : step + 1],
@@ -777,7 +777,7 @@ class EnsembleModel(nn.Module):
         ):
             self.has_incremental = True
 
-        self.analyse=True
+        self.analyse=False
 
     def forward(self):
         pass
