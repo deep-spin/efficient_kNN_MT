@@ -118,10 +118,10 @@ def main(args, override_args=None):
                 network_prob = network_prob.index_select(dim=0, index=non_pad_index)
 
 
-                targets_file[aux:aux+target.size(0)] = target.cpu().detach().numpy()
-                features_file[aux:aux+target.size(0)] = features.cpu().detach().numpy()
-                knn_probs_file[aux:aux+target.size(0)] = knn_prob.squeeze(0).cpu().detach().numpy()
-                network_probs_file[aux:aux+target.size(0)] = network_prob.squeeze(0).cpu().detach().numpy()
+                #targets_file[aux:aux+target.size(0)] = target.cpu().detach().numpy()
+                #features_file[aux:aux+target.size(0)] = features.cpu().detach().numpy()
+                #knn_probs_file[aux:aux+target.size(0)] = knn_prob.squeeze(0).cpu().detach().numpy()
+                #network_probs_file[aux:aux+target.size(0)] = network_prob.squeeze(0).cpu().detach().numpy()
 
                 aux+=target.size(0)
 
@@ -140,7 +140,7 @@ def main(args, override_args=None):
 
         #feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save}
         #torch.save(feats, override_args.adaptive_retrieval_features_path)
-
+        print(aux)
 
 def cli_main():
     parser = options.get_save_datastore_parser()
