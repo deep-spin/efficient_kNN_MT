@@ -78,8 +78,8 @@ def main(args, override_args=None):
         progress = progress_bar.progress_bar(itr, log_format=args.log_format, log_interval=args.log_interval,
            prefix=f"valid on '{subset}' subset", default_log_format=("tqdm" if not args.no_progress_bar else "simple"),)
 
-        targets_file = np.memmap(override_args.adaptive_retrieval_features_path+'_targets', 
-                            dtype='int', mode='w+', shape=(override_args.adaptive_retrieval_features_size,1))
+        #targets_file = np.memmap(override_args.adaptive_retrieval_features_path+'_targets', 
+        #                    dtype='int', mode='w+', shape=(override_args.adaptive_retrieval_features_size))
         features_file = np.memmap(override_args.adaptive_retrieval_features_path+'_features', 
                             dtype='float32', mode='w+', shape=(override_args.adaptive_retrieval_features_size,1024))
         knn_probs_file = np.memmap(override_args.adaptive_retrieval_features_path+'_knn_probs', 
@@ -125,13 +125,13 @@ def main(args, override_args=None):
 
                 aux+=target.size(0)
 
-                #if i==0:
-                #	targets_save = target.cpu().data
+                if i==0:
+                	targets_save = target.cpu().data
                 #	features_save = features.cpu().data
                 #	knn_prob_save = knn_prob.squeeze(0).cpu().data
                 #	network_prob_save = network_prob.squeeze(0).cpu().data
-                #else:
-                #	targets_save = torch.cat([targets_save, target.cpu().data],0)
+                else:
+                	targets_save = torch.cat([targets_save, target.cpu().data],0)
                 	#features_save = torch.cat([features_save, features.cpu().data],0)
                 	#knn_prob_save = torch.cat([knn_prob_save, knn_prob.squeeze(0).cpu().data],0)
                 	#network_prob_save = torch.cat([network_prob_save, network_prob.squeeze(0).cpu().data],0)
@@ -139,7 +139,7 @@ def main(args, override_args=None):
                 #print(targets_save.shape)
 
         #feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save}
-        #torch.save(feats, override_args.adaptive_retrieval_features_path)
+        torch.save(targets_save, override_args.adaptive_retrieval_features_path+'_targets')
 
 
 def cli_main():
