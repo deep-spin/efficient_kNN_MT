@@ -80,12 +80,12 @@ def main(args, override_args=None):
 
         #targets_file = np.memmap(override_args.adaptive_retrieval_features_path+'_targets', 
         #                    dtype='int', mode='w+', shape=(override_args.adaptive_retrieval_features_size))
-        #features_file = np.memmap(override_args.adaptive_retrieval_features_path+'_features', 
-        #                    dtype='float32', mode='w+', shape=(override_args.adaptive_retrieval_features_size,1024))
-        #knn_probs_file = np.memmap(override_args.adaptive_retrieval_features_path+'_knn_probs', 
-        #                    dtype='float32', mode='w+', shape=(override_args.adaptive_retrieval_features_size,42024))
-        #network_probs_file = np.memmap(override_args.adaptive_retrieval_features_path+'_network_probs', 
-        #                    dtype='float32', mode='w+', shape=(override_args.adaptive_retrieval_features_size,42024))
+        features_file = np.memmap(override_args.adaptive_retrieval_features_path+'_features', 
+                            dtype='float32', mode='w+', shape=(override_args.adaptive_retrieval_features_size,1024))
+        knn_probs_file = np.memmap(override_args.adaptive_retrieval_features_path+'_knn_probs', 
+                            dtype='float32', mode='w+', shape=(override_args.adaptive_retrieval_features_size,42024))
+        network_probs_file = np.memmap(override_args.adaptive_retrieval_features_path+'_network_probs', 
+                            dtype='float32', mode='w+', shape=(override_args.adaptive_retrieval_features_size,42024))
 
         aux=0
        	with torch.no_grad():
@@ -125,13 +125,13 @@ def main(args, override_args=None):
 
                 aux+=target.size(0)
 
-                #if i==0:
-                #	targets_save = target.cpu().data
+                if i==0:
+                	targets_save = target.cpu().data
                 #	features_save = features.cpu().data
                 #	knn_prob_save = knn_prob.squeeze(0).cpu().data
                 #	network_prob_save = network_prob.squeeze(0).cpu().data
-                #else:
-                #	targets_save = torch.cat([targets_save, target.cpu().data],0)
+                else:
+                	targets_save = torch.cat([targets_save, target.cpu().data],0)
                 	#features_save = torch.cat([features_save, features.cpu().data],0)
                 	#knn_prob_save = torch.cat([knn_prob_save, knn_prob.squeeze(0).cpu().data],0)
                 	#network_prob_save = torch.cat([network_prob_save, network_prob.squeeze(0).cpu().data],0)
@@ -139,7 +139,7 @@ def main(args, override_args=None):
                 #print(targets_save.shape)
 
         #feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save}
-        #torch.save(targets_save, override_args.adaptive_retrieval_features_path+'_targets')
+        torch.save(targets_save, override_args.adaptive_retrieval_features_path+'_targets')
         print(aux)
 
 def cli_main():
