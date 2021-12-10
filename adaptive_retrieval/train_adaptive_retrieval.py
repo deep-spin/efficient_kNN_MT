@@ -104,9 +104,6 @@ parser.add_argument('--use_conf_ent', action='store_true')
 parser.add_argument('--train_others', type=str, default=None,help='use a specified file for other features if specified')
 parser.add_argument('--val_others', type=str, default=None,help='use a specified file for other features if specified')
 parser.add_argument('--seed', type=int, default=1,help='the random seed')
-parser.add_argument('--features_size', type=int)
-parser.add_argument('--features_size_val', type=int)
-
 
 # training arguments
 parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
@@ -136,17 +133,14 @@ torch.manual_seed(args.seed)
 #valid_data = torch.load(args.val_file)
 
 targets_file = torch.load(args.train_file+'_targets')
-features_file = np.memmap(args.train_file+'_features', dtype='float32', mode='w+', shape=(args.features_size, 1024))
-knn_probs_file = np.memmap(args.train_file+'_knn_probs', dtype='float32', mode='w+', shape=(args.features_size, 42024))
-network_probs_file = np.memmap(args.train_file+'_network_probs', dtype='float32', mode='w+', shape=(args.features_size, 42024))
+features_file = np.memmap(args.train_file+'_features', dtype='float32', mode='w+', shape=(targets_file.size(0), 1024))
+knn_probs_file = np.memmap(args.train_file+'_knn_probs', dtype='float32', mode='w+', shape=(targets_file.size(0), 42024))
+network_probs_file = np.memmap(args.train_file+'_network_probs', dtype='float32', mode='w+', shape=(targets_file.size(0), 42024))
 
 targets_val_file = torch.load(args.val_file+'_targets')
-features_val_file = np.memmap(args.val_file+'_features', dtype='float32', mode='w+', shape=(args.features_size_val, 1024))
-knn_probs_file = np.memmap(args.val_file+'_knn_probs', dtype='float32', mode='w+', shape=(args.features_size_val, 42024))
-network_probs_file = np.memmap(args.val_file+'_network_probs', dtype='float32', mode='w+', shape=(args.features_size_val, 42024))
-
-print(targets_file.shape)
-print(targets_val_file.shape)
+features_val_file = np.memmap(args.val_file+'_features', dtype='float32', mode='w+', shape=(targets_val_file.size(0), 1024))
+knn_probs_val_file = np.memmap(args.val_file+'_knn_probs', dtype='float32', mode='w+', shape=(targets_val_file.size(0), 42024))
+network_probs_val_file = np.memmap(args.val_file+'_network_probs', dtype='float32', mode='w+', shape=(targets_val_file.size(0), 42024))
 
 #training_set = FeatureDataset(train_data)
 #val_set = FeatureDataset(valid_data)
