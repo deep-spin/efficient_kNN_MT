@@ -186,6 +186,11 @@ for epoch in tqdm(range(args.n_epochs)):
     for i, sample in enumerate(tqdm(train_dataloader)):
         features, targets, knn_probs, network_probs = sample[0], sample[1], sample[2], sample[3]
 
+        print('features',features)
+        print('targets',targets)
+        print('knn_probs', knn_probs)
+        print('network_probs', network_probs)
+
         for v in range(len(targets)):
         	if v==0:
         		network_prob = network_probs[v][targets[v]].unsqueeze(0)
