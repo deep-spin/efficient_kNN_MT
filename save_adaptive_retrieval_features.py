@@ -139,7 +139,7 @@ def main(args, override_args=None):
                 #print(targets_save.shape)
 
         #feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save}
-        torch.save(targets_save, override_args.adaptive_retrieval_features_path+'_targets')
+        #torch.save(targets_save, override_args.adaptive_retrieval_features_path+'_targets')
         print(aux)
 
 def cli_main():
