@@ -123,8 +123,6 @@ def main(args, override_args=None):
                 knn_probs_file[aux:aux+target.size(0)] = knn_prob.squeeze(0).cpu().detach().numpy()
                 network_probs_file[aux:aux+target.size(0)] = network_prob.squeeze(0).cpu().detach().numpy()
 
-                print(features_file[0])
-
                 aux+=target.size(0)
 
                 if i==0:
