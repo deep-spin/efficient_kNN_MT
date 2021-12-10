@@ -16,20 +16,32 @@ from collections import Counter, OrderedDict
 from lambda_mlp import LambdaMLP
 
 
+#class FeatureDataset(data.Dataset):
+#    def __init__(self, data):
+#        self.features = data['features']
+#        self.targets = data['targets']
+#        self.knn_probs = data['knn_probs']
+#        self.network_probs = data['network_probs']
+
+#    def __len__(self):
+#        return len(self.features)
+
+#    def __getitem__(self, idx):
+#        return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda()
+
 class FeatureDataset(data.Dataset):
-    def __init__(self, data):
-        self.features = data['features']
-        self.targets = data['targets']
-        self.knn_probs = data['knn_probs']
-        self.network_probs = data['network_probs']
+    def __init__(self, targets, features, knn_probs, network_probs):
+        self.targets=targets
+        self.features=features
+        self.knn_probs=knn_probs
+        self.network_probs=network_probs
 
     def __len__(self):
-        return len(self.features)
+        return len(self.targets)
 
     def __getitem__(self, idx):
+        print(self.features[idx].shape)
         return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda()
-
-
 
 def validate(val_dataloader, model, args):
     model.eval()
@@ -92,6 +104,7 @@ parser.add_argument('--use_conf_ent', action='store_true')
 parser.add_argument('--train_others', type=str, default=None,help='use a specified file for other features if specified')
 parser.add_argument('--val_others', type=str, default=None,help='use a specified file for other features if specified')
 parser.add_argument('--seed', type=int, default=1,help='the random seed')
+parser.add_argument('--feature_size', type=int)
 
 
 # training arguments
@@ -106,7 +119,7 @@ parser.add_argument('--ngram', type=int, default=0, help='the ngram features to 
 parser.add_argument('--arch', type=str, choices=['mlp'], default='mlp',help='architectures of the expert model')
 parser.add_argument('--hidden-units', type=int, default=128, help='hidden units')
 parser.add_argument('--nlayers', type=int, default=4, help='number of layers')
-parser.add_argument('--dropout', type=float, default=.2, help='dropout')
+parser.add_argument('--dropout', type=float, default=.5, help='dropout')
 
 parser.add_argument('--output-dir', type=str)
 parser.add_argument('--load-model', type=str, default=None, help='load model checkpoint')
@@ -118,12 +131,24 @@ print(args)
 np.random.seed(args.seed)
 torch.manual_seed(args.seed)
 
-train_data = torch.load(args.train_file)
-valid_data = torch.load(args.val_file)
+#train_data = torch.load(args.train_file)
+#valid_data = torch.load(args.val_file)
 
+targets_file = torch.load(args.train_file+'_targets')
+features_file = np.memmap(args.train_file+'_features', dtype='float32', mode='w+', shape=(args.features_size, 1024))
+knn_probs_file = np.memmap(args.train_file+'_knn_probs', dtype='float32', mode='w+', shape=(args.features_size, 42024))
+network_probs_file = np.memmap(args.train_file+'_network_probs', dtype='float32', mode='w+', shape=(args.features_size, 42024))
 
-training_set = FeatureDataset(train_data)
-val_set = FeatureDataset(valid_data)
+targets_val_file = torch.load(args.val_file+'_targets')
+features_val_file = np.memmap(args.val_file+'_features', dtype='float32', mode='w+', shape=(args.features_size, 1024))
+knn_probs_file = np.memmap(args.val_file+'_knn_probs', dtype='float32', mode='w+', shape=(args.features_size, 42024))
+network_probs_file = np.memmap(args.val_file+'_network_probs', dtype='float32', mode='w+', shape=(args.features_size, 42024))
+
+#training_set = FeatureDataset(train_data)
+#val_set = FeatureDataset(valid_data)
+
+training_set = FeatureDataset(targets_file, features_file, knn_probs_file, network_probs_file)
+val_set = FeatureDataset(targets_val_file, features_val_file, knn_probs_val_file, network_probs_val_file)
 
 train_dataloader = torch.utils.data.DataLoader(training_set,
                                                batch_size=args.batch_size,
