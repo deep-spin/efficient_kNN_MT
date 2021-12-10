@@ -124,8 +124,6 @@ def main(args, override_args=None):
                 #network_probs_file[aux:aux+target.size(0)] = network_prob.squeeze(0).cpu().detach().numpy()
 
                 aux+=target.size(0)
-                print(target.shape)
-                print(aux)
 
                 #if i==0:
                 #	targets_save = target.cpu().data
