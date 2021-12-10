@@ -146,7 +146,7 @@ knn_probs_file = np.memmap(args.val_file+'_knn_probs', dtype='float32', mode='w+
 network_probs_file = np.memmap(args.val_file+'_network_probs', dtype='float32', mode='w+', shape=(args.features_size_val, 42024))
 
 print(targets_file.shape)
-print(features_file.shape)
+print(targets_val_file.shape)
 
 #training_set = FeatureDataset(train_data)
 #val_set = FeatureDataset(valid_data)
