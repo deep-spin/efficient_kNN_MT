@@ -118,10 +118,12 @@ def main(args, override_args=None):
                 network_prob = network_prob.index_select(dim=0, index=non_pad_index)
 
 
-                #targets_file[aux:aux+target.size(0)] = target.cpu().detach().numpy()
-                #features_file[aux:aux+target.size(0)] = features.cpu().detach().numpy()
-                #knn_probs_file[aux:aux+target.size(0)] = knn_prob.squeeze(0).cpu().detach().numpy()
-                #network_probs_file[aux:aux+target.size(0)] = network_prob.squeeze(0).cpu().detach().numpy()
+                targets_file[aux:aux+target.size(0)] = target.cpu().detach().numpy()
+                features_file[aux:aux+target.size(0)] = features.cpu().detach().numpy()
+                knn_probs_file[aux:aux+target.size(0)] = knn_prob.squeeze(0).cpu().detach().numpy()
+                network_probs_file[aux:aux+target.size(0)] = network_prob.squeeze(0).cpu().detach().numpy()
+
+                print(features_file[0])
 
                 aux+=target.size(0)
 
