@@ -104,8 +104,8 @@ parser.add_argument('--use_conf_ent', action='store_true')
 parser.add_argument('--train_others', type=str, default=None,help='use a specified file for other features if specified')
 parser.add_argument('--val_others', type=str, default=None,help='use a specified file for other features if specified')
 parser.add_argument('--seed', type=int, default=1,help='the random seed')
-parser.add_argument('--feature_size', type=int)
-parser.add_argument('--feature_size_val', type=int)
+parser.add_argument('--features_size', type=int)
+parser.add_argument('--features_size_val', type=int)
 
 
 # training arguments
