@@ -140,7 +140,7 @@ def main(args, override_args=None):
 
         #feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save}
         torch.save(targets_save, override_args.adaptive_retrieval_features_path+'_targets')
-        targets_file.flush()
+        features_file.flush()
         knn_probs_file.flush()
         network_probs_file.flush()
 
