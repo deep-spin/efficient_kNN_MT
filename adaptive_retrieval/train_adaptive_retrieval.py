@@ -219,7 +219,7 @@ for epoch in tqdm(range(args.n_epochs)):
         	log_weight = model(features, conf, ent)
 
         print('log_weight', log_weight)
-        print('network_probs', torch.log(network_probs))
+        print('knn_probs', knn_probs)
         print('knn_probs', torch.log(knn_probs))
         cross_entropy = log_weight + torch.stack((torch.log(network_probs), torch.log(knn_probs)), dim=-1)
         print('----',cross_entropy)
