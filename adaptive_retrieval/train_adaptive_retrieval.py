@@ -53,13 +53,13 @@ def validate(val_dataloader, model, args):
     for i, sample in enumerate(val_dataloader):
         features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
 
-        for v in range(len(targets)):
-        	if v==0:
-        		network_prob = network_probs[v][targets[v]].unsqueeze(0)
-        		knn_prob = knn_probs[v][targets[v]].unsqueeze(0)
-        	else:
-        		network_prob = torch.cat([network_prob, network_probs[v][targets[v]].unsqueeze(0)],0)
-        		knn_prob = torch.cat([knn_prob, knn_probs[v][targets[v]].unsqueeze(0)],0)
+        #for v in range(len(targets)):
+        #	if v==0:
+        #		network_prob = network_probs[v][targets[v]].unsqueeze(0)
+        #		knn_prob = knn_probs[v][targets[v]].unsqueeze(0)
+        #	else:
+        #		network_prob = torch.cat([network_prob, network_probs[v][targets[v]].unsqueeze(0)],0)
+        #		knn_prob = torch.cat([knn_prob, knn_probs[v][targets[v]].unsqueeze(0)],0)
 
 
 
@@ -73,7 +73,7 @@ def validate(val_dataloader, model, args):
         
         #log_weight = torch.log(torch.FloatTensor([.4,.6])).cuda().unsqueeze(0)
         
-        cross_entropy = log_weight + torch.stack((torch.log(network_prob), torch.log(knn_prob)), dim=-1)
+        cross_entropy = log_weight + torch.stack((torch.log(network_probs), torch.log(knn_probs)), dim=-1)
 
         #print('lambda', torch.exp(log_weight))
         #print('network_prob', network_prob)
@@ -199,13 +199,13 @@ for epoch in tqdm(range(args.n_epochs)):
     for i, sample in enumerate(tqdm(train_dataloader)):
         features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
 
-        for v in range(len(targets)):
-        	if v==0:
-        		network_prob = network_probs[v][targets[v]].unsqueeze(0)
-        		knn_prob = knn_probs[v][targets[v]].unsqueeze(0)
-        	else:
-        		network_prob = torch.cat([network_prob, network_probs[v][targets[v]].unsqueeze(0)],0)
-        		knn_prob = torch.cat([knn_prob, knn_probs[v][targets[v]].unsqueeze(0)],0)
+        #for v in range(len(targets)):
+        	#if v==0:
+        	#	network_prob = network_probs[v][targets[v]].unsqueeze(0)
+        	#	knn_prob = knn_probs[v][targets[v]].unsqueeze(0)
+        	#else:
+        	#	network_prob = torch.cat([network_prob, network_probs[v][targets[v]].unsqueeze(0)],0)
+        	#	knn_prob = torch.cat([knn_prob, knn_probs[v][targets[v]].unsqueeze(0)],0)
 
 
         optimizer.zero_grad()
@@ -218,7 +218,7 @@ for epoch in tqdm(range(args.n_epochs)):
         	#ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
         	log_weight = model(features, conf, ent)
 
-        cross_entropy = log_weight + torch.stack((torch.log(network_prob), torch.log(knn_prob)), dim=-1)
+        cross_entropy = log_weight + torch.stack((torch.log(network_probs), torch.log(knn_probs)), dim=-1)
 
         # (B,)
         cross_entropy = -torch.logsumexp(cross_entropy, dim=-1)
