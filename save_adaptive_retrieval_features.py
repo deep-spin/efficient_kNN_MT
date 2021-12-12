@@ -126,6 +126,7 @@ def main(args, override_args=None):
                 aux+=target.size(0)
 
                 print(knn_prob.shape)
+                print(network_prob.shape)
                 for j in range(len(target)):
                     if j==0:
                         knn_probs=knn_prob[j,target[j]].unsqueeze(0)
