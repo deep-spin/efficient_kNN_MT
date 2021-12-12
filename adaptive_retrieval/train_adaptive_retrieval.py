@@ -220,7 +220,7 @@ for epoch in tqdm(range(args.n_epochs)):
 
         print(log_weight)
         cross_entropy = log_weight + torch.stack((torch.log(network_probs), torch.log(knn_probs)), dim=-1)
-        print(cross_entropy)
+        print('----',cross_entropy)
 
         # (B,)
         cross_entropy = -torch.logsumexp(cross_entropy, dim=-1)
