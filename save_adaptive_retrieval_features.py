@@ -125,8 +125,6 @@ def main(args, override_args=None):
 
                 aux+=target.size(0)
 
-                print(knn_prob.shape)
-                print(network_prob.shape)
                 for j in range(len(target)):
                     if j==0:
                         knn_probs=knn_prob[j,target[j]].unsqueeze(0)
@@ -134,22 +132,28 @@ def main(args, override_args=None):
                     else:
                         knn_probs=torch.cat([knn_probs,knn_prob[j,target[j]].unsqueeze(0)],0)
                         network_probs=torch.cat([network_probs,network_prob[j,target[j]].unsqueeze(0)],0)
-                    print(knn_probs.shape)
 
                 if i==0:
                 	targets_save = target.cpu().data
                 	features_save = features.cpu().data
-                	knn_prob_save = knn_prob.squeeze(0).cpu().data
-                	network_prob_save = network_prob.squeeze(0).cpu().data
+                	knn_prob_save = knn_probs.squeeze(0).cpu().data
+                	network_prob_save = network_probs.squeeze(0).cpu().data
+                    conf=torch.max(network_probs, -1).values.unsqueeze(-1).cpu().data
+                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1).cpu().data
                 else:
                 	targets_save = torch.cat([targets_save, target.cpu().data],0)
                 	features_save = torch.cat([features_save, features.cpu().data],0)
                 	knn_prob_save = torch.cat([knn_prob_save, knn_prob.squeeze(0).cpu().data],0)
                 	network_prob_save = torch.cat([network_prob_save, network_prob.squeeze(0).cpu().data],0)
 
+                    conf=torch.cat([conf, torch.max(network_probs, -1).values.unsqueeze(-1).cpu().data],0)
+                    ent=torch.cat([ent, torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1).cpu().data],0)
+
+                print(conf.shape)
+                print(ent.shape)
                 #print(targets_save.shape)
 
-        feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save}
+        feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save, 'conf': conf, 'ent': ent}
         torch.save(targets_save, override_args.adaptive_retrieval_features_path)
 
         #torch.save(targets_save, override_args.adaptive_retrieval_features_path+'_targets')
