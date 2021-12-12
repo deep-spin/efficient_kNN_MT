@@ -149,9 +149,7 @@ def main(args, override_args=None):
 
                     conf=torch.cat([conf, torch.max(network_probs, -1).values.unsqueeze(-1).cpu().data],0)
                     ent=torch.cat([ent, torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1).cpu().data],0)
-
-                print(conf.shape)
-                print(ent.shape)
+                    
                 #print(targets_save.shape)
 
         feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save, 'conf': conf, 'ent': ent}
