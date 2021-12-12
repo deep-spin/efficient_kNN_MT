@@ -139,17 +139,17 @@ def main(args, override_args=None):
                     knn_prob_save = knn_probs.squeeze(0).cpu().data
                     network_prob_save = network_probs.squeeze(0).cpu().data
                     print(network_probs.shape)
-                    conf=torch.max(network_probs, -1).values.unsqueeze(-1).cpu().data
+                    conf=torch.max(network_prob, -1).values.unsqueeze(-1).cpu().data
                     print(conf.shape)
-                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1).cpu().data
+                    ent=torch.distributions.Categorical(network_prob).entropy().unsqueeze(-1).cpu().data
                 else:
                     targets_save = torch.cat([targets_save, target.cpu().data],0)
                     features_save = torch.cat([features_save, features.cpu().data],0)
                     knn_prob_save = torch.cat([knn_prob_save, knn_probs.squeeze(0).cpu().data],0)
                     network_prob_save = torch.cat([network_prob_save, network_probs.squeeze(0).cpu().data],0)
 
-                    conf=torch.cat([conf, torch.max(network_probs, -1).values.unsqueeze(-1).cpu().data],0)
-                    ent=torch.cat([ent, torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1).cpu().data],0)
+                    conf=torch.cat([conf, torch.max(network_prob, -1).values.unsqueeze(-1).cpu().data],0)
+                    ent=torch.cat([ent, torch.distributions.Categorical(network_prob).entropy().unsqueeze(-1).cpu().data],0)
 
                 #print(targets_save.shape)
                 #print(conf.shape)
