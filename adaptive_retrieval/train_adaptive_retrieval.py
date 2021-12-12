@@ -73,6 +73,7 @@ def validate(val_dataloader, model, args):
         
         #log_weight = torch.log(torch.FloatTensor([.4,.6])).cuda().unsqueeze(0)
         
+        knn_probs=torch.clamp(knn_probs, min=1e-12)
         cross_entropy = log_weight + torch.stack((torch.log(network_probs), torch.log(knn_probs)), dim=-1)
 
         #print('lambda', torch.exp(log_weight))
