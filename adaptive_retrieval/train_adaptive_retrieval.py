@@ -40,7 +40,8 @@ class FeatureDataset(data.Dataset):
         return len(self.targets)
 
     def __getitem__(self, idx):
-        return torch.FloatTensor(self.features[idx]).cuda(), self.targets[idx].cuda(), torch.FloatTensor(self.knn_probs[idx]).cuda(), torch.FloatTensor(self.network_probs[idx]).cuda()
+        #return torch.FloatTensor(self.features[idx]).cuda(), self.targets[idx].cuda(), torch.FloatTensor(self.knn_probs[idx]).cuda(), torch.FloatTensor(self.network_probs[idx]).cuda()
+        return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda()
 
 def validate(val_dataloader, model, args):
     model.eval()
