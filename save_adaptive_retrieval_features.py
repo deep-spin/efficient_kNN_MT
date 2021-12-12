@@ -133,7 +133,7 @@ def main(args, override_args=None):
                         network_probs=knn_prob[j,target[j]].unsqueeze(0)
                     else:
                         knn_probs=torch.cat([knn_probs,knn_prob[j,target[j]].unsqueeze(0)],0)
-                        network_probs=torch.cat([network_prob,network_prob[j,target[j]].unsqueeze(0)],0)
+                        network_probs=torch.cat([network_probs,network_prob[j,target[j]].unsqueeze(0)],0)
                     print(knn_probs.shape)
 
                 if i==0:
