@@ -207,6 +207,8 @@ for epoch in tqdm(range(args.n_epochs)):
         	#	network_prob = torch.cat([network_prob, network_probs[v][targets[v]].unsqueeze(0)],0)
         	#	knn_prob = torch.cat([knn_prob, knn_probs[v][targets[v]].unsqueeze(0)],0)
 
+        print('features', features)
+        print(knn_probs)
 
         optimizer.zero_grad()
 
