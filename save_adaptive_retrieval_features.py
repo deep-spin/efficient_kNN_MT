@@ -119,9 +119,9 @@ def main(args, override_args=None):
 
 
                 #targets_file[aux:aux+target.size(0)] = target.cpu().detach().numpy()
-                features_file[aux:aux+target.size(0)] = features.cpu().detach().numpy()
-                knn_probs_file[aux:aux+target.size(0)] = knn_prob.squeeze(0).cpu().detach().numpy()
-                network_probs_file[aux:aux+target.size(0)] = network_prob.squeeze(0).cpu().detach().numpy()
+                #features_file[aux:aux+target.size(0)] = features.cpu().detach().numpy()
+                #knn_probs_file[aux:aux+target.size(0)] = knn_prob.squeeze(0).cpu().detach().numpy()
+                #network_probs_file[aux:aux+target.size(0)] = network_prob.squeeze(0).cpu().detach().numpy()
 
                 aux+=target.size(0)
 
