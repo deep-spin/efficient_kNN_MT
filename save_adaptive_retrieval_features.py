@@ -134,10 +134,10 @@ def main(args, override_args=None):
                         network_probs=torch.cat([network_probs,network_prob[j,target[j]].unsqueeze(0)],0)
 
                 if i==0:
-                	targets_save = target.cpu().data
-                	features_save = features.cpu().data
-                	knn_prob_save = knn_probs.squeeze(0).cpu().data
-                	network_prob_save = network_probs.squeeze(0).cpu().data
+                    targets_save = target.cpu().data
+                    features_save = features.cpu().data
+                    knn_prob_save = knn_probs.squeeze(0).cpu().data
+                    network_prob_save = network_probs.squeeze(0).cpu().data
                     
                     conf=torch.max(network_probs, -1).values.unsqueeze(-1).cpu().data
                     ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1).cpu().data
