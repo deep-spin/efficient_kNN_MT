@@ -80,12 +80,12 @@ def main(args, override_args=None):
 
         #targets_file = np.memmap(override_args.adaptive_retrieval_features_path+'_targets', 
         #                    dtype='int', mode='w+', shape=(override_args.adaptive_retrieval_features_size))
-        features_file = np.memmap(override_args.adaptive_retrieval_features_path+'_features', 
-                            dtype='float32', mode='w+', shape=(override_args.adaptive_retrieval_features_size,1024))
-        knn_probs_file = np.memmap(override_args.adaptive_retrieval_features_path+'_knn_probs', 
-                            dtype='float32', mode='w+', shape=(override_args.adaptive_retrieval_features_size,42024))
-        network_probs_file = np.memmap(override_args.adaptive_retrieval_features_path+'_network_probs', 
-                            dtype='float32', mode='w+', shape=(override_args.adaptive_retrieval_features_size,42024))
+        #features_file = np.memmap(override_args.adaptive_retrieval_features_path+'_features', 
+        #                    dtype='float32', mode='w+', shape=(override_args.adaptive_retrieval_features_size,1024))
+        #knn_probs_file = np.memmap(override_args.adaptive_retrieval_features_path+'_knn_probs', 
+        #                    dtype='float32', mode='w+', shape=(override_args.adaptive_retrieval_features_size,42024))
+        #network_probs_file = np.memmap(override_args.adaptive_retrieval_features_path+'_network_probs', 
+        #                    dtype='float32', mode='w+', shape=(override_args.adaptive_retrieval_features_size,42024))
 
         aux=0
        	with torch.no_grad():
@@ -125,24 +125,36 @@ def main(args, override_args=None):
 
                 aux+=target.size(0)
 
+                print(knn_prob.shape)
+                for j in range(len(target)):
+                    if j==0:
+                        knn_probs=knn_prob[target[:,j]]
+                        network_probs=knn_prob[target[:,j]]
+                    else:
+                        knn_probs=torch.cat([knn_probs,knn_prob[target[:,j]]],0)
+                        network_probs=torch.cat([network_prob,network_prob[target[:,j]]],0)
+                    print(knn_probs.shape)
+
                 if i==0:
                 	targets_save = target.cpu().data
-                #	features_save = features.cpu().data
-                #	knn_prob_save = knn_prob.squeeze(0).cpu().data
-                #	network_prob_save = network_prob.squeeze(0).cpu().data
+                	features_save = features.cpu().data
+                	knn_prob_save = knn_prob.squeeze(0).cpu().data
+                	network_prob_save = network_prob.squeeze(0).cpu().data
                 else:
                 	targets_save = torch.cat([targets_save, target.cpu().data],0)
-                	#features_save = torch.cat([features_save, features.cpu().data],0)
-                	#knn_prob_save = torch.cat([knn_prob_save, knn_prob.squeeze(0).cpu().data],0)
-                	#network_prob_save = torch.cat([network_prob_save, network_prob.squeeze(0).cpu().data],0)
+                	features_save = torch.cat([features_save, features.cpu().data],0)
+                	knn_prob_save = torch.cat([knn_prob_save, knn_prob.squeeze(0).cpu().data],0)
+                	network_prob_save = torch.cat([network_prob_save, network_prob.squeeze(0).cpu().data],0)
 
                 #print(targets_save.shape)
 
-        #feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save}
-        torch.save(targets_save, override_args.adaptive_retrieval_features_path+'_targets')
-        features_file.flush()
-        knn_probs_file.flush()
-        network_probs_file.flush()
+        feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save}
+        torch.save(targets_save, override_args.adaptive_retrieval_features_path)
+
+        #torch.save(targets_save, override_args.adaptive_retrieval_features_path+'_targets')
+        #features_file.flush()
+        #knn_probs_file.flush()
+        #network_probs_file.flush()
 
 
 def cli_main():
