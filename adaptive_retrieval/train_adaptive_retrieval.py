@@ -25,12 +25,6 @@ class FeatureDataset(data.Dataset):
         self.conf = data['conf']
         self.ent = data['ent']
 
-        print(self.features.shape)
-        print(self.targets.shape)
-        print(self.knn_probs.shape)
-        print(self.network_probs.shape)
-        print(self.conf.shape)
-        print(self.ent.shape)
 
     def __len__(self):
         return len(self.features)
