@@ -128,11 +128,11 @@ def main(args, override_args=None):
                 print(knn_prob.shape)
                 for j in range(len(target)):
                     if j==0:
-                        knn_probs=knn_prob[j,target[j]]
-                        network_probs=knn_prob[j,target[j]]
+                        knn_probs=knn_prob[j,target[j]].unsqueeze(0)
+                        network_probs=knn_prob[j,target[j]].unsqueeze(0)
                     else:
-                        knn_probs=torch.cat([knn_probs,knn_prob[j,target[j]]],0)
-                        network_probs=torch.cat([network_prob,network_prob[j,target[j]]],0)
+                        knn_probs=torch.cat([knn_probs,knn_prob[j,target[j]].unsqueeze(0)],0)
+                        network_probs=torch.cat([network_prob,network_prob[j,target[j]].unsqueeze(0)],0)
                     print(knn_probs.shape)
 
                 if i==0:
