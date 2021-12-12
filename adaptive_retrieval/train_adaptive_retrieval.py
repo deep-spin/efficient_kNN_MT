@@ -32,9 +32,9 @@ from lambda_mlp import LambdaMLP
 class FeatureDataset(data.Dataset):
     def __init__(self, targets, features, knn_probs, network_probs):
         self.targets=targets
-        self.features=torch.from_numpy(features) #features
-        self.knn_probs=torch.from_numpy(knn_probs) #knn_probs
-        self.network_probs=torch.from_numpy(network_probs)
+        self.features=features
+        self.knn_probs=knn_probs
+        self.network_probs=network_probs
 
     def __len__(self):
         return len(self.targets)
@@ -140,6 +140,15 @@ targets_val_file = torch.load(args.val_file+'_targets')
 features_val_file = np.memmap(args.val_file+'_features', dtype='float32', mode='r+', shape=(targets_val_file.size(0), 1024))
 knn_probs_val_file = np.memmap(args.val_file+'_knn_probs', dtype='float32', mode='r+', shape=(targets_val_file.size(0), 42024))
 network_probs_val_file = np.memmap(args.val_file+'_network_probs', dtype='float32', mode='r+', shape=(targets_val_file.size(0), 42024))
+
+features_file=torch.from_numpy(features_file)
+knn_probs_file=torch.from_numpy(knn_probs_file)
+network_probs_file=torch.from_numpy(network_probs_file)
+
+features_val_file=torch.from_numpy(features_val_file)
+knn_probs_val_file=torch.from_numpy(knn_probs_val_file)
+network_probs_val_file=torch.from_numpy(network_probs_val_file)
+
 
 #training_set = FeatureDataset(train_data)
 #val_set = FeatureDataset(valid_data)
