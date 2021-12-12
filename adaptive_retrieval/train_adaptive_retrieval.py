@@ -218,9 +218,8 @@ for epoch in tqdm(range(args.n_epochs)):
         	#ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
         	log_weight = model(features, conf, ent)
 
-        knn_probs=torch.clamp(knn_probs, min=1e-6)
+        knn_probs=torch.clamp(knn_probs, min=1e-12)
         cross_entropy = log_weight + torch.stack((torch.log(network_probs), torch.log(knn_probs)), dim=-1)
-        print('----',cross_entropy)
 
         # (B,)
         cross_entropy = -torch.logsumexp(cross_entropy, dim=-1)
