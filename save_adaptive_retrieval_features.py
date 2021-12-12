@@ -138,6 +138,7 @@ def main(args, override_args=None):
                 	features_save = features.cpu().data
                 	knn_prob_save = knn_probs.squeeze(0).cpu().data
                 	network_prob_save = network_probs.squeeze(0).cpu().data
+                    
                     conf=torch.max(network_probs, -1).values.unsqueeze(-1).cpu().data
                     ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1).cpu().data
                 else:
