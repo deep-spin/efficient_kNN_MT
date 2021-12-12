@@ -149,11 +149,11 @@ def main(args, override_args=None):
 
                     conf=torch.cat([conf, torch.max(network_probs, -1).values.unsqueeze(-1).cpu().data],0)
                     ent=torch.cat([ent, torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1).cpu().data],0)
-                    
+
                 #print(targets_save.shape)
 
         feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save, 'conf': conf, 'ent': ent}
-        torch.save(targets_save, override_args.adaptive_retrieval_features_path)
+        torch.save(feats, override_args.adaptive_retrieval_features_path)
 
         #torch.save(targets_save, override_args.adaptive_retrieval_features_path+'_targets')
         #features_file.flush()
