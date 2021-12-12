@@ -31,10 +31,10 @@ from lambda_mlp import LambdaMLP
 
 class FeatureDataset(data.Dataset):
     def __init__(self, targets, features, knn_probs, network_probs):
-        self.targets=targets
-        self.features=features
-        self.knn_probs=knn_probs
-        self.network_probs=network_probs
+        self.targets=torch.from_numpy(targets) #targets
+        self.features=torch.from_numpy(features) #features
+        self.knn_probs=torch.from_numpy(knn_probs) #knn_probs
+        self.network_probs=torch.from_numpy(network_probs)
 
     def __len__(self):
         return len(self.targets)
