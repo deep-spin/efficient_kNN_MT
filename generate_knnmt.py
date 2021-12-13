@@ -190,14 +190,26 @@ def _main(cfg: DictConfig, output_file):
             constraints = sample["constraints"]
 
         gen_timer.start()
-        hypos = task.inference_step(
-            generator,
-            models,
-            sample,
-            prefix_tokens=prefix_tokens,
-            constraints=constraints,)
 
-        print(hypos)
+        analyse=True
+        if analyse:
+            hypos, tokens_difs, difs_dataset, len_dataset = task.inference_step(
+                generator,
+                models,
+                sample,
+                prefix_tokens=prefix_tokens,
+                constraints=constraints,)
+        else:
+            hypos = task.inference_step(
+                generator,
+                models,
+                sample,
+                prefix_tokens=prefix_tokens,
+                constraints=constraints,)
+
+        print(tokens_difs)
+        print(difs_dataset)
+        print(len_dataset)
 
         num_generated_tokens = sum(len(h[0]["tokens"]) for h in hypos)
         gen_timer.stop(num_generated_tokens)

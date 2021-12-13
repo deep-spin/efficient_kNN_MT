@@ -162,14 +162,8 @@ class SequenceGenerator(nn.Module):
             if timer is not None:
                 timer.start()
             with torch.no_grad():
-                if self.analyse:
-                    hypos, tokens_difs, difs_dataset, len_dataset = self.generate(encoder_input)
-                    print('hypos', hypos)
-                    print('tokens_difs', tokens_difs)
-                    print('difs_dataset', difs_dataset)
-                    print('len_dataset', len_dataset)
-                else:
-                    hypos = self.generate(encoder_input)
+
+                hypos = self.generate(encoder_input)
             if timer is not None:
                 timer.stop(sum(len(h[0]["tokens"]) for h in hypos))
             for i, id in enumerate(s["id"].data):
