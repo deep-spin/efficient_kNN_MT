@@ -744,6 +744,8 @@ class SequenceGenerator(nn.Module):
                 self.len_dataset+=len(finalized[0][index]['tokens'])
 
                 print(self.difs_dataset, self.len_dataset)
+            else:
+                self.tokens_difs=None
 
         newly_finished: List[int] = []
 
