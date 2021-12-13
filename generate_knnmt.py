@@ -207,10 +207,7 @@ def _main(cfg: DictConfig, output_file):
                 prefix_tokens=prefix_tokens,
                 constraints=constraints,)
 
-        print(tokens_difs)
-        print(difs_dataset)
-        print(len_dataset)
-        print(hypos)
+        print(len(tokens_difs))
 
         num_generated_tokens = sum(len(h[0]["tokens"]) for h in hypos)
         gen_timer.stop(num_generated_tokens)
@@ -257,7 +254,7 @@ def _main(cfg: DictConfig, output_file):
 
             # Process top predictions
             for j, hypo in enumerate(hypos[i][: cfg.generation.nbest]):
-                print('-----',hypo)
+                print('-----',len(hypo['tokens']))
                 hypo_tokens, hypo_str, alignment = utils.post_process_prediction(
                     hypo_tokens=hypo["tokens"].int().cpu(),
                     src_str=src_str,
