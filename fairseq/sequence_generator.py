@@ -452,9 +452,6 @@ class SequenceGenerator(nn.Module):
                             self.difs_tokens[i]= x_tokens[cand_beams[0][i].item()].copy()
                             self.difs_tokens[i].append(1)
 
-                print(self.difs)
-                print(self.difs_tokens)
-
             # cand_bbsz_idx contains beam indices for the top candidate
             # hypotheses, with a range of values: [0, bsz*beam_size),
             # and dimensions: [bsz, cand_size]
