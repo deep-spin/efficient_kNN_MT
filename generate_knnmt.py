@@ -309,6 +309,8 @@ def _main(cfg: DictConfig, output_file):
                     else:
                         scorer.add(target_tokens, hypo_tokens)
 
+                print(hypo_tokens)
+
         wps_meter.update(num_generated_tokens)
         progress.log({"wps": round(wps_meter.avg)})
         num_sentences += (sample["nsentences"] if "nsentences" in sample else sample["id"].numel())
