@@ -338,7 +338,7 @@ class SequenceGenerator(nn.Module):
             
             with torch.autograd.profiler.record_function("EnsembleModel: forward_decoder"):
                 if self.analyse:
-                    lprobs, lnetwork_probs, avg_attn_scores, features = self.model.forward_decoder(
+                    lprobs, lnetwork_probs, knn_probs, avg_attn_scores, features = self.model.forward_decoder(
                         tokens[:, : step + 1],
                         encoder_outs,
                         incremental_states,
