@@ -444,12 +444,12 @@ class SequenceGenerator(nn.Module):
                     self.difs_tokens={}
                     for i in range(len(cand_indices[0])):
                         if cand_indices[0][i]==cand_indices_without_knn[0][i]:
-                            self.difs[i]=0 + x[cand_beams[0][i].item()]
-                            self.difs_tokens[i]= x_tokens[cand_beams[0][i].item()]
+                            self.difs[i]=0 + x[cand_beams[0][i].item()].copy()
+                            self.difs_tokens[i]= x_tokens[cand_beams[0][i].item()].copy()
                             self.difs_tokens[i].append(0)
                         else:
-                            self.difs[i]=1 + x[cand_beams[0][i].item()] 
-                            self.difs_tokens[i]= x_tokens[cand_beams[0][i].item()]
+                            self.difs[i]=1 + x[cand_beams[0][i].item()].copy()
+                            self.difs_tokens[i]= x_tokens[cand_beams[0][i].item()].copy()
                             self.difs_tokens[i].append(1)
 
                 print(self.difs)
