@@ -210,6 +210,7 @@ def _main(cfg: DictConfig, output_file):
         print(tokens_difs)
         print(difs_dataset)
         print(len_dataset)
+        print(hypos)
 
         num_generated_tokens = sum(len(h[0]["tokens"]) for h in hypos)
         gen_timer.stop(num_generated_tokens)
