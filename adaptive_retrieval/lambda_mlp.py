@@ -56,12 +56,12 @@ class LambdaMLP(nn.Module):
 
         if self.use_conf_ent:
             print(conf.shape)
-            x=self.input_layer['conf'](conf)
+            x=self.input_layer['conf'](conf.unsqueeze(-1))
             print(x.shape)
             print(features.shape)
             features_cat = [features]
-            features_cat.append(self.input_layer['conf'](conf))
-            features_cat.append(self.input_layer['ent'](ent))
+            features_cat.append(self.input_layer['conf'](conf.unsqueeze(-1)))
+            features_cat.append(self.input_layer['ent'](ent.unsqueeze(-1)))
             features_cat = torch.cat(features_cat,-1)
 
             return self.model(features_cat)
