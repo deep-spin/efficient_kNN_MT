@@ -448,7 +448,6 @@ class SequenceGenerator(nn.Module):
                             self.difs_tokens[i]= x_tokens[cand_beams[0][i].item()]
                             self.difs_tokens[i].append(0)
                         else:
-                            print('----',x_tokens)
                             self.difs[i]=1 + x[cand_beams[0][i].item()] 
                             self.difs_tokens[i]= x_tokens[cand_beams[0][i].item()]
                             self.difs_tokens[i].append(1)
