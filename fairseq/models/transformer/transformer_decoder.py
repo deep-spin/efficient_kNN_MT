@@ -272,8 +272,8 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             if self.knn_lambda_type == 'trainable':
                 if self.knn_lambda_use_conf_ent:
                     network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
-                    conf=torch.max(network_probs, -1).values.unsqueeze(-1)
-                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
+                    conf=torch.max(network_probs, -1).values
+                    ent=torch.distributions.Categorical(network_probs).entropy()
                     
                     knn_lambda = self.lambda_mlp.forward(last_hidden, conf, ent)
                 else:
