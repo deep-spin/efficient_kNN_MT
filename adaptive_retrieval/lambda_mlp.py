@@ -56,7 +56,8 @@ class LambdaMLP(nn.Module):
 
         if self.use_conf_ent:
             print(conf.shape)
-            print(self.input_layer['conf'](conf))
+            x=self.input_layer['conf'](conf)
+            print(x.shape)
             print(features.shape)
             features_cat = [features]
             features_cat.append(self.input_layer['conf'](conf))
