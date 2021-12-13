@@ -760,9 +760,6 @@ class SequenceGenerator(nn.Module):
                 finished[sent] = True
                 newly_finished.append(unfin_idx)
 
-        if self.analyse:
-            return newly_finished, self.tokens_difs, self.difs_dataset, self.len_dataset
-
         return newly_finished
 
     def is_finished(
