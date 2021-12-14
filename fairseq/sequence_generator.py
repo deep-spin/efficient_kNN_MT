@@ -420,8 +420,7 @@ class SequenceGenerator(nn.Module):
                 tokens[:, : step + 1],
                 original_batch_idxs,)
 
-            print(features.shape)
-            print(len(cand_indices[0]))
+            print(cand_beams)
             if self.analyse:
                 if self.difs is None:
                     self.difs={}
