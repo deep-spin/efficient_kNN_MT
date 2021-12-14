@@ -193,7 +193,7 @@ def _main(cfg: DictConfig, output_file):
 
         analyse=True
         if analyse:
-            hypos, tokens_difs, features_difs, difs_dataset, len_dataset = task.inference_step(
+            hypos, tokens_difs, features_difs, knn_probs_difs, network_probs_difs, difs_dataset, len_dataset = task.inference_step(
                 generator,
                 models,
                 sample,
@@ -209,7 +209,8 @@ def _main(cfg: DictConfig, output_file):
 
         print(len(tokens_difs))
         print(features_difs.shape)
-
+        print(knn_probs_difs.shape)
+        print(network_probs_difs.shape)
 
         num_generated_tokens = sum(len(h[0]["tokens"]) for h in hypos)
         gen_timer.stop(num_generated_tokens)
