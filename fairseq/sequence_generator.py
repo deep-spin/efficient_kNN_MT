@@ -439,14 +439,15 @@ class SequenceGenerator(nn.Module):
                 else:
                     x=self.difs.copy()
                     x_tokens=self.difs_tokens.copy()
+                    x_features=self.difs_features.copy()
                     self.difs={}
                     self.difs_tokens={}
                     self.difs_features={}
                     self.difs_knn_probs={}
                     self.difs_network_probs={}
                     for i in range(len(cand_indices[0])):
-                        print(self.difs_features)
-                        self.difs_features[i]=torch.cat([self.difs_features[cand_beams[0][i].item()],self.features[cand_beams[0][i]]],0) 
+                        print(x_features)
+                        self.difs_features[i]=torch.cat([x_features[cand_beams[0][i].item()],self.features[cand_beams[0][i]]],0) 
                         if cand_indices[0][i]==cand_indices_without_knn[0][i]:
                             self.difs[i]=0 + x[cand_beams[0][i].item()]
                             self.difs_tokens[i]= x_tokens[cand_beams[0][i].item()].copy()
