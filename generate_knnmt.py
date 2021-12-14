@@ -193,7 +193,7 @@ def _main(cfg: DictConfig, output_file):
 
         analyse=True
         if analyse:
-            hypos, tokens_difs, difs_dataset, len_dataset = task.inference_step(
+            hypos, tokens_difs, features_difs, difs_dataset, len_dataset = task.inference_step(
                 generator,
                 models,
                 sample,
@@ -208,6 +208,8 @@ def _main(cfg: DictConfig, output_file):
                 constraints=constraints,)
 
         print(len(tokens_difs))
+        print(features_difs.shape)
+
 
         num_generated_tokens = sum(len(h[0]["tokens"]) for h in hypos)
         gen_timer.stop(num_generated_tokens)
@@ -254,7 +256,6 @@ def _main(cfg: DictConfig, output_file):
 
             # Process top predictions
             for j, hypo in enumerate(hypos[i][: cfg.generation.nbest]):
-                print('-----',len(hypo['tokens']))
                 hypo_tokens, hypo_str, alignment = utils.post_process_prediction(
                     hypo_tokens=hypo["tokens"].int().cpu(),
                     src_str=src_str,

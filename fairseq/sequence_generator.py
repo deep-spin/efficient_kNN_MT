@@ -314,9 +314,9 @@ class SequenceGenerator(nn.Module):
 
         if self.analyse:
             self.difs=None
-            self.difs_tokens=None
             self.analyse_difs=[]
             self.analyse_difs_tokens=[]
+            self.analyse_difs_features=[]
             self.analyse_scores=[None for _ in range(beam_size)]
 
         for step in range(max_len + 1):  # one extra step for EOS marker
@@ -424,7 +424,11 @@ class SequenceGenerator(nn.Module):
                 if self.difs is None:
                     self.difs={}
                     self.difs_tokens={}
+                    self.difs_features={}
+                    self.difs_knn_probs={}
+                    self.difs_network_probs={}
                     for i in range(len(cand_indices[0])):
+                        self.difs_features[i]=features[i]
                         if cand_indices[0][i]==cand_indices_without_knn[0][i]:
                             self.difs[i]=0
                             self.difs_tokens[i]=[0]
@@ -436,7 +440,11 @@ class SequenceGenerator(nn.Module):
                     x_tokens=self.difs_tokens.copy()
                     self.difs={}
                     self.difs_tokens={}
+                    self.difs_features={}
+                    self.difs_knn_probs={}
+                    self.difs_network_probs={}
                     for i in range(len(cand_indices[0])):
+                        self.difs_features[i]=torch.cat([self.difs_features[cand_beams[0][i].item()]],0) 
                         if cand_indices[0][i]==cand_indices_without_knn[0][i]:
                             self.difs[i]=0 + x[cand_beams[0][i].item()]
                             self.difs_tokens[i]= x_tokens[cand_beams[0][i].item()].copy()
@@ -464,6 +472,7 @@ class SequenceGenerator(nn.Module):
                 for i in eos_bbsz_idx:
                     self.analyse_difs.append(self.difs[i.item()])
                     self.analyse_difs_tokens.append(self.difs_tokens[i.item()])
+                    self.analyse_difs_features.append(self.difs_features[i.item()])
 
             finalized_sents: List[int] = []
             if eos_bbsz_idx.numel() > 0:
@@ -593,7 +602,7 @@ class SequenceGenerator(nn.Module):
             _, sorted_scores_indices = torch.sort(scores, descending=True)
             finalized[sent] = [finalized[sent][ssi] for ssi in sorted_scores_indices]
             finalized[sent] = torch.jit.annotate(List[Dict[str, Tensor]], finalized[sent])
-        return finalized, self.tokens_difs, self.difs_dataset, self.len_dataset
+        return finalized, self.tokens_difs, self.features_difs, self.difs_dataset, self.len_dataset
 
     def _prefix_tokens(
         self, step: int, lprobs, scores, tokens, prefix_tokens, beam_size: int
@@ -732,16 +741,21 @@ class SequenceGenerator(nn.Module):
             
                 self.analyse_difs=self.analyse_difs[:beam_size]
                 self.analyse_difs_tokens=self.analyse_difs_tokens[:beam_size]
+                self.analyse_difs_features=self.analyse_difs_features[:beam_size]
 
                 index, value = max(enumerate(self.analyse_scores), key=operator.itemgetter(1))
 
                 self.tokens_difs=self.analyse_difs_tokens[index]
+                self.features_difs=self.analyse_difs_features[index]
+
                 self.difs_dataset+=self.analyse_difs[index]
                 self.len_dataset+=len(finalized[0][index]['tokens'])
+                
 
-                print(self.difs_dataset, self.len_dataset)
+                #print(self.difs_dataset, self.len_dataset)
             else:
                 self.tokens_difs=None
+                self.features_difs=None
 
         newly_finished: List[int] = []
 
