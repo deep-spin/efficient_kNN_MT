@@ -155,7 +155,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.knn_lambda_threshold = cfg.knn_lambda_threshold
         self.knn_lambda_use_conf_ent = cfg.knn_lambda_use_conf_ent
         self.knn_temperature_type = cfg.knn_temperature_type
-        self.analyse=True
+        self.analyse=False
 
         if self.knn_lambda_threshold>0:
             self.need_to_search=0

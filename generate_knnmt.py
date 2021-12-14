@@ -191,7 +191,7 @@ def _main(cfg: DictConfig, output_file):
 
         gen_timer.start()
 
-        analyse=True
+        analyse=False
         if analyse:
             hypos, tokens_difs, features_difs, knn_probs_difs, network_probs_difs, difs_dataset, len_dataset = task.inference_step(
                 generator,
