@@ -613,8 +613,7 @@ class SequenceGenerator(nn.Module):
             _, sorted_scores_indices = torch.sort(scores, descending=True)
             finalized[sent] = [finalized[sent][ssi] for ssi in sorted_scores_indices]
             finalized[sent] = torch.jit.annotate(List[Dict[str, Tensor]], finalized[sent])
-        return finalized, self.tokens_difs, self.features_difs, self.knn_probs_difs, self.network_probs_difs,
-                 self.difs_dataset, self.len_dataset
+        return finalized, self.tokens_difs, self.features_difs, self.knn_probs_difs, self.network_probs_difs, self.difs_dataset, self.len_dataset
 
     def _prefix_tokens(
         self, step: int, lprobs, scores, tokens, prefix_tokens, beam_size: int
