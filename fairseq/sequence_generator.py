@@ -429,7 +429,7 @@ class SequenceGenerator(nn.Module):
                     self.difs_knn_probs={}
                     self.difs_network_probs={}
                     for i in range(len(cand_indices[0])):
-                        self.difs_features[i]=features[cand_beams[0][i]]
+                        self.difs_features[i]=features[cand_beams[0][i]].unsqueeze(0)
                         if cand_indices[0][i]==cand_indices_without_knn[0][i]:
                             self.difs[i]=0
                             self.difs_tokens[i]=[0]
@@ -447,7 +447,7 @@ class SequenceGenerator(nn.Module):
                     self.difs_network_probs={}
                     for i in range(len(cand_indices[0])):
                         print(x_features)
-                        self.difs_features[i]=torch.cat([x_features[cand_beams[0][i].item()],features[cand_beams[0][i]]],0) 
+                        self.difs_features[i]=torch.cat([x_features[cand_beams[0][i].item()],features[cand_beams[0][i]].unsqueeze(0)],0) 
                         if cand_indices[0][i]==cand_indices_without_knn[0][i]:
                             self.difs[i]=0 + x[cand_beams[0][i].item()]
                             self.difs_tokens[i]= x_tokens[cand_beams[0][i].item()].copy()
