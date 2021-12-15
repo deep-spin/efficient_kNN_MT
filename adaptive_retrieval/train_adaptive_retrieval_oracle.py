@@ -24,12 +24,12 @@ class FeatureDataset(data.Dataset):
         conf = data['conf']
         ent = data['ent']
 
-        self.features = torch.cat(features, 0)
+        self.features = torch.cat(features, 0).unsqueeze(-1)
         self.targets = torch.LongTensor([item for sublist in targets for item in sublist])
-        self.knn_probs = torch.cat(knn_probs, 0)
-        self.network_probs = torch.cat(network_probs, 0)
-       	self.conf = torch.cat(conf, 0)
-       	self.ent = torch.cat(ent, 0)
+        self.knn_probs = torch.cat(knn_probs, 0).unsqueeze(-1)
+        self.network_probs = torch.cat(network_probs, 0).unsqueeze(-1)
+       	self.conf = torch.cat(conf, 0).unsqueeze(-1)
+       	self.ent = torch.cat(ent, 0).unsqueeze(-1)
 
         print('features', self.features.shape)
         print('targets', self.targets.shape)
