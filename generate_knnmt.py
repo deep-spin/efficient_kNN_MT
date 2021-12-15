@@ -335,7 +335,6 @@ def _main(cfg: DictConfig, output_file):
         progress.log({"wps": round(wps_meter.avg)})
         num_sentences += (sample["nsentences"] if "nsentences" in sample else sample["id"].numel())
 
-        break
     logger.info("NOTE: hypothesis and token scores are output in base 2")
     logger.info("Translated {:,} sentences ({:,} tokens) in {:.1f}s ({:.2f} sentences/s, {:.2f} tokens/s)".format(
             num_sentences,
@@ -361,10 +360,6 @@ def _main(cfg: DictConfig, output_file):
             ),
             file=output_file,
         )
-
-    print('------------------------------------------------',cfg)
-    print(cfg.keys())
-    print(cfg.common_eval)
 
     if analyse:
         feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_probs_save, 'network_probs': network_probs_save, 'conf': conf, 'ent': ent}
