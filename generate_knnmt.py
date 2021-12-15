@@ -217,11 +217,6 @@ def _main(cfg: DictConfig, output_file):
                 prefix_tokens=prefix_tokens,
                 constraints=constraints,)
 
-        #print(len(tokens_difs))
-        #print(features_difs.shape)
-        #print(knn_probs_difs)
-        #print(network_probs_difs)
-
         num_generated_tokens = sum(len(h[0]["tokens"]) for h in hypos)
         gen_timer.stop(num_generated_tokens)
 
@@ -329,8 +324,6 @@ def _main(cfg: DictConfig, output_file):
                 else:
                     knn_probs=torch.cat([knn_probs,knn_probs_difs[v][hypo['tokens'][v]].unsqueeze(0)],0)
                     network_probs=torch.cat([network_probs,network_probs_difs[v][hypo['tokens'][v]].unsqueeze(0)],0)
-
-            print('tokens',hypo['tokens'])
             
             targets_save.append(targets_difs)
             features_save.append(features_difs.cpu().data)
