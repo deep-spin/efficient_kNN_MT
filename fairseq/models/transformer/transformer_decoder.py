@@ -315,6 +315,8 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 self.need_to_search += scores.size(0) - indices.size(0)
                 self.total_possible_searches+=scores.size(0)
 
+                print(self.need_to_search, self.total_possible_searches)
+
                 knn_search_result = self.knn_datastore.retrieve(last_hidden)
 
                 knn_dists = knn_search_result['distance']  # [batch, seq len, k]  # we need do sort
