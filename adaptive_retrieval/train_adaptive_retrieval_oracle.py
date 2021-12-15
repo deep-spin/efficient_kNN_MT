@@ -17,13 +17,35 @@ from mlp_oracle import MLPOracle
 
 class FeatureDataset(data.Dataset):
     def __init__(self, data):
-        self.features = data['features']
-        self.targets = data['targets']
-        self.knn_probs = data['knn_probs']
-        self.network_probs = data['network_probs']
-        self.conf = data['conf']
-        self.ent = data['ent']
+        features = data['features']
+        targets = data['targets']
+        knn_probs = data['knn_probs']
+        network_probs = data['network_probs']
+        conf = data['conf']
+        ent = data['ent']
 
+        for i in range(len(features)):
+        	if i==0:
+        		self.features = features[i]
+        		self.targets = torch.LongTensortargets[i]
+        		self.knn_probs = knn_probs[i]
+        		self.network_probs = network_probs[i]
+        		self.conf = conf[i]
+        		self.ent = ent[i]
+        	else:
+        		self.features = torch.cat([self.features, features[i]],0)
+        		self.targets = torch.cat([self.targets, torch.LongTensor(targets[i])],0)
+        		self.knn_probs = torch.cat([self.knn_probs, knn_probs[i]],0)
+        		self.network_probs = torch.cat([self.network_probs, network_probs[i]],0)
+        		self.conf = torch.cat([self.conf, conf[i]],0)
+        		self.ent = torch.cat([self.ent, ent[i]],0)
+
+        print('features', self.features.shape)
+        print('targets', self.targets.shape)
+        print('knn_probs', self.knn_probs.shape)
+        print('network_probs', self.network_probs.shape)
+        print('conf', self.conf.shape)
+        print('ent', self.ent.shape)
 
     def __len__(self):
         return len(self.features)
@@ -34,9 +56,9 @@ class FeatureDataset(data.Dataset):
         print('knn_probs', self.knn_probs[idx].cuda().shape)
         print('network_probs', self.network_probs[idx].cuda().shape)
         print('conf', self.conf[idx].cuda().shape)
-        print('ent', self.ent[idx].cuda())
+        print('ent', self.ent[idx].cuda().shape)
 
-        return self.features[idx].cuda(), torch.LongTensor(self.targets[idx]).cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda()
+        return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda()
 
 
 def validate(val_dataloader, model, args):
