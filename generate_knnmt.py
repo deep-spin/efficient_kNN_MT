@@ -179,7 +179,7 @@ def _main(cfg: DictConfig, output_file):
     analyse=True    
     if analyse:
         save_step=0
-        tokens_save=[]
+        targets_save=[]
         features_save=[]
         knn_probs_save=[]
         network_probs_save=[]
@@ -324,11 +324,11 @@ def _main(cfg: DictConfig, output_file):
 
             for v in range(len(knn_probs_difs)):
                 if v==0:
-                    knn_probs=knn_probs_difs[v][[v]].unsqueeze(0)
-                    network_probs=network_probs_difs[v][[v]].unsqueeze(0)
+                    knn_probs=knn_probs_difs[v][hypo['tokens'][v]].unsqueeze(0)
+                    network_probs=network_probs_difs[v][hypo['tokens'][v]].unsqueeze(0)
                 else:
-                    knn_probs=torch.cat([knn_probs,knn_probs_difs[v][[v]].unsqueeze(0)],0)
-                    network_probs=torch.cat([network_probs,network_probs_difs[v][[v]].unsqueeze(0)],0)
+                    knn_probs=torch.cat([knn_probs,knn_probs_difs[v][hypo['tokens'][v]].unsqueeze(0)],0)
+                    network_probs=torch.cat([network_probs,network_probs_difs[v][hypo['tokens'][v]].unsqueeze(0)],0)
 
             print('tokens',hypo['tokens'])
             
