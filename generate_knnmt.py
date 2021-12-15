@@ -227,6 +227,7 @@ def _main(cfg: DictConfig, output_file):
 
             print(knn_probs_difs)
             print(network_probs_difs)
+            print(tokens_difs)
 
         else:
             hypos = task.inference_step(
