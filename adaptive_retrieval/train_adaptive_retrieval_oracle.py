@@ -27,7 +27,7 @@ class FeatureDataset(data.Dataset):
         for i in range(len(features)):
         	if i==0:
         		self.features = features[i]
-        		self.targets = torch.LongTensortargets[i]
+        		self.targets = torch.LongTensor(targets[i])
         		self.knn_probs = knn_probs[i]
         		self.network_probs = network_probs[i]
         		self.conf = conf[i]
