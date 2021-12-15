@@ -337,7 +337,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     knn_index = 0
                     tgt_index = 0
                     
-                    knn_prob=torch.zeros(scores.size(0), 1, 42024).cuda()
+                    knn_probs=torch.zeros(scores.size(0), 1, 42024).cuda()
 
                 return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
 
