@@ -226,7 +226,7 @@ def _main(cfg: DictConfig, output_file):
             ent.append(torch.distributions.Categorical(network_probs_difs).entropy().cpu().data)
 
             print('tokens', tokens_save)
-            print('knn_probs', knn_prob_save)
+            print('knn_probs', knn_probs_save)
             print('ent', ent)
 
         else:
