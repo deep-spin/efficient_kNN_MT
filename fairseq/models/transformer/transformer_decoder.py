@@ -307,6 +307,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
             if self.knn_search_prediction:
                 scores = self.oracle_mlp.forward(last_hidden)
+                print(scores)
                 indices = (scores < 0.5).nonzero()[:,0]
                 mask = torch.ones(last_hidden.size(0), dtype=torch.bool)
                 mask[indices] = False
