@@ -21,7 +21,7 @@ from fairseq.modules import (
     PositionalEmbedding,
     SinusoidalPositionalEmbedding,
 )
-from adaptive_retrieval import lambda_mlp, oracle_mlp
+from adaptive_retrieval import lambda_mlp, mlp_oracle
 from fairseq.modules import transformer_layer
 from fairseq.modules.checkpoint_activations import checkpoint_wrapper
 from fairseq.modules.quant_noise import quant_noise as apply_quant_noise_
@@ -184,9 +184,9 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             ckpt = torch.load(ckpt_path)            
 
             if cfg.knn_use_conf_ent:
-                self.oracle_mlp = oracle_mlp.MLPOracle(use_conf_ent=True)
+                self.oracle_mlp = mlp_oracle.MLPOracle(use_conf_ent=True)
             else:
-                self.oracle_mlp = oracle_mlp.MLPOracle()
+                self.oracle_mlp = mlp_oracle.MLPOracle()
 
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
