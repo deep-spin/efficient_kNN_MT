@@ -28,7 +28,7 @@ import mkl
 mkl.get_max_threads()
 
 def main(cfg: DictConfig):
-
+    print(cfg)
     if isinstance(cfg, Namespace):
         cfg = convert_namespace_to_omegaconf(cfg)
 
