@@ -39,7 +39,7 @@ class MLPOracle(nn.Module):
 
         models.append(nn.Linear(hidden_units, 1))
 
-        models.append(nn.Sigmoid(dim=-1))
+        models.append(nn.Sigmoid())
 
         self.model = nn.Sequential(*models)
 
