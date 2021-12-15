@@ -153,11 +153,13 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.use_knn_datastore = cfg.use_knn_datastore
         self.knn_lambda_type = cfg.knn_lambda_type
         self.knn_lambda_threshold = cfg.knn_lambda_threshold
-        self.knn_lambda_use_conf_ent = cfg.knn_lambda_use_conf_ent
+        self.knn_use_conf_ent = cfg.knn_use_conf_ent
         self.knn_temperature_type = cfg.knn_temperature_type
+        self.knn_search_prediction = cfg.knn_search_prediction
+        self.knn_oracle_mlp_path = cfg.knn_oracle_mlp_path
         self.analyse=False
 
-        if self.knn_lambda_threshold>0:
+        if self.knn_lambda_threshold>0 or self.knn_search_prediction:
             self.need_to_search=0
             self.total_possible_searches=0
 
@@ -170,12 +172,21 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             #    new_key = 'decoder.lambda_mlp.' + key
             #    new_state_dict[new_key] = value
             
-            if cfg.knn_lambda_use_conf_ent:
+            if cfg.knn_use_conf_ent:
                 self.lambda_mlp = lambda_mlp.LambdaMLP(use_conf_ent=True)
             else:
                 self.lambda_mlp = lambda_mlp.LambdaMLP()
 
             self.lambda_mlp.load_state_dict(ckpt)
+
+        if self.knn_search_prediction:
+            ckpt_path = os.path.join(cfg.knn_oracle_mlp_path)
+            ckpt = torch.load(ckpt_path)            
+
+            if cfg.knn_use_conf_ent:
+                self.oracle_mlp = oracle_mlp.MLPOracle(use_conf_ent=True)
+            else:
+                self.oracle_mlp = oracle_mlp.MLPOracle()
 
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
@@ -290,13 +301,38 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                     self.need_to_search += knn_lambda.size(0) - indices.size(0)
                     self.total_possible_searches+=knn_lambda.size(0)
-
-                    print(self.need_to_search, self.total_possible_searches)
                 
             else:
                 knn_lambda = self.knn_datastore.get_lambda()
 
-            if self.knn_lambda_threshold == 0 or knn_lambda.size(0) - indices.size(0) > 0:
+            if self.knn_search_prediction:
+                score = self.oracle_mlp.forward(last_hidden)
+                indices = (score < 0.5).nonzero()[:,0]
+                mask = torch.ones(last_hidden.size(0), dtype=torch.bool)
+                mask[indices] = False
+                last_hidden=last_hidden[mask]
+
+                self.need_to_search += scores.size(0) - indices.size(0)
+                self.total_possible_searches+=scores.size(0)
+
+                knn_search_result = self.knn_datastore.retrieve(last_hidden)
+
+                knn_dists = knn_search_result['distance']  # [batch, seq len, k]  # we need do sort
+                knn_index = knn_search_result['knn_index']
+                tgt_index = knn_search_result['tgt_index']
+
+                knn_temperature = self.knn_datastore.get_temperature()
+
+                decode_result = self.knn_datastore.calculate_knn_prob(knn_index, tgt_index, knn_dists, last_hidden, knn_temperature)
+                knn_prob = decode_result['prob']
+
+                knn_probs=torch.zeros(scores.size(0), knn_prob.size(1), knn_prob.size(2)).cuda()
+                knn_probs[mask]=knn_prob
+
+                return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
+
+
+            elif self.knn_lambda_threshold == 0 or knn_lambda.size(0) - indices.size(0) > 0:
                 knn_search_result = self.knn_datastore.retrieve(last_hidden)
 
                 knn_dists = knn_search_result['distance']  # [batch, seq len, k]  # we need do sort
