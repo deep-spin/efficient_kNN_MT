@@ -31,24 +31,10 @@ class FeatureDataset(data.Dataset):
        	self.conf = torch.cat(conf, 0).unsqueeze(-1)
        	self.ent = torch.cat(ent, 0).unsqueeze(-1)
 
-        print('features', self.features.shape)
-        print('targets', self.targets.shape)
-        print('knn_probs', self.knn_probs.shape)
-        print('network_probs', self.network_probs.shape)
-        print('conf', self.conf.shape)
-        print('ent', self.ent.shape)
-
     def __len__(self):
         return len(self.features)
 
     def __getitem__(self, idx):
-        print('features', self.features[idx].cuda().shape)
-        print('targets', torch.LongTensor(self.targets[idx]).cuda().shape)
-        print('knn_probs', self.knn_probs[idx].cuda().shape)
-        print('network_probs', self.network_probs[idx].cuda().shape)
-        print('conf', self.conf[idx].cuda().shape)
-        print('ent', self.ent[idx].cuda().shape)
-
         return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda()
 
 

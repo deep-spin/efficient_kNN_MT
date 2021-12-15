@@ -55,7 +55,7 @@ class MLPOracle(nn.Module):
             self.loss_ = nn.BCELoss()
 
 
-    def forward(self, features, conf=None, ent=None):
+    def forward(self, features, targets=None, conf=None, ent=None):
         if self.use_conf_ent:
             features_cat = [features]
             features_cat.append(self.input_layer['conf'](conf.unsqueeze(-1)))
