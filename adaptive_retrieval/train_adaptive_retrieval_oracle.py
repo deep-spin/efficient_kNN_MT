@@ -24,21 +24,23 @@ class FeatureDataset(data.Dataset):
         conf = data['conf']
         ent = data['ent']
 
-        for i in range(len(features)):
-        	if i==0:
-        		self.features = features[i]
-        		self.targets = torch.LongTensor(targets[i])
-        		self.knn_probs = knn_probs[i]
-        		self.network_probs = network_probs[i]
-        		self.conf = conf[i]
-        		self.ent = ent[i]
-        	else:
-        		self.features = torch.cat([self.features, features[i]],0)
-        		self.targets = torch.cat([self.targets, torch.LongTensor(targets[i])],0)
-        		self.knn_probs = torch.cat([self.knn_probs, knn_probs[i]],0)
-        		self.network_probs = torch.cat([self.network_probs, network_probs[i]],0)
-        		self.conf = torch.cat([self.conf, conf[i]],0)
-        		self.ent = torch.cat([self.ent, ent[i]],0)
+        print(torch.cat(features,0).shape)
+
+        #for i in range(len(features)):
+        #	if i==0:
+        #		self.features = features[i]
+        #		self.targets = torch.LongTensor(targets[i])
+        #		self.knn_probs = knn_probs[i]
+        #		self.network_probs = network_probs[i]
+        #		self.conf = conf[i]
+        #		self.ent = ent[i]
+        #	else:
+        #		self.features = torch.cat([self.features, features[i]],0)
+        #		self.targets = torch.cat([self.targets, torch.LongTensor(targets[i])],0)
+        #		self.knn_probs = torch.cat([self.knn_probs, knn_probs[i]],0)
+        #		self.network_probs = torch.cat([self.network_probs, network_probs[i]],0)
+        #		self.conf = torch.cat([self.conf, conf[i]],0)
+        #		self.ent = torch.cat([self.ent, ent[i]],0)
 
         print('features', self.features.shape)
         print('targets', self.targets.shape)
