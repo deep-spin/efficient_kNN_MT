@@ -367,7 +367,7 @@ def _main(cfg: DictConfig, output_file):
 
     if analyse:
         feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_probs_save, 'network_probs': network_probs_save, 'conf': conf, 'ent': ent}
-        torch.save(feats, cfg.adaptive_retrieval_features_path)
+        torch.save(feats, cfg.model_overrides.adaptive_retrieval_features_path)
 
     return scorer
 
