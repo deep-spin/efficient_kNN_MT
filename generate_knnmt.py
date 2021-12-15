@@ -202,32 +202,12 @@ def _main(cfg: DictConfig, output_file):
         gen_timer.start()
 
         if analyse:
-            hypos, tokens_difs, features_difs, knn_probs_difs, network_probs_difs, difs_dataset, len_dataset = task.inference_step(
+            hypos, targets_difs, features_difs, knn_probs_difs, network_probs_difs, difs_dataset, len_dataset = task.inference_step(
                 generator,
                 models,
                 sample,
                 prefix_tokens=prefix_tokens,
                 constraints=constraints,)
-
-            for v in range(len(knn_probs_difs)):
-                if v==0:
-                    knn_probs=knn_probs_difs[v][tokens_difs[v]].unsqueeze(0)
-                    network_probs=network_probs_difs[v][tokens_difs[v]].unsqueeze(0)
-                else:
-                    knn_probs=torch.cat([knn_probs,knn_probs_difs[v][tokens_difs[v]].unsqueeze(0)],0)
-                    network_probs=torch.cat([network_probs,network_probs_difs[v][tokens_difs[v]].unsqueeze(0)],0)
-
-            
-            tokens_save.append(tokens_difs)
-            features_save.append(features_difs.cpu().data)
-            knn_probs_save.append(knn_probs.cpu().data)
-            network_probs_save.append(network_probs.cpu().data)
-            conf.append(torch.max(network_probs_difs, -1).values.cpu().data)
-            ent.append(torch.distributions.Categorical(network_probs_difs).entropy().cpu().data)
-
-            print(knn_probs_difs)
-            print(network_probs_difs)
-            print(tokens_difs)
 
         else:
             hypos = task.inference_step(
@@ -340,6 +320,29 @@ def _main(cfg: DictConfig, output_file):
                     else:
                         scorer.add(target_tokens, hypo_tokens)
 
+        if analyse:
+
+            for v in range(len(knn_probs_difs)):
+                if v==0:
+                    knn_probs=knn_probs_difs[v][[v]].unsqueeze(0)
+                    network_probs=network_probs_difs[v][[v]].unsqueeze(0)
+                else:
+                    knn_probs=torch.cat([knn_probs,knn_probs_difs[v][[v]].unsqueeze(0)],0)
+                    network_probs=torch.cat([network_probs,network_probs_difs[v][[v]].unsqueeze(0)],0)
+
+            print('tokens',hypo['tokens'])
+            
+            targets_save.append(targets_difs)
+            features_save.append(features_difs.cpu().data)
+            knn_probs_save.append(knn_probs.cpu().data)
+            network_probs_save.append(network_probs.cpu().data)
+            conf.append(torch.max(network_probs_difs, -1).values.cpu().data)
+            ent.append(torch.distributions.Categorical(network_probs_difs).entropy().cpu().data)
+
+            print(knn_probs_difs)
+            print(network_probs_difs)
+            print(tokens_difs)
+
         wps_meter.update(num_generated_tokens)
         progress.log({"wps": round(wps_meter.avg)})
         num_sentences += (sample["nsentences"] if "nsentences" in sample else sample["id"].numel())
@@ -371,7 +374,7 @@ def _main(cfg: DictConfig, output_file):
         )
 
     if analyse:
-        feats = {'features': features_save, 'tokens': tokens_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save, 'conf': conf, 'ent': ent}
+        feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save, 'conf': conf, 'ent': ent}
         torch.save(feats, cfg.datastore.adaptive_retrieval_features_path)
 
     return scorer
