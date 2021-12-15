@@ -175,7 +175,17 @@ def _main(cfg: DictConfig, output_file):
     num_sentences = 0
     has_target = True
     wps_meter = TimeMeter()
-    #f_medical=open('knn_mt_medical_test','w')
+
+    analyse=False    
+    if analyse:
+        save_step=0
+        tokens_save=[]
+        features_save=[]
+        knn_probs_save=[]
+        network_probs_save=[]
+        conf=[]
+        ent=[]
+
     for sample in progress:
         sample = utils.move_to_cuda(sample) if use_cuda else sample
         if "net_input" not in sample:
@@ -191,7 +201,6 @@ def _main(cfg: DictConfig, output_file):
 
         gen_timer.start()
 
-        analyse=False
         if analyse:
             hypos, tokens_difs, features_difs, knn_probs_difs, network_probs_difs, difs_dataset, len_dataset = task.inference_step(
                 generator,
@@ -199,6 +208,27 @@ def _main(cfg: DictConfig, output_file):
                 sample,
                 prefix_tokens=prefix_tokens,
                 constraints=constraints,)
+
+            for v in range(len(knn_probs_difs)):
+                if v==0:
+                    knn_probs=knn_probs[v][tokens_difs[v]].unsqueeze(0)
+                    network_probs=network_probs[v][tokens_difs[v]].unsqueeze(0)
+                else:
+                    knn_probs=torch.cat([knn_probs,knn_probs[v][tokens_difs[v]].unsqueeze(0)],0)
+                    network_probs=torch.cat([network_probs,network_probs[v][tokens_difs[v]].unsqueeze(0)],0)
+
+            
+            tokens_save.append(tokens_difs.cpu().data)
+            features_save.append(features_difs.cpu().data)
+            knn_probs_save.append(knn_probs.cpu().data)
+            network_probs_save.append(network_probs.cpu().data)
+            conf.append(torch.max(network_probs_difs, -1).values.cpu().data)
+            ent.append(torch.distributions.Categorical(network_probs_difs).entropy().cpu().data)
+
+            print('tokens', tokens_save)
+            print('knn_probs', knn_prob_save)
+            print('ent', ent)
+
         else:
             hypos = task.inference_step(
                 generator,
@@ -339,6 +369,10 @@ def _main(cfg: DictConfig, output_file):
             ),
             file=output_file,
         )
+
+    if analyse:
+        feats = {'features': features_save, 'tokens': tokens_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save, 'conf': conf, 'ent': ent}
+        torch.save(feats, cfg.datastore.adaptive_retrieval_features_path)
 
     return scorer
 
