@@ -25,7 +25,7 @@ class FeatureDataset(data.Dataset):
         ent = data['ent']
 
         self.features = torch.cat(features, 0)
-        self.targets = torch.LongTensor([item for sublist in targets for item in sublist]).unsqueeze(-1)
+        self.targets = torch.FloatTensor([item for sublist in targets for item in sublist]).unsqueeze(-1)
         self.knn_probs = torch.cat(knn_probs, 0).unsqueeze(-1)
         self.network_probs = torch.cat(network_probs, 0).unsqueeze(-1)
        	self.conf = torch.cat(conf, 0).unsqueeze(-1)
