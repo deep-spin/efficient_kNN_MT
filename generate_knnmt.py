@@ -339,9 +339,9 @@ def _main(cfg: DictConfig, output_file):
             conf.append(torch.max(network_probs_difs, -1).values.cpu().data)
             ent.append(torch.distributions.Categorical(network_probs_difs).entropy().cpu().data)
 
-            print(knn_probs_difs)
-            print(network_probs_difs)
-            print(tokens_difs)
+            print('targets', targets_save)
+            print('knn_probs', knn_probs_save)
+            print('network_probs', network_probs_save)
 
         wps_meter.update(num_generated_tokens)
         progress.log({"wps": round(wps_meter.avg)})
