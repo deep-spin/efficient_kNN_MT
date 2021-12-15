@@ -28,7 +28,6 @@ import mkl
 mkl.get_max_threads()
 
 def main(cfg: DictConfig):
-    print('------------------------------------------------',cfg)
     if isinstance(cfg, Namespace):
         cfg = convert_namespace_to_omegaconf(cfg)
 
@@ -37,6 +36,8 @@ def main(cfg: DictConfig):
             ), "--sampling requires --nbest to be equal to --beam"
     assert (cfg.generation.replace_unk is None or cfg.dataset.dataset_impl == "raw"
             ), "--replace-unk requires a raw text dataset (--dataset-impl=raw)"
+
+    print('------------------------------------------------',cfg)
 
     if cfg.common_eval.results_path is not None:
         os.makedirs(cfg.common_eval.results_path, exist_ok=True)
@@ -366,7 +367,7 @@ def _main(cfg: DictConfig, output_file):
 
     if analyse:
         feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_probs_save, 'network_probs': network_probs_save, 'conf': conf, 'ent': ent}
-        torch.save(feats, cfg.datastore.adaptive_retrieval_features_path)
+        torch.save(feats, cfg.adaptive_retrieval_features_path)
 
     return scorer
 
