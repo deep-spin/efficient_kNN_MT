@@ -211,11 +211,11 @@ def _main(cfg: DictConfig, output_file):
 
             for v in range(len(knn_probs_difs)):
                 if v==0:
-                    knn_probs=knn_probs[v][tokens_difs[v]].unsqueeze(0)
-                    network_probs=network_probs[v][tokens_difs[v]].unsqueeze(0)
+                    knn_probs=knn_probs_difs[v][tokens_difs[v]].unsqueeze(0)
+                    network_probs=network_probs_difs[v][tokens_difs[v]].unsqueeze(0)
                 else:
-                    knn_probs=torch.cat([knn_probs,knn_probs[v][tokens_difs[v]].unsqueeze(0)],0)
-                    network_probs=torch.cat([network_probs,network_probs[v][tokens_difs[v]].unsqueeze(0)],0)
+                    knn_probs=torch.cat([knn_probs,knn_probs_difs[v][tokens_difs[v]].unsqueeze(0)],0)
+                    network_probs=torch.cat([network_probs,network_probs_difs[v][tokens_difs[v]].unsqueeze(0)],0)
 
             
             tokens_save.append(tokens_difs.cpu().data)
