@@ -225,8 +225,8 @@ def _main(cfg: DictConfig, output_file):
             conf.append(torch.max(network_probs_difs, -1).values.cpu().data)
             ent.append(torch.distributions.Categorical(network_probs_difs).entropy().cpu().data)
 
-            print(knn_probs)
-            print(network_probs)
+            print(knn_probs_difs)
+            print(network_probs_difs)
 
         else:
             hypos = task.inference_step(
