@@ -218,7 +218,7 @@ def _main(cfg: DictConfig, output_file):
                     network_probs=torch.cat([network_probs,network_probs_difs[v][tokens_difs[v]].unsqueeze(0)],0)
 
             
-            tokens_save.append(tokens_difs.cpu().data)
+            tokens_save.append(tokens_difs)
             features_save.append(features_difs.cpu().data)
             knn_probs_save.append(knn_probs.cpu().data)
             network_probs_save.append(network_probs.cpu().data)
