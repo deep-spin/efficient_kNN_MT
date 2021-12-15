@@ -29,7 +29,14 @@ class FeatureDataset(data.Dataset):
         return len(self.features)
 
     def __getitem__(self, idx):
-        return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda()
+    	print('features', self.features[idx].cuda().shape)
+    	print('targets', torch.LongTensor(self.targets[idx]).cuda().shape)
+    	print('knn_probs', self.knn_probs[idx].cuda().shape)
+    	print('network_probs', self.network_probs[idx].cuda().shape)
+    	print('conf', self.conf[idx].cuda().shape)
+    	print('ent', self.ent[idx].cuda())
+
+        return self.features[idx].cuda(), torch.LongTensor(self.targets[idx]).cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda()
 
 
 def validate(val_dataloader, model, args):
