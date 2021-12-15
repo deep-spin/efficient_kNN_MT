@@ -37,8 +37,6 @@ def main(cfg: DictConfig):
     assert (cfg.generation.replace_unk is None or cfg.dataset.dataset_impl == "raw"
             ), "--replace-unk requires a raw text dataset (--dataset-impl=raw)"
 
-    print('------------------------------------------------',cfg)
-
     if cfg.common_eval.results_path is not None:
         os.makedirs(cfg.common_eval.results_path, exist_ok=True)
         output_path = os.path.join(cfg.common_eval.results_path,
@@ -364,6 +362,8 @@ def _main(cfg: DictConfig, output_file):
             file=output_file,
         )
 
+    print('------------------------------------------------',cfg)
+    print(cfg.keys())
 
     if analyse:
         feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_probs_save, 'network_probs': network_probs_save, 'conf': conf, 'ent': ent}
