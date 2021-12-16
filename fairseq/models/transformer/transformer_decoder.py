@@ -311,11 +311,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             if self.knn_search_prediction:
                 self.oracle_mlp.eval()
 
-                for n,p in self.oracle_mlp.named_parameters():
-                    print(n,p)
-
                 scores = self.oracle_mlp.forward(last_hidden).squeeze(-1)
-                print(scores)
                 indices = (scores < 0.5).nonzero()[:,0]
                 mask = torch.ones(last_hidden.size(0), dtype=torch.bool)
                 mask[indices] = False
@@ -326,7 +322,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                 print(self.need_to_search, self.total_possible_searches)
 
-                if self.need_to_search>0:
+                if scores.size(0) - indices.size(0) > 0:
 
                     knn_search_result = self.knn_datastore.retrieve(last_hidden)
 
