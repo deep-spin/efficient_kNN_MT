@@ -188,6 +188,8 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             else:
                 self.oracle_mlp = mlp_oracle.MLPOracle()
 
+            self.oracle_mlp.load_state_dict(ckpt)
+
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
         if cfg.adaptive_softmax_cutoff is not None:
