@@ -159,7 +159,7 @@ for epoch in tqdm(range(args.n_epochs)):
         loss.backward()
         optimizer.step()
 
-        bsz = features.size(0)
+        bsz = len(targets)
         running_loss += loss.item() * bsz
         nsamples += bsz
 
