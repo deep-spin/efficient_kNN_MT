@@ -42,6 +42,7 @@ def validate(val_dataloader, model, args):
     model.eval()
     running_loss = 0.
     nsamples = 0
+    rights = 0
     for i, sample in enumerate(val_dataloader):
         features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
 
@@ -58,10 +59,15 @@ def validate(val_dataloader, model, args):
 
         running_loss += ent_loss.item() * bsz
         nsamples += bsz
+        
+        for t in range(len(targets)):
+        	if targets[t]==1 and scores[t]>0.5 or targets[t]==0 and scores[t]<=0.5:
+        		rights+=1
 
     val_loss = running_loss / nsamples
+    acc = rights / nsamples
 
-    print(f"\n val loss: {val_loss:.3f}")
+    print(f"\n val loss: {val_loss:.3f}, val acc: {acc:.3f}")
 
     return val_loss
 
@@ -136,6 +142,7 @@ best_loss = 1e5
 for epoch in tqdm(range(args.n_epochs)):
     running_loss = 0.
     nsamples = 0
+    rights = 0
 
     for i, sample in enumerate(tqdm(train_dataloader)):
         features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
@@ -156,8 +163,13 @@ for epoch in tqdm(range(args.n_epochs)):
         running_loss += loss.item() * bsz
         nsamples += bsz
 
+        for t in range(len(targets)):
+        	if targets[t]==1 and scores[t]>0.5 or targets[t]==0 and scores[t]<=0.5:
+        		rights+=1
+
+    acc = rights / nsamples
     report_loss = running_loss / nsamples
-    print(f'\n epoch: {epoch}, step: {i},  training loss: {report_loss:.3f}')
+    print(f'\n epoch: {epoch}, step: {i},  training loss: {report_loss:.3f}, training acc: {acc:.3f}')
 
     val_loss = validate(val_dataloader, model, args)
 
