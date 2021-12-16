@@ -363,7 +363,7 @@ def _main(cfg: DictConfig, output_file):
 
     if analyse:
         feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_probs_save, 'network_probs': network_probs_save, 'conf': conf, 'ent': ent}
-        torch.save(feats,'/media/hdd1/pam/mt/data/joint_multi_domain/koran/adaptive_retrieval/using_train_set/oracle_features_val')
+        torch.save(feats,'/media/hdd1/pam/mt/data/joint_multi_domain/law/adaptive_retrieval/using_train_set/oracle_features')
 
     return scorer
 
