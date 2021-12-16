@@ -284,7 +284,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         if self.use_knn_datastore:
             if self.knn_lambda_type == 'trainable':
                 self.lambda_mlp.eval()
-                if self.knn_lambda_use_conf_ent:
+                if self.knn_use_conf_ent:
                     network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
                     conf=torch.max(network_probs, -1).values
                     ent=torch.distributions.Categorical(network_probs).entropy()
@@ -310,8 +310,13 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
             if self.knn_search_prediction:
                 self.oracle_mlp.eval()
-
-                scores = self.oracle_mlp.forward(last_hidden).squeeze(-1)
+                if self.knn_use_conf_ent:
+                    network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
+                    conf=torch.max(network_probs, -1).values.unsqueeze(-1)
+                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
+                    scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent).squeeze(-1)
+                else:
+                    scores = self.oracle_mlp.forward(last_hidden).squeeze(-1)
                 indices = (scores < 0.5).nonzero()[:,0]
                 mask = torch.ones(last_hidden.size(0), dtype=torch.bool)
                 mask[indices] = False
