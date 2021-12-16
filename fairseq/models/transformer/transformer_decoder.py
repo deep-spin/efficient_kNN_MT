@@ -308,6 +308,10 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
             if self.knn_search_prediction:
                 self.oracle_mlp.eval()
+
+                for n,p in self.oracle_mlp.named_parameters():
+                    print(n,p)
+
                 scores = self.oracle_mlp.forward(last_hidden).squeeze(-1)
                 print(scores)
                 indices = (scores < 0.5).nonzero()[:,0]
