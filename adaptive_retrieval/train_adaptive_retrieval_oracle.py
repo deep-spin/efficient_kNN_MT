@@ -57,8 +57,8 @@ def validate(val_dataloader, model, args):
         #if args.l1 > 0:
         #    loss = loss + args.l1 * torch.abs(log_weight.exp()[:,1]).sum() / log_weight.size(0)
 
-        running_loss += ent_loss.item() * bsz
-        nsamples += bsz
+        running_loss += ent_loss.item() * len(targets)
+        nsamples += len(targets)
         
         for t in range(len(targets)):
         	if targets[t]==1 and scores[t]>0.5 or targets[t]==0 and scores[t]<=0.5:
