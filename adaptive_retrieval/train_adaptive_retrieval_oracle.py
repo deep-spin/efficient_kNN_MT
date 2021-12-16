@@ -50,6 +50,7 @@ def validate(val_dataloader, model, args):
         else:
         	scores, loss = model(features, targets, conf=conf, ent=ent)
 
+        print(features.shape)
         print(scores)
         
         # (B,)
