@@ -312,7 +312,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 self.oracle_mlp.eval()
 
                 scores = self.oracle_mlp.forward(last_hidden).squeeze(-1)
-                indices = (scores < 0.3).nonzero()[:,0]
+                indices = (scores < 0.4).nonzero()[:,0]
                 mask = torch.ones(last_hidden.size(0), dtype=torch.bool)
                 mask[indices] = False
                 last_hidden=last_hidden[mask]
