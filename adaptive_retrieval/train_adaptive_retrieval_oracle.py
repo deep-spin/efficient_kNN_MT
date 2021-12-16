@@ -52,7 +52,6 @@ def validate(val_dataloader, model, args):
 
         for n,p in model.named_parameters():
         	print(n,p)
-        break
         
         # (B,)
         ent_loss = loss
