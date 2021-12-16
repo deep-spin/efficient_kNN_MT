@@ -49,6 +49,8 @@ def validate(val_dataloader, model, args):
         	scores, loss = model(features, targets)
         else:
         	scores, loss = model(features, targets, conf=conf, ent=ent)
+
+        print(scores)
         
         # (B,)
         ent_loss = loss
@@ -139,7 +141,6 @@ for epoch in tqdm(range(args.n_epochs)):
 
     for i, sample in enumerate(tqdm(train_dataloader)):
         features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
-        print(targets)
         optimizer.zero_grad()
 
         if not args.use_conf_ent:
@@ -147,7 +148,6 @@ for epoch in tqdm(range(args.n_epochs)):
         else:
         	scores, loss = model(features, targets=targets, conf=conf, ent=ent)
 
-        print(scores)
         #if args.l1 > 0:
         #    loss = loss + args.l1 * torch.abs(log_weight.exp()[:,1]).sum() / log_weight.size(0)
 
