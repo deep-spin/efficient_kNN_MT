@@ -157,7 +157,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.knn_temperature_type = cfg.knn_temperature_type
         self.knn_search_prediction = cfg.knn_search_prediction
         self.knn_oracle_mlp_path = cfg.knn_oracle_mlp_path
-        self.analyse=True
+        self.analyse=False
 
         if self.knn_lambda_threshold>0 or self.knn_search_prediction:
             self.need_to_search=0
