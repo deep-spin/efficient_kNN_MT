@@ -317,7 +317,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent).squeeze(-1)
                 else:
                     scores = self.oracle_mlp.forward(last_hidden).squeeze(-1)
-                indices = (scores < 0.15).nonzero()[:,0]
+                indices = (scores < 0.5).nonzero()[:,0]
                 mask = torch.ones(last_hidden.size(0), dtype=torch.bool)
                 mask[indices] = False
                 last_hidden=last_hidden[mask]
@@ -325,7 +325,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 self.need_to_search += scores.size(0) - indices.size(0)
                 self.total_possible_searches+=scores.size(0)
 
-                print(self.need_to_search, self.total_possible_searches)
+                #print(self.need_to_search, self.total_possible_searches)
 
                 if scores.size(0) - indices.size(0) > 0:
 
