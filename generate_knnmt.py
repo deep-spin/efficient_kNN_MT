@@ -175,7 +175,7 @@ def _main(cfg: DictConfig, output_file):
     has_target = True
     wps_meter = TimeMeter()
 
-    analyse=False    
+    analyse=True    
     if analyse:
         save_step=0
         targets_save=[]
