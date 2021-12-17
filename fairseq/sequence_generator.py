@@ -321,6 +321,7 @@ class SequenceGenerator(nn.Module):
             self.analyse_difs_network_probs=[]
             self.analyse_scores=[None for _ in range(beam_size)]
 
+        new_sent=True
         for step in range(max_len + 1):  # one extra step for EOS marker
             # reorder decoder internal states based on the prev choice of beams
             if reorder_state is not None:
@@ -338,16 +339,18 @@ class SequenceGenerator(nn.Module):
                         tokens[:, : step + 1],
                         encoder_outs,
                         incremental_states,
-                        self.temperature,)
+                        self.temperature,
+                        new_sent=new_sent)
                     
                 else:
                     lprobs, avg_attn_scores = self.model.forward_decoder(
                         tokens[:, : step + 1],
                         encoder_outs,
                         incremental_states,
-                        self.temperature,)
+                        self.temperature,
+                        new_sent=new_sent)
 
-
+            new_sent=False
             if self.lm_model is not None:
                 lm_out = self.lm_model(tokens[:, : step + 1])
                 probs = self.lm_model.get_normalized_probs(lm_out, log_probs=True, sample=None)
@@ -855,6 +858,7 @@ class EnsembleModel(nn.Module):
         encoder_outs: List[Dict[str, List[Tensor]]],
         incremental_states: List[Dict[str, Dict[str, Optional[Tensor]]]],
         temperature: float = 1.0,
+        new_sent=False
     ):
         log_probs = []
         avg_attn: Optional[Tensor] = None
@@ -871,7 +875,7 @@ class EnsembleModel(nn.Module):
                 )
             else:
                 if hasattr(model, "decoder"):
-                    decoder_out = model.decoder.forward(tokens, encoder_out=encoder_out)
+                    decoder_out = model.decoder.forward(tokens, encoder_out=encoder_out, new_sent=new_sent)
                 else:
                     decoder_out = model.forward(tokens)
 

@@ -251,6 +251,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         alignment_heads: Optional[int] = None,
         src_lengths: Optional[Any] = None,
         return_all_hiddens: bool = False,
+        new_sent = False
     ):
         """
         Args:
@@ -291,14 +292,20 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 mask = torch.ones(last_hidden.size(0), dtype=torch.bool)
                 knn_probs=torch.zeros(last_hidden.size(0), 1, 42024).cuda()
 
+            print('-------------------------', new_sent)
             if self.use_knn_cache:
+                if new_sent:
+                    self.knn_cache=None
                 if self.knn_cache is not None:
                     dists = torch.cdist(last_hidden, self.knn_cache, p=2).min(-1)
                     print(dists)
+                    self.knn_cache = torch.cat([self.knn_cache, last_hidden],0)
                     indices = (dists.values<=self.knn_cache_threshold).nonzero()[:,0]
                     mask[indices] = False
                     last_hidden=last_hidden[mask]
-                    knn_probs[indices] = self.knn_cache_probs[dists.argmax()]
+                    knn_probs[mask] = self.knn_cache_probs[dists.argmax()]
+                else:
+                    self.knn_cache=last_hidden
 
 
             if self.knn_lambda_type == 'trainable':
@@ -359,15 +366,27 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                 if self.knn_lambda_threshold > 0 or self.knn_search_prediction:    
                     knn_probs[mask]=knn_prob
+                    if self.use_knn_cache:
+                        if self.knn_cache is None:
+                            self.knn_cache_probs=knn_probs
+                        else:
+                            self.knn_cache_probs=torch.cat([self.knn_cache_probs, knn_probs],0)
+
                     return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
 
-            else:
+            elif not self.use_knn_cache:
                 knn_dists = 0
                 knn_index = 0
                 tgt_index = 0
                 
                 knn_probs=torch.zeros(x.size(0), 1, 42024).cuda()
             
+                return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
+
+            else:
+                knn_dists = 0
+                knn_index = 0
+                tgt_index = 0
                 return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
 
             if features_only:
