@@ -310,7 +310,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     last_hidden=last_hidden[mask]
                     print('-----',indices)
                     if indices.size(0)>0:
-                        knn_probs[indices] = self.knn_cache_probs[dists.indices]
+                        knn_probs[indices] = self.knn_cache_probs[dists.indices[indices]]
                 else:
                     self.knn_cache=last_hidden
 
