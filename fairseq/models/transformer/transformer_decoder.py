@@ -298,24 +298,21 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     self.knn_cache=None
                     self.knn_cache_probs=None
                 if self.knn_cache is not None:
-                    print('\n\n')
-                    print(last_hidden.shape)
-                    print(self.knn_cache.shape)
-                    print(self.knn_cache_probs.shape)
-                    print(torch.cdist(last_hidden.squeeze(1), self.knn_cache.squeeze(1), p=2).shape)
                     dists = torch.cdist(last_hidden.squeeze(1), self.knn_cache.squeeze(1), p=2).min(-1)
-                    print(dists.values.shape)
-                    print(dists)
 
                     indices = (dists.values<=self.knn_cache_threshold).nonzero()[:,0]
                     mask[indices] = False
 
                     self.knn_cache = torch.cat([self.knn_cache, last_hidden],0)
                     last_hidden=last_hidden[mask]
-                    print(indices)
-                    print(dists.indices[indices])
                     if indices.size(0)>0:
                         knn_probs[indices] = self.knn_cache_probs[dists.indices[indices]]
+
+                    self.need_to_search += x.size(0) - indices.size(0)
+                    self.total_possible_searches+=x.size(0)
+
+                    print(self.need_to_search, self.total_possible_searches)
+
                 else:
                     self.knn_cache=last_hidden
 
@@ -400,7 +397,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     self.knn_cache_probs=knn_probs
                 else:
                     self.knn_cache_probs=torch.cat([self.knn_cache_probs, knn_probs],0)
-                    
+
                 knn_dists = 0
                 knn_index = 0
                 tgt_index = 0
