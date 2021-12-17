@@ -868,9 +868,9 @@ class EnsembleModel(nn.Module):
                 encoder_out = encoder_outs[i]
             # decode each model
             if self.has_incremental_states():
-                print('.....................', new_sent)
                 decoder_out = model.decoder.forward(
                     tokens,
+                    new_sent,
                     encoder_out=encoder_out,
                     incremental_state=incremental_states[i],
                 )
