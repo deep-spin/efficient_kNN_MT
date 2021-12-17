@@ -877,7 +877,7 @@ class EnsembleModel(nn.Module):
                 if hasattr(model, "decoder"):
                     decoder_out = model.decoder.forward(tokens, encoder_out=encoder_out, new_sent=new_sent)
                 else:
-                    decoder_out = model.forward(tokens)
+                    decoder_out = model.forward(tokens, new_sent=new_sent)
 
             attn: Optional[Tensor] = None
             decoder_len = len(decoder_out)

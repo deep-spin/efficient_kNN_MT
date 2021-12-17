@@ -161,6 +161,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         if self.use_knn_cache:
             self.knn_cache_threshold = cfg.knn_lambda_threshold
             self.knn_cache=None
+            self.knn_cache_probs=None
 
         self.analyse=False
 
@@ -296,6 +297,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             if self.use_knn_cache:
                 if new_sent:
                     self.knn_cache=None
+                    self.knn_cache_probs=None
                 if self.knn_cache is not None:
                     dists = torch.cdist(last_hidden, self.knn_cache, p=2).min(-1)
                     print(dists)
@@ -367,7 +369,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 if self.knn_lambda_threshold > 0 or self.knn_search_prediction or self.use_knn_cache:    
                     knn_probs[mask]=knn_prob
                     if self.use_knn_cache:
-                        if self.knn_cache is None:
+                        if self.knn_cache_probs is None:
                             self.knn_cache_probs=knn_probs
                         else:
                             self.knn_cache_probs=torch.cat([self.knn_cache_probs, knn_probs],0)
