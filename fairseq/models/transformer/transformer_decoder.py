@@ -359,7 +359,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                 if self.knn_lambda_threshold > 0 or self.knn_search_prediction:    
                     knn_probs[mask]=knn_prob
-                    print(knn_probs.shape)
+                    print('-------',knn_probs.shape)
                     return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
 
             else:
