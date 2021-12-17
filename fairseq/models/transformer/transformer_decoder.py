@@ -364,7 +364,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 decode_result = self.knn_datastore.calculate_knn_prob(knn_index, tgt_index, knn_dists, last_hidden, knn_temperature)
                 knn_prob = decode_result['prob']
 
-                if self.knn_lambda_threshold > 0 or self.knn_search_prediction:    
+                if self.knn_lambda_threshold > 0 or self.knn_search_prediction or self.use_knn_cache:    
                     knn_probs[mask]=knn_prob
                     if self.use_knn_cache:
                         if self.knn_cache is None:
