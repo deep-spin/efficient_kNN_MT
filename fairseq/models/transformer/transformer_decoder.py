@@ -367,9 +367,9 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 knn_index = 0
                 tgt_index = 0
                 
-                knn_prob=torch.zeros(knn_lambda.size(0), 1, 42024).cuda()
+                knn_probs=torch.zeros(last_hidden.size(0), 1, 42024).cuda()
             
-                return x, extra, knn_prob, knn_lambda, knn_dists, knn_index
+                return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
 
             if features_only:
                 prob = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
