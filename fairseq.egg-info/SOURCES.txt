@@ -665,6 +665,7 @@ fairseq/modules/gumbel_vector_quantizer.py
 fairseq/modules/kmeans_attention.py
 fairseq/modules/kmeans_vector_quantizer.py
 fairseq/modules/knn_datastore.py
+fairseq/modules/lambda_mlp.py
 fairseq/modules/layer_drop.py
 fairseq/modules/layer_norm.py
 fairseq/modules/learned_positional_embedding.py
