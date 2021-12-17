@@ -306,7 +306,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                     self.knn_cache = torch.cat([self.knn_cache, last_hidden],0)
                     last_hidden=last_hidden[mask]
-                    print('-----',indices)
                     print(last_hidden.shape)
                     if indices.size(0)>0:
                         knn_probs[indices] = self.knn_cache_probs[dists.indices[indices]]
