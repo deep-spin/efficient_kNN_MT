@@ -299,6 +299,8 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     self.knn_cache=None
                     self.knn_cache_probs=None
                 if self.knn_cache is not None:
+                    print(last_hidden.shape)
+                    print(self.knn_cache.shape)
                     dists = torch.cdist(last_hidden, self.knn_cache, p=2).min(-1)
                     print(dists)
                     self.knn_cache = torch.cat([self.knn_cache, last_hidden],0)
