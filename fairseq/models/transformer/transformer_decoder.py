@@ -358,7 +358,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                 if self.knn_lambda_threshold > 0 or self.knn_search_prediction:    
                     knn_probs[mask]=knn_prob
-                    print('-------',knn_probs.shape)
                     return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
 
             else:
@@ -366,7 +365,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 knn_index = 0
                 tgt_index = 0
                 
-                knn_probs=torch.zeros(last_hidden.size(0), 1, 42024).cuda()
+                knn_probs=torch.zeros(x.size(0), 1, 42024).cuda()
             
                 return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
 
