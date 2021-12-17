@@ -244,6 +244,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
     def forward(
         self,
         prev_output_tokens,
+        new_sent,
         encoder_out: Optional[Dict[str, List[Tensor]]] = None,
         incremental_state: Optional[Dict[str, Dict[str, Optional[Tensor]]]] = None,
         features_only: bool = False,
@@ -252,7 +253,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         alignment_heads: Optional[int] = None,
         src_lengths: Optional[Any] = None,
         return_all_hiddens: bool = False,
-        new_sent = False
     ):
         """
         Args:
@@ -301,8 +301,10 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 if self.knn_cache is not None:
                     print(last_hidden.shape)
                     print(self.knn_cache.shape)
+                    
                     dists = torch.cdist(last_hidden.squeeze(1), self.knn_cache.squeeze(1), p=2).min(-1)
                     print(dists)
+
                     indices = (dists.values<=self.knn_cache_threshold).nonzero()[:,0]
                     mask[indices] = False
 

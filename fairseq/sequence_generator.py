@@ -874,10 +874,11 @@ class EnsembleModel(nn.Module):
                     incremental_state=incremental_states[i],
                 )
             else:
+                print('.....................', new_sent)
                 if hasattr(model, "decoder"):
-                    decoder_out = model.decoder.forward(tokens, encoder_out=encoder_out, new_sent=new_sent)
+                    decoder_out = model.decoder.forward(tokens, new_sent, encoder_out=encoder_out)
                 else:
-                    decoder_out = model.forward(tokens, new_sent=new_sent)
+                    decoder_out = model.forward(tokens, new_sent)
 
             attn: Optional[Tensor] = None
             decoder_len = len(decoder_out)
