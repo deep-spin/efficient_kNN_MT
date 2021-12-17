@@ -159,7 +159,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.knn_oracle_mlp_path = cfg.knn_oracle_mlp_path
         self.use_knn_cache = cfg.knn_cache
         if self.use_knn_cache:
-            self.knn_cache_threshold = cfg.knn_lambda_threshold
+            self.knn_cache_threshold = cfg.knn_cache_threshold
             self.knn_cache=None
             self.knn_cache_probs=None
 
