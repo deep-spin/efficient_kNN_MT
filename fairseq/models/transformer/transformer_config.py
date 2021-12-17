@@ -242,6 +242,8 @@ class TransformerConfig(FairseqDataclass):
     knn_use_conf_ent: bool = field(default=False)
     knn_search_prediction: bool = field(default=False)
     knn_oracle_mlp_path: str = field(default=None)
+    knn_cache: str = field(default=None)
+    knn_cache_threshold: int = field(default=0)
     knn_temperature_type: str = field(default='fix')
     knn_temperature_value: float = field(default=10)
     only_train_knn_parameters: bool = field(default=False)

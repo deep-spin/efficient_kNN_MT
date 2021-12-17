@@ -157,6 +157,11 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.knn_temperature_type = cfg.knn_temperature_type
         self.knn_search_prediction = cfg.knn_search_prediction
         self.knn_oracle_mlp_path = cfg.knn_oracle_mlp_path
+        self.use_knn_cache = cfg.knn_cache
+        if self.use_knn_cache:
+            self.knn_cache_threshold = cfg.knn_lambda_threshold
+            self.knn_cache=None
+
         self.analyse=False
 
         if self.knn_lambda_threshold>0 or self.knn_search_prediction:
@@ -282,6 +287,19 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             x = self.output_layer(x)
 
         if self.use_knn_datastore:
+            if self.use_knn_cache or self.knn_search_prediction or self.knn_lambda_threshold>0:
+                mask = torch.ones(last_hidden.size(0), dtype=torch.bool)
+                knn_probs=torch.zeros(last_hidden.size(0), 1, 42024).cuda()
+
+            if self.use_knn_cache:
+                if self.knn_cache is not None:
+                    dists = torch.cdist(last_hidden, self.knn_cache, p=2).max(-1)
+                    indices = (dists.values<=self.knn_cache_threshold).nonzero()[:,0]
+                    mask[indices] = False
+                    last_hidden=last_hidden[mask]
+                    knn_probs[indices] = self.knn_cache_probs[dists.argmax()]
+
+
             if self.knn_lambda_type == 'trainable':
                 self.lambda_mlp.eval()
                 if self.knn_use_conf_ent:
@@ -298,7 +316,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 if self.knn_lambda_threshold>0:
                     indices = (knn_lambda < self.knn_lambda_threshold).nonzero()[:,0]
                     knn_lambda[indices]=0
-                    mask = torch.ones(last_hidden.size(0), dtype=torch.bool)
                     mask[indices] = False
                     last_hidden=last_hidden[mask]
 
@@ -317,8 +334,8 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent).squeeze(-1)
                 else:
                     scores = self.oracle_mlp.forward(last_hidden).squeeze(-1)
-                indices = (scores < 0.15).nonzero()[:,0]
-                mask = torch.ones(last_hidden.size(0), dtype=torch.bool)
+                indices = (scores < 0.5).nonzero()[:,0]
+                
                 mask[indices] = False
                 last_hidden=last_hidden[mask]
 
@@ -327,32 +344,8 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                 print(self.need_to_search, self.total_possible_searches)
 
-                if scores.size(0) - indices.size(0) > 0:
 
-                    knn_search_result = self.knn_datastore.retrieve(last_hidden)
-
-                    knn_dists = knn_search_result['distance']  # [batch, seq len, k]  # we need do sort
-                    knn_index = knn_search_result['knn_index']
-                    tgt_index = knn_search_result['tgt_index']
-
-                    knn_temperature = self.knn_datastore.get_temperature()
-
-                    decode_result = self.knn_datastore.calculate_knn_prob(knn_index, tgt_index, knn_dists, last_hidden, knn_temperature)
-                    knn_prob = decode_result['prob']
-
-                    knn_probs=torch.zeros(scores.size(0), knn_prob.size(1), knn_prob.size(2)).cuda()
-                    knn_probs[mask]=knn_prob
-                else:
-                    knn_dists = 0
-                    knn_index = 0
-                    tgt_index = 0
-                    
-                    knn_probs=torch.zeros(scores.size(0), 1, 42024).cuda()
-
-                return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
-
-
-            elif self.knn_lambda_threshold == 0 or knn_lambda.size(0) - indices.size(0) > 0:
+            if (self.knn_lambda_threshold == 0 and not self.knn_search_prediction) or indices.size(0) < last_hidden.size(0):
                 knn_search_result = self.knn_datastore.retrieve(last_hidden)
 
                 knn_dists = knn_search_result['distance']  # [batch, seq len, k]  # we need do sort
@@ -364,8 +357,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 decode_result = self.knn_datastore.calculate_knn_prob(knn_index, tgt_index, knn_dists, last_hidden, knn_temperature)
                 knn_prob = decode_result['prob']
 
-                if self.knn_lambda_threshold > 0:    
-                    knn_probs=torch.zeros(knn_lambda.size(0), knn_prob.size(1), knn_prob.size(2)).cuda()
+                if self.knn_lambda_threshold > 0 or self.knn_search_prediction:    
                     knn_probs[mask]=knn_prob
 
                     return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
