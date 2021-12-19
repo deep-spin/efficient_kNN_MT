@@ -312,7 +312,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     self.need_to_search += x.size(0) - indices.size(0)
                     self.total_possible_searches+=x.size(0)
 
-                    #print(self.need_to_search, self.total_possible_searches)
+                    print(self.need_to_search, self.total_possible_searches)
 
                 else:
                     self.knn_cache=last_hidden
