@@ -88,7 +88,7 @@ class FairseqDecoder(nn.Module):
 
         logits = net_output[0]
 
-        analyse=False
+        analyse=True
         if self.use_knn_datastore:
 
             knn_probs = net_output[2]  # [batch, seq len, vocab size]

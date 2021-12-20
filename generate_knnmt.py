@@ -175,13 +175,14 @@ def _main(cfg: DictConfig, output_file):
     has_target = True
     wps_meter = TimeMeter()
 
-    analyse=False    
+    analyse=True    
     if analyse:
         save_step=0
         targets_save=[]
         features_save=[]
         knn_probs_save=[]
         network_probs_save=[]
+        tokens_save=[]
         conf=[]
         ent=[]
 
@@ -330,6 +331,8 @@ def _main(cfg: DictConfig, output_file):
             network_probs_save.append(network_probs.cpu().data)
             conf.append(torch.max(network_probs_difs, -1).values.cpu().data)
             ent.append(torch.distributions.Categorical(network_probs_difs).entropy().cpu().data)
+            tokens_save.append(hypo['tokens'])
+            print(tokens_save)
 
         wps_meter.update(num_generated_tokens)
         progress.log({"wps": round(wps_meter.avg)})
