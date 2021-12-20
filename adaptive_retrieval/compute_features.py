@@ -105,6 +105,5 @@ else:
     fertility_cnt = get_ngram_fertility(args.data, dictionary=dictionary, break_line=args.break_line)
     if dictionary is not None:
         fertility_cnt = Counter({k:np.log(v + 1) for k,v in fertility_cnt.items()})
-    print(fertility_cnt)
     with open(fertility_cache, 'wb') as pf:
         pickle.dump(fertility_cnt, pf)
