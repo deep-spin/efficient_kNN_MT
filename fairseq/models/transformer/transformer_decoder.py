@@ -401,7 +401,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                     return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
 
-            elif not self.use_knn_cache or self.searching=False:
+            elif not self.use_knn_cache:
                 knn_dists = 0
                 knn_index = 0
                 tgt_index = 0
