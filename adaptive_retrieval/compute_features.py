@@ -39,8 +39,10 @@ def get_ngram_freq(file, ngram=4, dictionary=None, break_line=False):
                         res[tuple(prev[-j:])] += 1
 
                 prev.append(tok if dictionary is None else dictionary.index(tok))
-
-            prev=['</s>' if dictionary is None else dictionary.index('</s>')]
+            if break_line:
+                prev=['</s>' if dictionary is None else dictionary.index('</s>')]
+            else:
+                prev.append('</s>' if dictionary is None else dictionary.index('</s>'))
     return res
 
 def get_ngram_fertility(file, ngram=4, dictionary=None, break_line=False):
@@ -62,7 +64,10 @@ def get_ngram_fertility(file, ngram=4, dictionary=None, break_line=False):
                         res[tuple(prev[-j:])].update([tok])
                 prev.append(tok if dictionary is None else dictionary.index(tok))
 
-            prev.append('</s>' if dictionary is None else dictionary.index('</s>'))
+            if break_line:
+                prev=['</s>' if dictionary is None else dictionary.index('</s>')]
+            else:
+                prev.append('</s>' if dictionary is None else dictionary.index('</s>'))
 
     return Counter({key: len(res[key]) for key in res})
 
@@ -88,6 +93,8 @@ else:
     freq_cnt = get_ngram_freq(args.data, dictionary=dictionary, break_line=args.break_line)
     if dictionary is not None:
         freq_cnt = Counter({k:np.log(v + 1) for k,v in freq_cnt.items()})
+
+    print(freq_cnt)
     with open(freq_cache, 'wb') as pf:
         pickle.dump(freq_cnt, pf)
 
@@ -99,5 +106,6 @@ else:
     fertility_cnt = get_ngram_fertility(args.data, dictionary=dictionary, break_line=args.break_line)
     if dictionary is not None:
         fertility_cnt = Counter({k:np.log(v + 1) for k,v in fertility_cnt.items()})
+    print(fertility_cnt)
     with open(fertility_cache, 'wb') as pf:
         pickle.dump(fertility_cnt, pf)
