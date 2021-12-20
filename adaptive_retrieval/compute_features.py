@@ -94,7 +94,6 @@ else:
     if dictionary is not None:
         freq_cnt = Counter({k:np.log(v + 1) for k,v in freq_cnt.items()})
 
-    print(freq_cnt)
     with open(freq_cache, 'wb') as pf:
         pickle.dump(freq_cnt, pf)
 
