@@ -91,11 +91,9 @@ if not args.overwrite and os.path.isfile(freq_cache):
 else:
     print('compute freq statistics')
     freq_cnt = get_ngram_freq(args.data, dictionary=dictionary, break_line=args.break_line)
-    print(freq_cnt)
     if dictionary is not None:
         freq_cnt = Counter({k:np.log(v + 1) for k,v in freq_cnt.items()})
 
-    print(freq_cnt)
     with open(freq_cache, 'wb') as pf:
         pickle.dump(freq_cnt, pf)
 
