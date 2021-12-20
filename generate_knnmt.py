@@ -332,7 +332,6 @@ def _main(cfg: DictConfig, output_file):
             conf.append(torch.max(network_probs_difs, -1).values.cpu().data)
             ent.append(torch.distributions.Categorical(network_probs_difs).entropy().cpu().data)
             tokens_save.append(hypo['tokens'])
-            print(tokens_save)
 
         wps_meter.update(num_generated_tokens)
         progress.log({"wps": round(wps_meter.avg)})
@@ -365,7 +364,7 @@ def _main(cfg: DictConfig, output_file):
         )
 
     if analyse:
-        feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_probs_save, 'network_probs': network_probs_save, 'conf': conf, 'ent': ent}
+        feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_probs_save, 'network_probs': network_probs_save, 'conf': conf, 'ent': ent, 'tokens': tokens_save}
         torch.save(feats,'/media/hdd1/pam/mt/data/joint_multi_domain/law/adaptive_retrieval/using_train_set/oracle_features')
 
     return scorer
