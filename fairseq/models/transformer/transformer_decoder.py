@@ -300,13 +300,14 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             if self.knn_search_every>0:
                 if new_sent:
                     self.knn_step=0
-                if self.knn_step % self.knn_search_every!=0:
+                if new_sent or self.knn_step % self.knn_search_every!=0:
                     print('------------')
                     mask[:] = False
                     last_hidden=last_hidden[mask]
                     self.knn_step+=1
                     self.searching=False
                 else:
+                    self.knn_step+=1
                     self.searching=True
 
             if self.use_knn_cache and self.searching:
