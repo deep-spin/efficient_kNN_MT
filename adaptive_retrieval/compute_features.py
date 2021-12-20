@@ -32,7 +32,7 @@ def get_ngram_freq(file, ngram=4, dictionary=None, break_line=False):
             
             for tok in line.strip().split():
                 prev = prev[-ngram:]
-                for j in range(3, ngram+1):
+                for j in range(1, ngram+1):
                     if dictionary is None:
                         res[' '.join(prev[-j:])] += 1
                     else:
@@ -57,7 +57,7 @@ def get_ngram_fertility(file, ngram=4, dictionary=None, break_line=False):
                 print(f'procesed {i} lines')
             for tok in line.strip().split():
                 prev = prev[-ngram:]
-                for j in range(3, ngram+1):
+                for j in range(1, ngram+1):
                     if dictionary is None:
                         res[' '.join(prev[-j:])].update([tok])
                     else:
@@ -94,6 +94,7 @@ else:
     if dictionary is not None:
         freq_cnt = Counter({k:np.log(v + 1) for k,v in freq_cnt.items()})
 
+    print(freq_cnt)
     with open(freq_cache, 'wb') as pf:
         pickle.dump(freq_cnt, pf)
 
