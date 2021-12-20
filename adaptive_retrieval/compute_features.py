@@ -29,11 +29,13 @@ def get_ngram_freq(file, ngram=4, dictionary=None, break_line=False):
         for i, line in enumerate(fin):
             if i % 100000 == 0:
                 print(f'procesed {i} lines')
-            
+            print(line.strip().split())
             for tok in line.strip().split():
                 prev = prev[-ngram:]
                 for j in range(1, ngram+1):
                     print(j)
+                    print(prev[-j:])
+
                     if dictionary is None:
                         res[' '.join(prev[-j:])] += 1
                     else:
