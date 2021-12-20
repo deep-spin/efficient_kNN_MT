@@ -309,7 +309,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     self.knn_step+=1
                     self.searching=True
 
-            if self.use_knn_cache and self.searching:
+            if self.use_knn_cache:
                 if new_sent:
                     self.knn_cache=None
                     self.knn_cache_probs=None
