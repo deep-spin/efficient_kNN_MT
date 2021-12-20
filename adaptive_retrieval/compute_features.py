@@ -33,6 +33,7 @@ def get_ngram_freq(file, ngram=4, dictionary=None, break_line=False):
             for tok in line.strip().split():
                 prev = prev[-ngram:]
                 for j in range(1, ngram+1):
+                    print(j)
                     if dictionary is None:
                         res[' '.join(prev[-j:])] += 1
                     else:
