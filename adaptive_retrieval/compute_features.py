@@ -23,7 +23,7 @@ args = parser.parse_args()
 
 
 # do not perform scaling over context
-def get_ngram_freq(file, source_file ngram=4, dictionary=None, break_line=False):
+def get_ngram_freq(file, source_file, ngram=4, dictionary=None, break_line=False):
     res = Counter()
     prev = ['</s>'] * ngram if dictionary is None else [dictionary.index('</s')] * ngram
     fsource = open(source_file,'r')
@@ -49,7 +49,7 @@ def get_ngram_freq(file, source_file ngram=4, dictionary=None, break_line=False)
             prev.append('</s>' if dictionary is None else dictionary.index('</s>'))
     return res
 
-def get_ngram_fertility(file, ngram=4, dictionary=None, break_line=False):
+def get_ngram_fertility(file, source_file, ngram=4, dictionary=None, break_line=False):
     """compute the next word fertility of the context, which is
     the number of unique words following this context
     """
@@ -91,7 +91,7 @@ if not args.overwrite and os.path.isfile(freq_cache):
     print('skip freq cache files since they exist')
 else:
     print('compute freq statistics')
-    freq_cnt = get_ngram_freq(args.data, dictionary=dictionary, break_line=args.break_line)
+    freq_cnt = get_ngram_freq(args.data, args.source_data, dictionary=dictionary, break_line=args.break_line)
     if dictionary is not None:
         freq_cnt = Counter({k:np.log(v + 1) for k,v in freq_cnt.items()})
     with open(freq_cache, 'wb') as pf:
@@ -102,7 +102,7 @@ if not args.overwrite and os.path.isfile(fertility_cache):
     print('skip fertility cache files since they exist')
 else:
     print('compute fertility statistics')
-    fertility_cnt = get_ngram_fertility(args.data, dictionary=dictionary, break_line=args.break_line)
+    fertility_cnt = get_ngram_fertility(args.data, args.source_data, dictionary=dictionary, break_line=args.break_line)
     if dictionary is not None:
         fertility_cnt = Counter({k:np.log(v + 1) for k,v in fertility_cnt.items()})
     with open(fertility_cache, 'wb') as pf:
