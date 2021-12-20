@@ -301,7 +301,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 if new_sent:
                     self.knn_step=0
                 if new_sent or self.knn_step % self.knn_search_every!=0:
-                    print('------------')
                     mask[:] = False
                     last_hidden=last_hidden[mask]
                     self.knn_step+=1
@@ -335,8 +334,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 else:
                     self.knn_cache=last_hidden
             
-
-
 
             if self.knn_lambda_type == 'trainable':
                 self.lambda_mlp.eval()
@@ -382,7 +379,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                 print(self.need_to_search, self.total_possible_searches)
 
-            if (self.knn_lambda_threshold == 0 and not self.knn_search_prediction and not self.use_knn_cache) or last_hidden.size(0) > 0:
+            if ((self.knn_lambda_threshold == 0 and not self.knn_search_prediction and not self.use_knn_cache) or last_hidden.size(0) > 0) and self.searching:
                 knn_search_result = self.knn_datastore.retrieve(last_hidden)
 
                 knn_dists = knn_search_result['distance']  # [batch, seq len, k]  # we need do sort
@@ -404,7 +401,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                     return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
 
-            elif not self.use_knn_cache:
+            elif not self.use_knn_cache or self.searching=False:
                 knn_dists = 0
                 knn_index = 0
                 tgt_index = 0
