@@ -41,6 +41,7 @@ def get_ngram_freq(file, ngram=4, dictionary=None, break_line=False):
                 prev.append(tok if dictionary is None else dictionary.index(tok))
 
             prev.append('</s>' if dictionary is None else dictionary.index('</s>'))
+            print('----',prev)
 
     return res
 
