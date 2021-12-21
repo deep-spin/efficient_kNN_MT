@@ -165,7 +165,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             self.knn_cache=None
             self.knn_cache_probs=None
 
-        self.analyse=False
+        self.analyse=True
 
         if self.knn_lambda_threshold>0 or self.knn_search_prediction or self.use_knn_cache:
             self.need_to_search=0

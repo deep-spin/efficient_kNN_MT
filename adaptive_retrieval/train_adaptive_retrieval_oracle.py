@@ -76,7 +76,9 @@ parser = argparse.ArgumentParser(description='')
 
 parser.add_argument('--train_file', type=str, default=None)
 parser.add_argument('--val_file', type=str, default=None)
+parser.add_argument('--freq_fert_path', type=str, default=None)
 parser.add_argument('--use_conf_ent', action='store_true')
+parser.add_argument('--use_freq_fert', action='store_true')
 parser.add_argument('--seed', type=int, default=1,help='the random seed')
 
 # training arguments
@@ -107,13 +109,9 @@ valid_data = torch.load(args.val_file)
 training_set = FeatureDataset(train_data)
 val_set = FeatureDataset(valid_data)
 
-train_dataloader = torch.utils.data.DataLoader(training_set,
-                                               batch_size=args.batch_size,
-                                               shuffle=True,)
+train_dataloader = torch.utils.data.DataLoader(training_set, batch_size=args.batch_size, shuffle=True, freq=freq)
 
-val_dataloader = torch.utils.data.DataLoader(val_set,
-                                             batch_size=args.batch_size,
-                                             shuffle=False,)
+val_dataloader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=False, fert=fert)
 
 if args.arch == 'mlp':
     model = MLPOracle(
