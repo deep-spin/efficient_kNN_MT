@@ -310,7 +310,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     self.knn_step+=1
                     self.searching=True
 
-            if self.use_knn_cache and not self.searching:
+            if self.use_knn_cache:
                 if new_sent:
                     self.knn_cache=None
                     self.knn_cache_probs=None
@@ -333,11 +333,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                     #print(self.need_to_search, self.total_possible_searches)
 
-                else:
-                    self.knn_cache=last_hidden
-            elif self.use_knn_cache:
-                if self.knn_cache is not None:
-                    self.knn_cache = torch.cat([self.knn_cache, last_hidden],0)
                 else:
                     self.knn_cache=last_hidden
             
