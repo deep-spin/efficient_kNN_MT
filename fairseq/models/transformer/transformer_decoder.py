@@ -325,6 +325,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     mask[indices] = False
                     last_hidden=last_hidden[mask]
 
+
                     print(indices)
 
                     if indices.size(0)>0:
