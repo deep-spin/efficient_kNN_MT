@@ -335,6 +335,11 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                 else:
                     self.knn_cache=last_hidden
+            elif self.use_knn_cache:
+                if self.knn_cache is not None:
+                    self.knn_cache = torch.cat([self.knn_cache, last_hidden],0)
+                else:
+                    self.knn_cache=last_hidden
             
 
             if self.knn_lambda_type == 'trainable':
@@ -371,7 +376,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent).squeeze(-1)
                 else:
                     scores = self.oracle_mlp.forward(last_hidden).squeeze(-1)
-                indices = (scores < 0.1).nonzero()[:,0]
+                indices = (scores < 0.5).nonzero()[:,0]
                 
                 mask[indices] = False
                 last_hidden=last_hidden[mask]
