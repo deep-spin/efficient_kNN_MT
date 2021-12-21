@@ -17,7 +17,7 @@ class LeakyReLUNet(nn.Module):
 
 
 class MLPOracle(nn.Module):
-    def __init__(self, hidden_units=128, nlayers=4, dropout=0.5, ctxt_dim=1024, activation='relu', use_conf_ent=False, use_freq_fert, compute_loss=False):
+    def __init__(self, hidden_units=128, nlayers=4, dropout=0.5, ctxt_dim=1024, activation='relu', use_conf_ent=False, use_freq_fert=False, compute_loss=False):
         super().__init__()
 
         self.use_conf_ent = use_conf_ent 
