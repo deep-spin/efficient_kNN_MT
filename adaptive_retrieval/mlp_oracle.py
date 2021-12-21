@@ -17,13 +17,14 @@ class LeakyReLUNet(nn.Module):
 
 
 class MLPOracle(nn.Module):
-    def __init__(self, hidden_units=128, nlayers=4, dropout=0.5, ctxt_dim=1024, activation='relu', use_conf_ent=False, compute_loss=False):
+    def __init__(self, hidden_units=128, nlayers=4, dropout=0.5, ctxt_dim=1024, activation='relu', use_conf_ent=False, use_freq_fert, compute_loss=False):
         super().__init__()
 
         self.use_conf_ent = use_conf_ent 
+        self.use_freq_fert = use_freq_fert
         self.compute_loss = compute_loss
 
-        if use_conf_ent:    
+        if use_conf_ent or use_freq_fert:    
             input_dim=int(ctxt_dim*2)
         else:
             input_dim=ctxt_dim
@@ -43,10 +44,17 @@ class MLPOracle(nn.Module):
 
         self.model = nn.Sequential(*models)
 
-        if use_conf_ent:
+        if use_conf_ent and not use_freq_fert:
             input_layer = {}
             ndim = int(ctxt_dim / 2)
             for k in ['conf','ent']:
+                input_layer[k] = LeakyReLUNet(1, ndim)
+
+            self.input_layer = nn.ModuleDict(input_layer)
+        elif use_conf_ent and use_freq_fert:
+            input_layer = {}
+            ndim = int(ctxt_dim / 10)
+            for k in ['conf','ent','freq_1','freq_2','freq_3','freq_4','fert_1','fert_2','fert_3','fert_4']:
                 input_layer[k] = LeakyReLUNet(1, ndim)
 
             self.input_layer = nn.ModuleDict(input_layer)
@@ -55,11 +63,26 @@ class MLPOracle(nn.Module):
             self.loss_ = nn.BCELoss()
 
 
-    def forward(self, features, targets=None, conf=None, ent=None):
-        if self.use_conf_ent:
+    def forward(self, features, targets=None, conf=None, ent=None, freq_1=None, freq_2=None, freq_3=None, freq_4=None, fert_1=None, fert_2=None, fert_3=None, fert_4=None):
+        if self.use_conf_ent and not self.use_freq_fert:
             features_cat = [features]
             features_cat.append(self.input_layer['conf'](conf))
             features_cat.append(self.input_layer['ent'](ent))
+            features_cat = torch.cat(features_cat,-1)
+
+            scores = self.model(features_cat)
+        elif self.use_conf_ent and self.use_freq_fert:
+            features_cat = [features]
+            features_cat.append(self.input_layer['conf'](conf))
+            features_cat.append(self.input_layer['ent'](ent))
+            features_cat.append(self.input_layer['freq_1'](freq_1))
+            features_cat.append(self.input_layer['freq_2'](freq_2))
+            features_cat.append(self.input_layer['freq_3'](freq_3))
+            features_cat.append(self.input_layer['freq_4'](freq_4))
+            features_cat.append(self.input_layer['fert_1'](fert_1))
+            features_cat.append(self.input_layer['fert_2'](fert_2))
+            features_cat.append(self.input_layer['fert_3'](fert_3))
+            features_cat.append(self.input_layer['fert_4'](fert_4))
             features_cat = torch.cat(features_cat,-1)
 
             scores = self.model(features_cat)

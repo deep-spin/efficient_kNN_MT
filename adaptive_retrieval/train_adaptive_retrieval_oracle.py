@@ -16,13 +16,19 @@ from collections import Counter, OrderedDict
 from mlp_oracle import MLPOracle
 
 class FeatureDataset(data.Dataset):
-    def __init__(self, data):
+    def __init__(self, data, freq=None, fert=None):
         features = data['features']
         targets = data['targets']
         knn_probs = data['knn_probs']
         network_probs = data['network_probs']
         conf = data['conf']
         ent = data['ent']
+        self.tokens = data['tokens']
+        if freq is not None:
+            self.freq_dict = freq
+            self.fert_dict = fert
+        else:
+            self.freq_dict=None
 
         self.features = torch.cat(features, 0)
         self.targets = torch.FloatTensor([item for sublist in targets for item in sublist]).unsqueeze(-1)
@@ -35,7 +41,17 @@ class FeatureDataset(data.Dataset):
         return len(self.features)
 
     def __getitem__(self, idx):
-        return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda()
+        if self.freq_dict is not None:
+            freq_1=self.freq_dict(self.tokens[idx][:-1])
+            freq_2=self.freq_dict(self.tokens[idx][:-2])
+            freq_3=self.freq_dict(self.tokens[idx][:-3])
+            freq_4=self.freq_dict(self.tokens[idx][:-4])
+            fert_1=self.fert_dict(self.tokens[idx][:-1])
+            fert_2=self.fert_dict(self.tokens[idx][:-2])
+            fert_3=self.fert_dict(self.tokens[idx][:-3])
+            fert_4=self.fert_dict(self.tokens[idx][:-4])
+
+        return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda(), freq_1[idx].cuda(), freq_2[idx].cuda(), freq_3[idx].cuda(), freq_4[idx].cuda(), fert_1[idx].cuda(), fert_2[idx].cuda(), fert_3[idx].cuda(), fert_4[idx].cuda()
 
 
 def validate(val_dataloader, model, args):
@@ -44,13 +60,17 @@ def validate(val_dataloader, model, args):
     nsamples = 0
     rights = 0
     for i, sample in enumerate(val_dataloader):
-        features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
-
-        if not args.use_conf_ent:
-        	scores, loss = model(features, targets)
+        if args.use_freq_fert:
+            features, targets, knn_probs, network_probs, conf, ent, freq_1, freq_2, freq_3, freq_4, fert_1, fert_2, fert_3, fert_4 = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7], sample[8], sample[9], sample[10], sample[11], sample[12], sample[13]
         else:
-        	scores, loss = model(features, targets, conf=conf, ent=ent)
+            features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
 
+        if not args.use_conf_ent and not args.use_freq_fert:
+            scores, loss = model(features, targets=targets)
+        elif args.use_conf_ent and not args.use_freq_fert:
+            scores, loss = model(features, targets=targets, conf=conf, ent=ent)
+        elif args.use_conf_ent and args.use_freq_fert:
+            scores, loss = model(features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, freq_3=fert_3, freq_4=fert_4)
         # (B,)
         ent_loss = loss
 
@@ -106,12 +126,24 @@ torch.manual_seed(args.seed)
 train_data = torch.load(args.train_file)
 valid_data = torch.load(args.val_file)
 
-training_set = FeatureDataset(train_data)
-val_set = FeatureDataset(valid_data)
 
-train_dataloader = torch.utils.data.DataLoader(training_set, batch_size=args.batch_size, shuffle=True, freq=freq)
 
-val_dataloader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=False, fert=fert)
+if args.use_freq_fert:
+    freq_file=open(args.freq_fert_path+'freq_cache_id.pickle','rb')
+    fert_file=open(args.freq_fert_path+'fertility_cache_id.pickle','rb')
+
+    training_set = FeatureDataset(train_data, freq=freq_file, fert=fert_file)
+    val_set = FeatureDataset(valid_data, freq=freq_file, fert=fert_file)
+
+    train_dataloader = torch.utils.data.DataLoader(training_set, batch_size=args.batch_size, shuffle=True)
+    val_dataloader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=False)
+
+else:
+    training_set = FeatureDataset(train_data)
+    val_set = FeatureDataset(valid_data)
+
+    train_dataloader = torch.utils.data.DataLoader(training_set, batch_size=args.batch_size, shuffle=True)
+    val_dataloader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=False)
 
 if args.arch == 'mlp':
     model = MLPOracle(
@@ -119,6 +151,7 @@ if args.arch == 'mlp':
                 nlayers=args.nlayers,
                 dropout=args.dropout,
                 use_conf_ent=args.use_conf_ent,
+                use_freq_fert=args.use_freq_fert,
                 compute_loss=True
                 )
 
@@ -143,13 +176,19 @@ for epoch in tqdm(range(args.n_epochs)):
     rights = 0
 
     for i, sample in enumerate(tqdm(train_dataloader)):
-        features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
+        if args.use_freq_fert:
+            features, targets, knn_probs, network_probs, conf, ent, freq_1, freq_2, freq_3, freq_4, fert_1, fert_2, fert_3, fert_4 = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7], sample[8], sample[9], sample[10], sample[11], sample[12], sample[13]
+        else:
+            features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
+
         optimizer.zero_grad()
 
-        if not args.use_conf_ent:
-        	scores, loss = model(features, targets=targets)
-        else:
-        	scores, loss = model(features, targets=targets, conf=conf, ent=ent)
+        if not args.use_conf_ent and not args.use_freq_fert:
+            scores, loss = model(features, targets=targets)
+        elif args.use_conf_ent and not args.use_freq_fert:
+            scores, loss = model(features, targets=targets, conf=conf, ent=ent)
+        elif args.use_conf_ent and args.use_freq_fert:
+            scores, loss = model(features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, freq_3=fert_3, freq_4=fert_4)
 
         #if args.l1 > 0:
         #    loss = loss + args.l1 * torch.abs(log_weight.exp()[:,1]).sum() / log_weight.size(0)
