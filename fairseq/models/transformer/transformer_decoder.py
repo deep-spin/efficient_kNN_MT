@@ -413,12 +413,11 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 if self.knn_lambda_threshold > 0 or self.knn_search_prediction or self.use_knn_cache or self.use_faiss_centroids:    
                     knn_probs[mask]=knn_prob
                     if self.use_knn_cache:
-                        print(knn_prob.shape)
-                        print(knn_probs.shape)
                         if self.knn_cache_probs is None:
                             self.knn_cache_probs=knn_prob
                         else:
                             self.knn_cache_probs=torch.cat([self.knn_cache_probs, knn_prob],0)
+                        print(self.knn_cache_probs.shape)
 
                     return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
 
