@@ -250,6 +250,8 @@ class TransformerConfig(FairseqDataclass):
     only_train_knn_parameters: bool = field(default=False)
     pruned_datastore: bool = field(default=False)
     multiple_dstores: bool = field(default=False)
+    use_faiss_centroids: bool = field(default=False)
+
     
     # We need to make this hierarchical dataclass like the flat namespace
     # __getattr__ and __setattr__ here allow backward compatibility

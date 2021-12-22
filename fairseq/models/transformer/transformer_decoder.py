@@ -165,7 +165,13 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             self.knn_cache=None
             self.knn_cache_probs=None
 
-        self.analyse=True
+        self.use_faiss_centroids=cfg.use_faiss_centroids
+        if self.use_faiss_centroids:
+            self.faiss_centroids = self.knn_datastore.get_faiss_centroids()
+
+            print(self.faiss_centroids)
+
+        self.analyse=False
 
         if self.knn_lambda_threshold>0 or self.knn_search_prediction or self.use_knn_cache:
             self.need_to_search=0

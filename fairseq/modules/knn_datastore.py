@@ -21,6 +21,7 @@ class KNN_Dstore(object):
         self.vocab_size = trg_vocab_size
 
         self.index = self.setup_faiss(args)
+
         self.time_for_retrieve = 0.
         self.retrieve_count = 0.
         self.time_for_setup_prob = 0.
@@ -121,6 +122,9 @@ class KNN_Dstore(object):
         if self.lambda_type == 'trainable':
             self.lambda_value = None  # not generate lambda value in this class
 
+    def get_faiss_centroids(self):
+        return self.index.quantizer.reconstruct_n(0, self.index.nlist)
+
     def get_lambda(self, step=None, distance=None):
 
         if self.lambda_type == 'fix':
@@ -145,6 +149,7 @@ class KNN_Dstore(object):
 
         start = time.time()
         index = faiss.read_index(args.dstore_filename + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
+
         if self.use_gpu_to_search:
             print('put index from cpu to gpu')
             res = faiss.StandardGpuResources()
