@@ -38,8 +38,20 @@ class FeatureDataset(data.Dataset):
         self.network_probs = torch.cat(network_probs, 0).unsqueeze(-1)
        	self.conf = torch.cat(conf, 0).unsqueeze(-1)
        	self.ent = torch.cat(ent, 0).unsqueeze(-1)
-        self.tokens = torch.cat(tokens,0).unsqueeze(-1)
-        print(self.tokens)
+        
+        self.tokens=[]
+        for sent in tokens:
+            for i in range(len(sent)):
+                if i==0:
+                    self.tokens.append((2,2,2,sent[i]))
+                elif i==1:
+                    self.tokens.append((2,2,sent[i-1],sent[i]))
+                elif i==2:
+                    self.tokens.append((2,sent[i-2],sent[i-1],sent[i]))
+                else:
+                    self.tokens.append((sent[i-3],sent[i-2],sent[i-1],sent[i]))
+
+                print(self.tokens)
 
     def __len__(self):
         return len(self.features)
