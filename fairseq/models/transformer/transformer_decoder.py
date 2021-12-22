@@ -326,7 +326,8 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                     indices = (dists.values<=self.knn_cache_threshold).nonzero()[:,0]
                     mask[indices] = False
-                    last_hidden=last_hidden[mask]
+                    if not self.use_faiss_centroids:
+                        last_hidden=last_hidden[mask]
 
 
                     if indices.size(0)>0:
@@ -345,8 +346,8 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                 mask_ = torch.ones(last_hidden.size(0), dtype=torch.bool)
                 indices = (dists.values>15).nonzero()[:,0]
-                mask_[indices] = False
-                last_hidden=last_hidden[mask_]
+                mask[indices] = False
+                last_hidden=last_hidden[mask]
 
                 self.need_to_search += last_hidden.size(0) #x.size(0) - indices.size(0)
                 self.total_possible_searches+=x.size(0)    
