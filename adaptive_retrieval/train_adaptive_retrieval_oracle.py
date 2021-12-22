@@ -77,6 +77,13 @@ class FeatureDataset(data.Dataset):
             fert_4=torch.FloatTensor([0])
 
         print(freq_1)
+        print(freq_2)
+        print(freq_3)
+        print(freq_4)
+        print(fert_1)
+        print(fert_2)
+        print(fert_3)
+        print(fert_4)
 
         return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda(), freq_1.cuda(), freq_2.cuda(), freq_3.cuda(), freq_4.cuda(), fert_1.cuda(), fert_2.cuda(), fert_3.cuda(), fert_4.cuda()
 
