@@ -25,7 +25,7 @@ class FeatureDataset(data.Dataset):
         conf = data['conf']
         ent = data['ent']
         self.tokens = data['tokens']
-        len(ent)
+        print(len(ent))
         print(len(self.tokens))
         for i in self.tokens:
             print(i)
