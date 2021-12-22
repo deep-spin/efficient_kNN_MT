@@ -188,7 +188,7 @@ for epoch in tqdm(range(args.n_epochs)):
         elif args.use_conf_ent and not args.use_freq_fert:
             scores, loss = model(features, targets=targets, conf=conf, ent=ent)
         elif args.use_conf_ent and args.use_freq_fert:
-            scores, loss = model(features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, freq_3=fert_3, freq_4=fert_4)
+            scores, loss = model(features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
 
         #if args.l1 > 0:
         #    loss = loss + args.l1 * torch.abs(log_weight.exp()[:,1]).sum() / log_weight.size(0)
