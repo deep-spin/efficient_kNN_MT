@@ -169,7 +169,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         if self.use_faiss_centroids:
             self.faiss_centroids = self.knn_datastore.get_faiss_centroids()
 
-            print(self.faiss_centroids)
+            print(self.faiss_centroids.shape)
 
         self.analyse=False
 
