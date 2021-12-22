@@ -322,13 +322,12 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 if self.knn_cache is not None:
                     dists = torch.cdist(last_hidden.squeeze(1), self.knn_cache.squeeze(1), p=2).min(-1)
 
-                    self.knn_cache = torch.cat([self.knn_cache, last_hidden],0)
-
                     indices = (dists.values<=self.knn_cache_threshold).nonzero()[:,0]
                     mask[indices] = False
                     if not self.use_faiss_centroids:
                         last_hidden=last_hidden[mask]
 
+                    self.knn_cache = torch.cat([self.knn_cache, last_hidden],0)
 
                     if indices.size(0)>0:
                         knn_probs[indices] = self.knn_cache_probs[dists.indices[indices]]
