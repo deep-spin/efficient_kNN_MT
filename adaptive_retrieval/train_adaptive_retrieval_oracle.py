@@ -25,6 +25,9 @@ class FeatureDataset(data.Dataset):
         conf = data['conf']
         ent = data['ent']
         self.tokens = data['tokens']
+        for i in self.tokens:
+            print(i)
+            
         if freq is not None:
             self.freq_dict = freq
             self.fert_dict = fert
@@ -43,7 +46,7 @@ class FeatureDataset(data.Dataset):
         return len(self.features)
 
     def __getitem__(self, idx):
-        if self.freq_dict is not None:
+                
             freq_1=self.freq_dict(self.tokens[idx][:-1])
             freq_2=self.freq_dict(self.tokens[idx][:-2])
             freq_3=self.freq_dict(self.tokens[idx][:-3])
