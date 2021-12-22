@@ -24,11 +24,7 @@ class FeatureDataset(data.Dataset):
         network_probs = data['network_probs']
         conf = data['conf']
         ent = data['ent']
-        self.tokens = data['tokens']
-        print(len(ent))
-        print(len(self.tokens))
-        for i in self.tokens:
-            print(i)
+        tokens = data['tokens']
 
         if freq is not None:
             self.freq_dict = freq
@@ -43,6 +39,8 @@ class FeatureDataset(data.Dataset):
         self.network_probs = torch.cat(network_probs, 0).unsqueeze(-1)
        	self.conf = torch.cat(conf, 0).unsqueeze(-1)
        	self.ent = torch.cat(ent, 0).unsqueeze(-1)
+        self.tokens = torch.cat(tokens,0).unsqueeze(-1)
+        print(self.tokens)
 
     def __len__(self):
         return len(self.features)
