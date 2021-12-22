@@ -167,7 +167,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
         self.use_faiss_centroids=cfg.use_faiss_centroids
         if self.use_faiss_centroids:
-            self.faiss_centroids = self.knn_datastore.get_faiss_centroids()
+            self.faiss_centroids = self.knn_datastore.get_faiss_centroids().cuda()
 
         self.analyse=False
 
