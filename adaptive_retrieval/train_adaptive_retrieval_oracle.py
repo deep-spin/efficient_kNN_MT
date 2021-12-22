@@ -41,6 +41,8 @@ class FeatureDataset(data.Dataset):
         
         self.tokens=[]
         for sent in tokens:
+            print('\n\n')
+            print(sent)
             for i in range(len(sent)):
                 if i==0:
                     self.tokens.append((2,2,2,sent[i].item()))
@@ -52,6 +54,7 @@ class FeatureDataset(data.Dataset):
                     self.tokens.append((sent[i-3].item(),sent[i-2].item(),sent[i-1].item(),sent[i].item()))
 
                 print(self.tokens)
+            
 
     def __len__(self):
         return len(self.features)
