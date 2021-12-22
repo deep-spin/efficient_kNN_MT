@@ -130,8 +130,8 @@ valid_data = torch.load(args.val_file)
 
 
 if args.use_freq_fert:
-    freq_file=pickle.load(args.freq_fert_path+'freq_cache_id.pickle')
-    fert_file=pickle.load(args.freq_fert_path+'fertility_cache_id.pickle')
+    freq_file=pickle.load(open(args.freq_fert_path+'freq_cache_id.pickle','rb'))
+    fert_file=pickle.load(open(args.freq_fert_path+'fertility_cache_id.pickle','rb'))
 
     training_set = FeatureDataset(train_data, freq=freq_file, fert=fert_file)
     val_set = FeatureDataset(valid_data, freq=freq_file, fert=fert_file)
