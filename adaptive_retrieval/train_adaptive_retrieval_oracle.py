@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader, TensorDataset
 import torch.utils.data as data
 import numpy as np
 from tqdm import tqdm
-import picke
+import pickle
 
 from collections import Counter, OrderedDict
 
