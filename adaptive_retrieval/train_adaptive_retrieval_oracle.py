@@ -70,7 +70,7 @@ def validate(val_dataloader, model, args):
         elif args.use_conf_ent and not args.use_freq_fert:
             scores, loss = model(features, targets=targets, conf=conf, ent=ent)
         elif args.use_conf_ent and args.use_freq_fert:
-            scores, loss = model(features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, freq_3=fert_3, freq_4=fert_4)
+            scores, loss = model(features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
         # (B,)
         ent_loss = loss
 
