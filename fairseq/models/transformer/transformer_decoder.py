@@ -343,11 +343,11 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             if self.use_faiss_centroids:
                 dists = torch.cdist(last_hidden.squeeze(1), self.faiss_centroids, p=2).min(-1)
 
-                indices = (dists.values>10).nonzero()[:,0]
+                indices = (dists.values>15).nonzero()[:,0]
                 mask[indices] = False
                 last_hidden=last_hidden[mask]
 
-                self.need_to_search += x.size(0) - indices.size(0)
+                self.need_to_search += last_hidden.size(0) #x.size(0) - indices.size(0)
                 self.total_possible_searches+=x.size(0)    
 
                 print(self.need_to_search, self.total_possible_searches)
