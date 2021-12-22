@@ -85,7 +85,10 @@ class MLPOracle(nn.Module):
             features_cat.append(self.input_layer['fert_4'](fert_4))
             features_cat = torch.cat(features_cat,-1)
 
+            torch.set_printoptions(profile="full")
             print(features_cat)
+            torch.set_printoptions(profile="default") # reset
+
 
             scores = self.model(features_cat)
         else:
