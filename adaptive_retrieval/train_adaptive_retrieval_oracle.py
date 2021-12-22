@@ -25,9 +25,11 @@ class FeatureDataset(data.Dataset):
         conf = data['conf']
         ent = data['ent']
         self.tokens = data['tokens']
+        len(ent)
+        print(len(self.tokens))
         for i in self.tokens:
             print(i)
-            
+
         if freq is not None:
             self.freq_dict = freq
             self.fert_dict = fert
