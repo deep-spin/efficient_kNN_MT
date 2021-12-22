@@ -169,8 +169,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         if self.use_faiss_centroids:
             self.faiss_centroids = self.knn_datastore.get_faiss_centroids()
 
-            print(self.faiss_centroids.shape)
-
         self.analyse=False
 
         if self.knn_lambda_threshold>0 or self.knn_search_prediction or self.use_knn_cache:
@@ -341,7 +339,18 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                 else:
                     self.knn_cache=last_hidden
-            
+
+            if self.use_faiss_centroids:
+                dists = torch.cdist(last_hidden.squeeze(1), self.faiss_centroids, p=2).min(-1)
+
+                indices = (dists.values>2).nonzero()[:,0]
+                mask[indices] = False
+                last_hidden=last_hidden[mask]
+
+                self.need_to_search += x.size(0) - indices.size(0)
+                self.total_possible_searches+=x.size(0)    
+
+                print(self.need_to_search, self.total_possible_searches)
 
             if self.knn_lambda_type == 'trainable':
                 self.lambda_mlp.eval()
