@@ -28,7 +28,7 @@ class FeatureDataset(data.Dataset):
         if freq is not None:
             self.freq_dict = freq
             self.fert_dict = fert
-            print(freq_dict)
+            print(self.freq_dict)
         else:
             self.freq_dict=None
 
