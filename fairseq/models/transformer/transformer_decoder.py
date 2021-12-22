@@ -343,7 +343,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             if self.use_faiss_centroids:
                 dists = torch.cdist(last_hidden.squeeze(1), self.faiss_centroids, p=2).min(-1)
 
-                indices = (dists.values>2).nonzero()[:,0]
+                indices = (dists.values>4).nonzero()[:,0]
                 mask[indices] = False
                 last_hidden=last_hidden[mask]
 
@@ -408,7 +408,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 decode_result = self.knn_datastore.calculate_knn_prob(knn_index, tgt_index, knn_dists, last_hidden, knn_temperature)
                 knn_prob = decode_result['prob']
 
-                if self.knn_lambda_threshold > 0 or self.knn_search_prediction or self.use_knn_cache:    
+                if self.knn_lambda_threshold > 0 or self.knn_search_prediction or self.use_knn_cache or self.use_faiss_centroids:    
                     knn_probs[mask]=knn_prob
                     if self.use_knn_cache:
                         if self.knn_cache_probs is None:
