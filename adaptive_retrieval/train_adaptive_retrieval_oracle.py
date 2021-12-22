@@ -66,7 +66,7 @@ class FeatureDataset(data.Dataset):
             fert_2=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-2]]])
             fert_3=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-3]]])
             fert_4=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-4]]])
-        else:
+        except:
             freq_1=torch.FloatTensor([0])
             freq_2=torch.FloatTensor([0])
             freq_3=torch.FloatTensor([0])
