@@ -56,17 +56,25 @@ class FeatureDataset(data.Dataset):
         return len(self.features)
 
     def __getitem__(self, idx):
-            
-        freq_1=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-1]]])
-        freq_2=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-2]]])
-        freq_3=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-3]]])
-        freq_4=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-4]]])
-        fert_1=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-1]]])
-        fert_2=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-2]]])
-        fert_3=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-3]]])
-        fert_4=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-4]]])
-
-        print(freq_1)
+        
+        try:
+            freq_1=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-1]]])
+            freq_2=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-2]]])
+            freq_3=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-3]]])
+            freq_4=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-4]]])
+            fert_1=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-1]]])
+            fert_2=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-2]]])
+            fert_3=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-3]]])
+            fert_4=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-4]]])
+        else:
+            freq_1=torch.FloatTensor([0])
+            freq_2=torch.FloatTensor([0])
+            freq_3=torch.FloatTensor([0])
+            freq_4=torch.FloatTensor([0])
+            fert_1=torch.FloatTensor([0])
+            fert_2=torch.FloatTensor([0])
+            fert_3=torch.FloatTensor([0])
+            fert_4=torch.FloatTensor([0])
 
         return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda(), freq_1.cuda(), freq_2.cuda(), freq_3.cuda(), freq_4.cuda(), fert_1.cuda(), fert_2.cuda(), fert_3.cuda(), fert_4.cuda()
 
