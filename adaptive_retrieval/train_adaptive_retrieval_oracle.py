@@ -43,13 +43,13 @@ class FeatureDataset(data.Dataset):
         for sent in tokens:
             for i in range(len(sent)):
                 if i==0:
-                    self.tokens.append((2,2,2,sent[i]))
+                    self.tokens.append((2,2,2,sent[i].item()))
                 elif i==1:
-                    self.tokens.append((2,2,sent[i-1],sent[i]))
+                    self.tokens.append((2,2,sent[i-1].item(),sent[i].item()))
                 elif i==2:
-                    self.tokens.append((2,sent[i-2],sent[i-1],sent[i]))
+                    self.tokens.append((2,sent[i-2].item(),sent[i-1].item(),sent[i].item()))
                 else:
-                    self.tokens.append((sent[i-3],sent[i-2],sent[i-1],sent[i]))
+                    self.tokens.append((sent[i-3].item(),sent[i-2].item(),sent[i-1].item(),sent[i].item()))
 
                 print(self.tokens)
 
