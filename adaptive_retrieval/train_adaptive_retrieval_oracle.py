@@ -46,15 +46,15 @@ class FeatureDataset(data.Dataset):
         return len(self.features)
 
     def __getitem__(self, idx):
-                
-            freq_1=self.freq_dict(self.tokens[idx][:-1])
-            freq_2=self.freq_dict(self.tokens[idx][:-2])
-            freq_3=self.freq_dict(self.tokens[idx][:-3])
-            freq_4=self.freq_dict(self.tokens[idx][:-4])
-            fert_1=self.fert_dict(self.tokens[idx][:-1])
-            fert_2=self.fert_dict(self.tokens[idx][:-2])
-            fert_3=self.fert_dict(self.tokens[idx][:-3])
-            fert_4=self.fert_dict(self.tokens[idx][:-4])
+            
+        freq_1=self.freq_dict(self.tokens[idx][:-1])
+        freq_2=self.freq_dict(self.tokens[idx][:-2])
+        freq_3=self.freq_dict(self.tokens[idx][:-3])
+        freq_4=self.freq_dict(self.tokens[idx][:-4])
+        fert_1=self.fert_dict(self.tokens[idx][:-1])
+        fert_2=self.fert_dict(self.tokens[idx][:-2])
+        fert_3=self.fert_dict(self.tokens[idx][:-3])
+        fert_4=self.fert_dict(self.tokens[idx][:-4])
 
         return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda(), freq_1[idx].cuda(), freq_2[idx].cuda(), freq_3[idx].cuda(), freq_4[idx].cuda(), fert_1[idx].cuda(), fert_2[idx].cuda(), fert_3[idx].cuda(), fert_4[idx].cuda()
 
