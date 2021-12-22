@@ -322,11 +322,13 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 if self.knn_cache is not None:
                     dists = torch.cdist(last_hidden.squeeze(1), self.knn_cache.squeeze(1), p=2).min(-1)
 
+                    self.knn_cache = torch.cat([self.knn_cache, last_hidden],0)
+
                     indices = (dists.values<=self.knn_cache_threshold).nonzero()[:,0]
                     mask[indices] = False
                     if not self.use_faiss_centroids:
                         last_hidden=last_hidden[mask]
-                        self.knn_cache = torch.cat([self.knn_cache, last_hidden],0)
+
 
                     if indices.size(0)>0:
                         knn_probs[indices] = self.knn_cache_probs[dists.indices[indices]]
@@ -336,20 +338,16 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                     #print(self.need_to_search, self.total_possible_searches)
 
-                elif not self.use_faiss_centroids:
+                else:
                     self.knn_cache=last_hidden
 
             if self.use_faiss_centroids:
                 dists = torch.cdist(last_hidden.squeeze(1), self.faiss_centroids, p=2).min(-1)
 
                 mask_ = torch.ones(last_hidden.size(0), dtype=torch.bool)
-                indices = (dists.values>15).nonzero()[:,0]
+                indices = (dists.values>10).nonzero()[:,0]
                 mask[indices] = False
                 last_hidden=last_hidden[mask]
-                if self.use_knn_cache and self.knn_cache is not None:
-                    self.knn_cache = torch.cat([self.knn_cache, last_hidden],0)
-                elif self.use_knn_cache:
-                    self.knn_cache = last_hidden
 
                 self.need_to_search += last_hidden.size(0) #x.size(0) - indices.size(0)
                 self.total_possible_searches+=x.size(0)    
@@ -416,9 +414,9 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     knn_probs[mask]=knn_prob
                     if self.use_knn_cache:
                         if self.knn_cache_probs is None:
-                            self.knn_cache_probs=knn_prob
+                            self.knn_cache_probs=knn_probs
                         else:
-                            self.knn_cache_probs=torch.cat([self.knn_cache_probs, knn_prob],0)
+                            self.knn_cache_probs=torch.cat([self.knn_cache_probs, knn_probs],0)
 
                     return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
 
