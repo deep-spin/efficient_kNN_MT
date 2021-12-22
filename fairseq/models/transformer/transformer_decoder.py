@@ -414,6 +414,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     knn_probs[mask]=knn_prob
                     if self.use_knn_cache:
                         print(knn_prob.shape)
+                        print(knn_probs.shape)
                         if self.knn_cache_probs is None:
                             self.knn_cache_probs=knn_prob
                         else:
