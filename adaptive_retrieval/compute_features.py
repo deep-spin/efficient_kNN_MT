@@ -39,7 +39,7 @@ def get_ngram_freq(file, ngram=4, dictionary=None, break_line=False):
                         res[tuple(prev[-j:])] += 1
 
                 prev.append(tok if dictionary is None else dictionary.index(tok))
-                print(dictionary.index('</s>'))
+
             if break_line:
                 prev=['</s>' if dictionary is None else dictionary.index('</s>')]
             else:
@@ -86,6 +86,8 @@ else:
 
 freq_cache = os.path.join(args.cache, freq_path)
 fertility_cache = os.path.join(args.cache, fert_path)
+
+print(dictionary)
 
 if not args.overwrite and os.path.isfile(freq_cache):
     print('skip freq cache files since they exist')
