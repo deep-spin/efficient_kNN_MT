@@ -87,7 +87,8 @@ else:
 freq_cache = os.path.join(args.cache, freq_path)
 fertility_cache = os.path.join(args.cache, fert_path)
 
-print(dictionary)
+for i in dictionary.keys():
+    print(dictionary[i])
 
 if not args.overwrite and os.path.isfile(freq_cache):
     print('skip freq cache files since they exist')
