@@ -24,8 +24,10 @@ class MLPOracle(nn.Module):
         self.use_freq_fert = use_freq_fert
         self.compute_loss = compute_loss
 
-        if use_conf_ent or use_freq_fert:    
-            input_dim=int(ctxt_dim*2)
+        if use_conf_ent and not use_freq_fert:    
+            input_dim=int(ctxt_dim)*2
+        elif use_conf_ent and use_freq_fert:    
+            input_dim=2044
         else:
             input_dim=ctxt_dim
 
@@ -84,8 +86,6 @@ class MLPOracle(nn.Module):
             features_cat.append(self.input_layer['fert_3'](fert_3))
             features_cat.append(self.input_layer['fert_4'](fert_4))
             features_cat = torch.cat(features_cat,-1)
-
-            print(features_cat.shape)
 
             scores = self.model(features_cat)
         else:
