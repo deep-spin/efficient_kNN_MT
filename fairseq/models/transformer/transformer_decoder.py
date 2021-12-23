@@ -418,7 +418,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                     print(prev_output_tokens)
                     print(prev_output_tokens.tolist())
-                    print(self.freq_dict[prev_output_tokens.tolist()])
+                    print(self.freq_dict[prev_output_tokens.tolist()[0]])
 
                     """
                     freq_1=torch.FloatTensor([self.freq_dict[[:-1]]])
