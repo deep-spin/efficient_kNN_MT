@@ -418,15 +418,15 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                     print(prev_output_tokens)
                     
-                    freq_1=torch.FloatTensor([self.freq_dict[tuple(tokens[:-1])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1)
-                    freq_2=torch.FloatTensor([self.freq_dict[tuple(tokens[:-2])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1)
-                    freq_3=torch.FloatTensor([self.freq_dict[tuple(tokens[:-3])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1)
-                    freq_4=torch.FloatTensor([self.freq_dict[tuple(tokens[:-4])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1)
+                    freq_1=torch.FloatTensor([self.freq_dict[tuple(tokens[:-1])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
+                    freq_2=torch.FloatTensor([self.freq_dict[tuple(tokens[:-2])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
+                    freq_3=torch.FloatTensor([self.freq_dict[tuple(tokens[:-3])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
+                    freq_4=torch.FloatTensor([self.freq_dict[tuple(tokens[:-4])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
 
-                    fert_1=torch.FloatTensor([self.fert_dict[tuple(tokens[:-1])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1)
-                    fert_2=torch.FloatTensor([self.fert_dict[tuple(tokens[:-2])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1)
-                    fert_3=torch.FloatTensor([self.fert_dict[tuple(tokens[:-3])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1)
-                    fert_4=torch.FloatTensor([self.fert_dict[tuple(tokens[:-4])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1)
+                    fert_1=torch.FloatTensor([self.fert_dict[tuple(tokens[:-1])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
+                    fert_2=torch.FloatTensor([self.fert_dict[tuple(tokens[:-2])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
+                    fert_3=torch.FloatTensor([self.fert_dict[tuple(tokens[:-3])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
+                    fert_4=torch.FloatTensor([self.fert_dict[tuple(tokens[:-4])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
 
                     print(freq_1)
 
