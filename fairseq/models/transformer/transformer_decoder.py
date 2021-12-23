@@ -404,32 +404,30 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     if prev_output_tokens.size(1)==1:
                         aux=torch.ones(prev_output_tokens.size(0),3).cuda()
                         aux[:,:]=2
-                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1)
+                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
                     elif prev_output_tokens.size(1)==2:
                         aux=torch.ones(prev_output_tokens.size(0),2).cuda()
                         aux[:,:]=2
-                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1)
+                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
                     elif prev_output_tokens.size(1)==3:
                         aux=torch.ones(prev_output_tokens.size(0),2).cuda()
                         aux[:,:]=2
-                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1)
+                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
                     elif prev_output_tokens.size(1)>4:
-                        prev_output_tokens=prev_output_tokens[:,-4:]
+                        prev_output_tokens=prev_output_tokens[:,-4:].type(torch.LongTensor)
 
                     print(prev_output_tokens)
                     print(prev_output_tokens.tolist())
                     print(self.freq_dict[prev_output_tokens.tolist()])
 
-                    """    
-                    freq_1 =
-                    freq_2 =
-                    freq_3 =
-                    freq_4 =
-                    fert_1 =
-                    fert_2 =
-                    fert_3 =
-                    fert_4 =
-                    """
+                    freq_1=torch.FloatTensor([self.freq_dict[[:-1]]])
+                    freq_2=torch.FloatTensor([self.freq_dict[[:-2]]])
+                    freq_3=torch.FloatTensor([self.freq_dict[[:-3]]])
+                    freq_4=torch.FloatTensor([self.freq_dict[[:-4]]])
+                    fert_1=torch.FloatTensor([self.fert_dict[[:-1]]])
+                    fert_2=torch.FloatTensor([self.fert_dict[[:-2]]])
+                    fert_3=torch.FloatTensor([self.fert_dict[[:-3]]])
+                    fert_4=torch.FloatTensor([self.fert_dict[[:-4]]])
 
                     scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4 ).squeeze(-1)
                 else:
