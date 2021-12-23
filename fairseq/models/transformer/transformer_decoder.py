@@ -402,15 +402,15 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     print(prev_output_tokens)
 
                     if prev_output_tokens.size(1)==1:
-                        aux=torch.ones(prev_output_tokens.size(0),3)
+                        aux=torch.ones(prev_output_tokens.size(0),3).cuda()
                         aux[:,:]=2
                         prev_output_tokens=torch.cat([aux, prev_output_tokens],1)
                     elif prev_output_tokens.size(1)==2:
-                        aux=torch.ones(prev_output_tokens.size(0),2)
+                        aux=torch.ones(prev_output_tokens.size(0),2).cuda()
                         aux[:,:]=2
                         prev_output_tokens=torch.cat([aux, prev_output_tokens],1)
                     elif prev_output_tokens.size(1)==3:
-                        aux=torch.ones(prev_output_tokens.size(0),2)
+                        aux=torch.ones(prev_output_tokens.size(0),2).cuda()
                         aux[:,:]=2
                         prev_output_tokens=torch.cat([aux, prev_output_tokens],1)
                     elif prev_output_tokens.size(1)>4:
