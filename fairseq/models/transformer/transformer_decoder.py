@@ -154,6 +154,11 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.knn_lambda_type = cfg.knn_lambda_type
         self.knn_lambda_threshold = cfg.knn_lambda_threshold
         self.knn_use_conf_ent = cfg.knn_use_conf_ent
+        self.knn_use_freq_fert = cfg.knn_use_freq_fert
+        if self.knn_use_freq_fert:
+            self.freq_dict=pickle.load(open(cfg.knn_freq_fert_path+'freq_cache_id.pickle','rb'))
+            self.fert_dict=pickle.load(open(cfg.knn_freq_fert_path+'fertility_cache_id.pickle','rb'))
+
         self.knn_temperature_type = cfg.knn_temperature_type
         self.knn_search_prediction = cfg.knn_search_prediction
         self.knn_oracle_mlp_path = cfg.knn_oracle_mlp_path
@@ -195,8 +200,10 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             ckpt_path = os.path.join(cfg.knn_oracle_mlp_path)
             ckpt = torch.load(ckpt_path)            
 
-            if cfg.knn_use_conf_ent:
+            if cfg.knn_use_conf_ent and not cfg.knn_use_freq_fert:
                 self.oracle_mlp = mlp_oracle.MLPOracle(use_conf_ent=True)
+            elif cfg.knn_use_conf_ent and cfg.knn_use_freq_fert:
+                self.oracle_mlp = mlp_oracle.MLPOracle(use_conf_ent=True, use_freq_fert=True)
             else:
                 self.oracle_mlp = mlp_oracle.MLPOracle()
 
@@ -381,11 +388,31 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
             if self.knn_search_prediction:
                 self.oracle_mlp.eval()
-                if self.knn_use_conf_ent:
+                if self.knn_use_conf_ent and not self.knn_use_freq_fert:
                     network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
                     conf=torch.max(network_probs, -1).values.unsqueeze(-1)
                     ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
                     scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent).squeeze(-1)
+                elif self.knn_use_conf_ent and self.knn_use_freq_fert:
+                    network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
+                    conf=torch.max(network_probs, -1).values.unsqueeze(-1)
+                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
+                    
+                    print('\n\n\n')
+                    print(prev_output_tokens)
+
+                    """    
+                    freq_1 =
+                    freq_2 =
+                    freq_3 =
+                    freq_4 =
+                    fert_1 =
+                    fert_2 =
+                    fert_3 =
+                    fert_4 =
+                    """
+
+                    scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4 ).squeeze(-1)
                 else:
                     scores = self.oracle_mlp.forward(last_hidden).squeeze(-1)
                 indices = (scores < 0.5).nonzero()[:,0]

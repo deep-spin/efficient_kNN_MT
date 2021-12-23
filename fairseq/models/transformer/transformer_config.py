@@ -240,6 +240,8 @@ class TransformerConfig(FairseqDataclass):
     knn_lambda_threshold: float = field(default=0)
     knn_lambda_mlp_path: str = field(default=None)
     knn_use_conf_ent: bool = field(default=False)
+    knn_use_freq_fert: bool = field(default=False)
+    knn_freq_fert_path: str = field(default=None)
     knn_search_prediction: bool = field(default=False)
     knn_oracle_mlp_path: str = field(default=None)
     knn_cache: str = field(default=None)
