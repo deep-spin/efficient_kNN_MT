@@ -399,7 +399,24 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
                     
                     print('\n\n\n')
-                    print(prev_output_tokens.shape)
+                    print(prev_output_tokens)
+
+                    if prev_output_tokens.size(1)==1:
+                        aux=torch.ones(prev_output_tokens.size(0),3)
+                        aux[:,:]=2
+                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1)
+                    elif prev_output_tokens.size(1)==2:
+                        aux=torch.ones(prev_output_tokens.size(0),2)
+                        aux[:,:]=2
+                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1)
+                    elif prev_output_tokens.size(1)==3:
+                        aux=torch.ones(prev_output_tokens.size(0),2)
+                        aux[:,:]=2
+                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1)
+                    elif prev_output_tokens.size(1)>4:
+                        prev_output_tokens=prev_output_tokens[:,-4:]
+
+                    print(prev_output_tokens)
 
                     """    
                     freq_1 =
