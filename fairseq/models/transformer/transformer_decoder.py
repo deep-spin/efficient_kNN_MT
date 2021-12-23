@@ -417,7 +417,8 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                         prev_output_tokens=prev_output_tokens[:,-4:]
 
                     print(prev_output_tokens)
-                    print(self.freq_dict[prev_output_tokens])
+                    print(prev_output_tokens.tolist())
+                    print(self.freq_dict[prev_output_tokens.tolist()])
 
                     """    
                     freq_1 =
