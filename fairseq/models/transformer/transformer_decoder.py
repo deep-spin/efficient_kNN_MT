@@ -421,8 +421,9 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     print(tuple(prev_output_tokens.tolist()[0]))
                     print(self.freq_dict[tuple(prev_output_tokens.tolist()[0])])
 
-                    """
-                    freq_1=torch.FloatTensor([self.freq_dict[[:-1]]])
+                    
+                    freq_1=torch.FloatTensor([self.freq_dict[tuple(tokens[:-1])] for tokens in prev_output_tokens.tolist()])
+                    print(freq_1)
                     freq_2=torch.FloatTensor([self.freq_dict[[:-2]]])
                     freq_3=torch.FloatTensor([self.freq_dict[[:-3]]])
                     freq_4=torch.FloatTensor([self.freq_dict[[:-4]]])
@@ -430,7 +431,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     fert_2=torch.FloatTensor([self.fert_dict[[:-2]]])
                     fert_3=torch.FloatTensor([self.fert_dict[[:-3]]])
                     fert_4=torch.FloatTensor([self.fert_dict[[:-4]]])
-                    """
+                    
                     scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4 ).squeeze(-1)
                 else:
                     scores = self.oracle_mlp.forward(last_hidden).squeeze(-1)
