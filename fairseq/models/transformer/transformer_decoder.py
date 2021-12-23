@@ -398,9 +398,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     conf=torch.max(network_probs, -1).values.unsqueeze(-1)
                     ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
                     
-                    print('\n\n\n')
-                    print(prev_output_tokens)
-
                     if prev_output_tokens.size(1)==1:
                         aux=torch.ones(prev_output_tokens.size(0),3).cuda()
                         aux[:,:]=2
@@ -415,8 +412,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                         prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
                     elif prev_output_tokens.size(1)>4:
                         prev_output_tokens=prev_output_tokens[:,-4:].type(torch.LongTensor)
-
-                    print(prev_output_tokens)
                     
                     freq_1=torch.FloatTensor([self.freq_dict[tuple(tokens[:-1])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
                     freq_2=torch.FloatTensor([self.freq_dict[tuple(tokens[:-2])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
@@ -428,8 +423,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     fert_3=torch.FloatTensor([self.fert_dict[tuple(tokens[:-3])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
                     fert_4=torch.FloatTensor([self.fert_dict[tuple(tokens[:-4])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
 
-                    print(freq_1)
-
+                    
                     scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4 ).squeeze(-1)
                 else:
                     scores = self.oracle_mlp.forward(last_hidden).squeeze(-1)
