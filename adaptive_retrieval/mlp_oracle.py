@@ -75,6 +75,7 @@ class MLPOracle(nn.Module):
             scores = self.model(features_cat)
         elif self.use_conf_ent and self.use_freq_fert:
             features_cat = [features]
+            print(conf.shape)
             features_cat.append(self.input_layer['conf'](conf))
             features_cat.append(self.input_layer['ent'](ent))
             features_cat.append(self.input_layer['freq_1'](freq_1))
