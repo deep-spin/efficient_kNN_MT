@@ -11,13 +11,14 @@ import torch.utils.data as data
 import numpy as np
 from tqdm import tqdm
 import pickle
+import faiss
 
 from collections import Counter, OrderedDict
 
 from mlp_oracle import MLPOracle
 
 class FeatureDataset(data.Dataset):
-    def __init__(self, data, freq=None, fert=None):
+    def __init__(self, args, data, freq=None, fert=None, centroids=None):
         features = data['features']
         targets = data['targets']
         knn_probs = data['knn_probs']
@@ -38,18 +39,27 @@ class FeatureDataset(data.Dataset):
         self.network_probs = torch.cat(network_probs, 0).unsqueeze(-1)
        	self.conf = torch.cat(conf, 0).unsqueeze(-1)
        	self.ent = torch.cat(ent, 0).unsqueeze(-1)
+
+        self.use_freq_fert = args.use_freq_fert
+        self.use_faiss_centroids = args.use_faiss_centroids
         
-        self.tokens=[]
-        for sent in tokens:
-            for i in range(len(sent)):
-                if i==0:
-                    self.tokens.append((2,2,2,sent[i].item()))
-                elif i==1:
-                    self.tokens.append((2,2,sent[i-1].item(),sent[i].item()))
-                elif i==2:
-                    self.tokens.append((2,sent[i-2].item(),sent[i-1].item(),sent[i].item()))
-                else:
-                    self.tokens.append((sent[i-3].item(),sent[i-2].item(),sent[i-1].item(),sent[i].item()))
+        if self.use_freq_fert:
+            self.tokens=[]
+            for sent in tokens:
+                for i in range(len(sent)):
+                    if i==0:
+                        self.tokens.append((2,2,2,sent[i].item()))
+                    elif i==1:
+                        self.tokens.append((2,2,sent[i-1].item(),sent[i].item()))
+                    elif i==2:
+                        self.tokens.append((2,sent[i-2].item(),sent[i-1].item(),sent[i].item()))
+                    else:
+                        self.tokens.append((sent[i-3].item(),sent[i-2].item(),sent[i-1].item(),sent[i].item()))
+
+        if self.use_faiss_centroids:
+            for feature in self.features:
+                print(feature.shape)
+                print(centroids.shape)
             
 
     def __len__(self):
@@ -57,27 +67,32 @@ class FeatureDataset(data.Dataset):
 
     def __getitem__(self, idx):
         
-        try:
-            freq_1=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-1]]])
-            freq_2=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-2]]])
-            freq_3=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-3]]])
-            freq_4=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-4]]])
-            fert_1=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-1]]])
-            fert_2=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-2]]])
-            fert_3=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-3]]])
-            fert_4=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-4]]])
-        except:
-            freq_1=torch.FloatTensor([0])
-            freq_2=torch.FloatTensor([0])
-            freq_3=torch.FloatTensor([0])
-            freq_4=torch.FloatTensor([0])
-            fert_1=torch.FloatTensor([0])
-            fert_2=torch.FloatTensor([0])
-            fert_3=torch.FloatTensor([0])
-            fert_4=torch.FloatTensor([0])
+        if self.use_freq_fert:
+            try:
+                freq_1=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-1]]])
+                freq_2=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-2]]])
+                freq_3=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-3]]])
+                freq_4=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-4]]])
+                fert_1=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-1]]])
+                fert_2=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-2]]])
+                fert_3=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-3]]])
+                fert_4=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-4]]])
+            except:
+                freq_1=torch.FloatTensor([0])
+                freq_2=torch.FloatTensor([0])
+                freq_3=torch.FloatTensor([0])
+                freq_4=torch.FloatTensor([0])
+                fert_1=torch.FloatTensor([0])
+                fert_2=torch.FloatTensor([0])
+                fert_3=torch.FloatTensor([0])
+                fert_4=torch.FloatTensor([0])
 
-        return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda(), freq_1.cuda(), freq_2.cuda(), freq_3.cuda(), freq_4.cuda(), fert_1.cuda(), fert_2.cuda(), fert_3.cuda(), fert_4.cuda()
+            return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda(), freq_1.cuda(), freq_2.cuda(), freq_3.cuda(), freq_4.cuda(), fert_1.cuda(), fert_2.cuda(), fert_3.cuda(), fert_4.cuda()
 
+        elif self.use_faiss_centroids:
+            return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda(), self.min_dist[idx].cuda(), self.min_top32_dist[idx].cuda()
+        else:
+            return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda()
 
 def validate(val_dataloader, model, args):
     model.eval()
@@ -87,6 +102,8 @@ def validate(val_dataloader, model, args):
     for i, sample in enumerate(val_dataloader):
         if args.use_freq_fert:
             features, targets, knn_probs, network_probs, conf, ent, freq_1, freq_2, freq_3, freq_4, fert_1, fert_2, fert_3, fert_4 = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7], sample[8], sample[9], sample[10], sample[11], sample[12], sample[13]
+        elif args.use_faiss_centroids:
+            features, targets, knn_probs, network_probs, conf, ent, min_dist, min_top32_dist = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7]
         else:
             features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
 
@@ -96,6 +113,9 @@ def validate(val_dataloader, model, args):
             scores, loss = model(features, targets=targets, conf=conf, ent=ent)
         elif args.use_conf_ent and args.use_freq_fert:
             scores, loss = model(features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
+        elif args.use_conf_ent and args.use_faiss_centroids:
+            scores, loss = model(features, targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
+
         # (B,)
         ent_loss = loss
 
@@ -126,6 +146,8 @@ parser.add_argument('--val_file', type=str, default=None)
 parser.add_argument('--freq_fert_path', type=str, default=None)
 parser.add_argument('--use_conf_ent', action='store_true')
 parser.add_argument('--use_freq_fert', action='store_true')
+parser.add_argument('--use_faiss_centroids', action='store_true')
+parser.add_argument('--faiss_index', action='store_true')
 parser.add_argument('--seed', type=int, default=1,help='the random seed')
 
 # training arguments
@@ -159,15 +181,25 @@ if args.use_freq_fert:
     freq_file=pickle.load(open(args.freq_fert_path+'freq_cache_id.pickle','rb'))
     fert_file=pickle.load(open(args.freq_fert_path+'fertility_cache_id.pickle','rb'))
 
-    training_set = FeatureDataset(train_data, freq=freq_file, fert=fert_file)
-    val_set = FeatureDataset(valid_data, freq=freq_file, fert=fert_file)
+    training_set = FeatureDataset(args, train_data, freq=freq_file, fert=fert_file)
+    val_set = FeatureDataset(args, valid_data, freq=freq_file, fert=fert_file)
 
     train_dataloader = torch.utils.data.DataLoader(training_set, batch_size=args.batch_size, shuffle=True)
     val_dataloader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=False)
 
+elif args.use_faiss_centroids
+    index = faiss.read_index(args.faiss_index + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
+    centroids = index.quantizer.reconstruct_n(0, self.index.nlist)
+
+    training_set = FeatureDataset(args, train_data, centroids=centroids)
+    val_set = FeatureDataset(args, valid_data, centroids=centroids)
+
+    train_dataloader = torch.utils.data.DataLoader(training_set, batch_size=args.batch_size, shuffle=True)
+    val_dataloader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=False)
+    
 else:
-    training_set = FeatureDataset(train_data)
-    val_set = FeatureDataset(valid_data)
+    training_set = FeatureDataset(args, train_data)
+    val_set = FeatureDataset(args, valid_data)
 
     train_dataloader = torch.utils.data.DataLoader(training_set, batch_size=args.batch_size, shuffle=True)
     val_dataloader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=False)
@@ -205,6 +237,8 @@ for epoch in tqdm(range(args.n_epochs)):
     for i, sample in enumerate(tqdm(train_dataloader)):
         if args.use_freq_fert:
             features, targets, knn_probs, network_probs, conf, ent, freq_1, freq_2, freq_3, freq_4, fert_1, fert_2, fert_3, fert_4 = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7], sample[8], sample[9], sample[10], sample[11], sample[12], sample[13]
+        elif args.use_faiss_centroids:
+            features, targets, knn_probs, network_probs, conf, ent, min_dist, min_top32_dist = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7]
         else:
             features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
 
@@ -216,6 +250,8 @@ for epoch in tqdm(range(args.n_epochs)):
             scores, loss = model(features, targets=targets, conf=conf, ent=ent)
         elif args.use_conf_ent and args.use_freq_fert:
             scores, loss = model(features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
+        elif args.use_conf_ent and args.use_faiss_centroids:
+            scores, loss = model(features, targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
 
         #if args.l1 > 0:
         #    loss = loss + args.l1 * torch.abs(log_weight.exp()[:,1]).sum() / log_weight.size(0)
