@@ -187,7 +187,7 @@ if args.use_freq_fert:
     train_dataloader = torch.utils.data.DataLoader(training_set, batch_size=args.batch_size, shuffle=True)
     val_dataloader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=False)
 
-elif args.use_faiss_centroids
+elif args.use_faiss_centroids:
     index = faiss.read_index(args.faiss_index + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
     centroids = index.quantizer.reconstruct_n(0, self.index.nlist)
 
