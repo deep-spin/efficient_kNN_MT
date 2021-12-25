@@ -59,10 +59,13 @@ class FeatureDataset(data.Dataset):
         if self.use_faiss_centroids:
             centroids=torch.FloatTensor(centroids)
             for feature in self.features:
-                print(feature.shape)
-                print(centroids.shape)
                 dists = torch.cdist(feature.unsqueeze(0), centroids, p=2)
                 print(dists.shape)
+                min_dist = dists.min()
+                min_top32_dist = torch.topk(dists, 32, largest=False)
+                print(min_dist)
+                print(min_top32_dist.shape)
+                print(min_top32_dist)
             
 
     def __len__(self):
