@@ -147,7 +147,8 @@ parser.add_argument('--freq_fert_path', type=str, default=None)
 parser.add_argument('--use_conf_ent', action='store_true')
 parser.add_argument('--use_freq_fert', action='store_true')
 parser.add_argument('--use_faiss_centroids', action='store_true')
-parser.add_argument('--faiss_index', type=str, default=None)
+parser.add_argument('--train_faiss_index', type=str, default=None)
+parser.add_argument('--valid_faiss_index', type=str, default=None)
 parser.add_argument('--seed', type=int, default=1,help='the random seed')
 
 # training arguments
@@ -188,11 +189,14 @@ if args.use_freq_fert:
     val_dataloader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=False)
 
 elif args.use_faiss_centroids:
-    index = faiss.read_index(args.faiss_index + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
-    centroids = index.quantizer.reconstruct_n(0, self.index.nlist)
+    index_train = faiss.read_index(args.train_faiss_index + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
+    index_valid = faiss.read_index(args.valid_faiss_index + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
+    
+    centroids_train = index_train.quantizer.reconstruct_n(0, self.index.nlist)
+    centroids_valid = index_valid.quantizer.reconstruct_n(0, self.index.nlist)
 
-    training_set = FeatureDataset(args, train_data, centroids=centroids)
-    val_set = FeatureDataset(args, valid_data, centroids=centroids)
+    training_set = FeatureDataset(args, train_data, centroids=centroids_train)
+    val_set = FeatureDataset(args, valid_data, centroids=centroids_valid)
 
     train_dataloader = torch.utils.data.DataLoader(training_set, batch_size=args.batch_size, shuffle=True)
     val_dataloader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=False)
