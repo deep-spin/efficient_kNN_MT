@@ -17,7 +17,7 @@ class LeakyReLUNet(nn.Module):
 
 
 class MLPOracle(nn.Module):
-    def __init__(self, hidden_units=128, nlayers=4, dropout=0.5, ctxt_dim=1024, activation='relu', use_conf_ent=False, use_freq_fert=False, compute_loss=False):
+    def __init__(self, hidden_units=128, nlayers=4, dropout=0.5, ctxt_dim=1024, activation='relu', use_conf_ent=False, use_freq_fert=False, compute_loss=False, use_faiss_centroids=False):
         super().__init__()
 
         self.use_conf_ent = use_conf_ent 
@@ -28,6 +28,8 @@ class MLPOracle(nn.Module):
             input_dim=int(ctxt_dim)*2
         elif use_conf_ent and use_freq_fert:    
             input_dim=2044
+        elif use_conf_ent and use_faiss_centroids:
+            input_dim=int(ctxt_dim)*2
         else:
             input_dim=ctxt_dim
 
@@ -57,6 +59,11 @@ class MLPOracle(nn.Module):
             input_layer = {}
             ndim = int(ctxt_dim / 10)
             for k in ['conf','ent','freq_1','freq_2','freq_3','freq_4','fert_1','fert_2','fert_3','fert_4']:
+                input_layer[k] = LeakyReLUNet(1, ndim)
+        elif use_conf_ent and use_faiss_centroids:
+            input_layer = {}
+            ndim = int(ctxt_dim / 4)
+            for k in ['conf','ent','min_dist', 'min_top32_dist']:
                 input_layer[k] = LeakyReLUNet(1, ndim)
 
             self.input_layer = nn.ModuleDict(input_layer)

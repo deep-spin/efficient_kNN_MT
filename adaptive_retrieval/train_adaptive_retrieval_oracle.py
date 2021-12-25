@@ -211,6 +211,7 @@ if args.arch == 'mlp':
                 dropout=args.dropout,
                 use_conf_ent=args.use_conf_ent,
                 use_freq_fert=args.use_freq_fert,
+                use_faiss_centroids=args.use_faiss_centroids,
                 compute_loss=True
                 )
 
