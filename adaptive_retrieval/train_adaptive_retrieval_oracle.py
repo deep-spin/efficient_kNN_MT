@@ -147,7 +147,7 @@ parser.add_argument('--freq_fert_path', type=str, default=None)
 parser.add_argument('--use_conf_ent', action='store_true')
 parser.add_argument('--use_freq_fert', action='store_true')
 parser.add_argument('--use_faiss_centroids', action='store_true')
-parser.add_argument('--faiss_index', action='store_true')
+parser.add_argument('--faiss_index', type=str, default=None)
 parser.add_argument('--seed', type=int, default=1,help='the random seed')
 
 # training arguments
