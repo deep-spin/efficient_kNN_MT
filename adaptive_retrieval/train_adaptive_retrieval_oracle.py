@@ -61,7 +61,7 @@ class FeatureDataset(data.Dataset):
             for feature in self.features:
                 print(feature.shape)
                 print(centroids.shape)
-                dists = torch.cdist(feature, centroids, p=2)
+                dists = torch.cdist(feature.unsqueeze(0), centroids, p=2)
                 print(dists.shape)
             
 
