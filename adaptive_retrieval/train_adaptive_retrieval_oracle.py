@@ -57,7 +57,7 @@ class FeatureDataset(data.Dataset):
                         self.tokens.append((sent[i-3].item(),sent[i-2].item(),sent[i-1].item(),sent[i].item()))
 
         if self.use_faiss_centroids:
-            self.centroids=torch.FloatTensor(centroids)
+            centroids=torch.FloatTensor(centroids)
             for feature in self.features:
                 print(feature.shape)
                 print(centroids.shape)
