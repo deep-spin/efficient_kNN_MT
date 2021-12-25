@@ -192,8 +192,8 @@ elif args.use_faiss_centroids:
     index_train = faiss.read_index(args.train_faiss_index + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
     index_valid = faiss.read_index(args.valid_faiss_index + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
     
-    centroids_train = index_train.quantizer.reconstruct_n(0, self.index.nlist)
-    centroids_valid = index_valid.quantizer.reconstruct_n(0, self.index.nlist)
+    centroids_train = index_train.quantizer.reconstruct_n(0, index_train.nlist)
+    centroids_valid = index_valid.quantizer.reconstruct_n(0, index_valid.nlist)
 
     training_set = FeatureDataset(args, train_data, centroids=centroids_train)
     val_set = FeatureDataset(args, valid_data, centroids=centroids_valid)
