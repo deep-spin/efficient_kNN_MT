@@ -64,8 +64,8 @@ class FeatureDataset(data.Dataset):
                 min_dist = dists.min()
                 min_top32_dist = torch.topk(dists, 32, largest=False)
                 print(min_dist)
-                print(min_top32_dist.values)
-                print(min_top32_dist.values.shape)
+                print(min_top32_dist.values.mean(-1))
+                print(min_top32_dist.values.mean(-1).shape)
 
             
 
