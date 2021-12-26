@@ -60,7 +60,7 @@ class FeatureDataset(data.Dataset):
             centroids=torch.FloatTensor(centroids)
             v=0
             dists = torch.cdist(self.features, centroids, p=2)
-            self.min_dist = dists.min(-1)
+            self.min_dist = dists.min(-1).values
             self.min_top32_dist = torch.topk(dists, 32, largest=False, dim=-1).values
             print(dists.shape)
             #for feature in self.features:
