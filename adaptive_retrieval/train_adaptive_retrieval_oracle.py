@@ -61,7 +61,7 @@ class FeatureDataset(data.Dataset):
             v=0
             dists = torch.cdist(self.features, centroids, p=2)
 
-            print(dists,shape)
+            print(dists.shape)
             #for feature in self.features:
             #    dists = torch.cdist(feature.unsqueeze(0), centroids, p=2)
             #    min_dist = dists.min()
