@@ -482,6 +482,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
             """
 
+            knn_lambda = self.knn_datastore.get_lambda()
             knn_search_result = self.knn_datastore.retrieve(last_hidden)
 
             knn_dists = knn_search_result['distance']  # [batch, seq len, k]  # we need do sort
