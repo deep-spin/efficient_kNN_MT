@@ -59,7 +59,7 @@ class FeatureDataset(data.Dataset):
         if self.use_faiss_centroids:
             centroids=torch.FloatTensor(centroids)
             v=0
-            dists = torch.cdist(features, centroids, p=2)
+            dists = torch.cdist(self.features, centroids, p=2)
 
             print(dists,shape)
             #for feature in self.features:
