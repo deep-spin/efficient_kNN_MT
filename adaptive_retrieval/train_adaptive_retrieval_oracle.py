@@ -121,7 +121,7 @@ def validate(val_dataloader, model, args):
         # (B,)
         ent_loss = loss
 
-        print(scores)
+        #print(scores)
 
         #if args.l1 > 0:
         #    loss = loss + args.l1 * torch.abs(log_weight.exp()[:,1]).sum() / log_weight.size(0)
