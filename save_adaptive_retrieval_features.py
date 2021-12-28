@@ -90,7 +90,6 @@ def main(args, override_args=None):
         aux=0
        	with torch.no_grad():
             model.eval()
-            tokens_=None
             aux=torch.LongTensor([2,2,2]).cuda()
             for i, sample in enumerate(progress):
                 sample = utils.move_to_cuda(sample) if use_cuda else sample
@@ -119,7 +118,7 @@ def main(args, override_args=None):
                 network_prob = network_prob.contiguous().view(batch_size * seq_len, -1)
                 network_prob = network_prob.index_select(dim=0, index=non_pad_index)
 
-
+                tokens_=None
                 for sent in tokens:
                     for v in range(len(sent)):
                         if tokens_ is None:
