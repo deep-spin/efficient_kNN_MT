@@ -124,8 +124,8 @@ def main(args, override_args=None):
                     print('\n\n\n')
                     print(sent)
                     print(aux)
-                    print(sent[v])
                     for v in range(len(sent)):
+                        print(sent[v])
                         if tokens_ is None:
                             if v==0:
                                 tokens_= torch.cat([aux,sent[v]],-1)
