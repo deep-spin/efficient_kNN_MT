@@ -178,7 +178,7 @@ def main(args, override_args=None):
                     conf=torch.cat([conf, torch.max(network_prob, -1).values.cpu().data],0)
                     ent=torch.cat([ent, torch.distributions.Categorical(network_prob).entropy().cpu().data],0)
 
-                    tokens_save=torch.cat([tokens_save, tokens_.cpu(.data)],0)
+                    tokens_save=torch.cat([tokens_save, tokens_.cpu().data],0)
 
                 #print(targets_save.shape)
                 #print(conf.shape)
