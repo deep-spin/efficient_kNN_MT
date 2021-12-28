@@ -170,6 +170,7 @@ print(args)
 np.random.seed(args.seed)
 torch.manual_seed(args.seed)
 
+print('--------', args.train_file)
 train_data = torch.load(args.train_file)
 valid_data = torch.load(args.val_file)
 
