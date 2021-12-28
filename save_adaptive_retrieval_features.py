@@ -137,9 +137,9 @@ def main(args, override_args=None):
                             if v==0:
                                 tokens_= torch.cat([tokens_,torch.cat([aux,sent[v].unsqueeze(0)],-1).unsqueeze(0)],0)
                             elif v==1:
-                                tokens_= torch.cat([tokens_,torch.cat([aux[-2:],sent[:v]],-1).unsqueeze(0)],0)
+                                tokens_= torch.cat([tokens_,torch.cat([aux[-3:],sent[:v]],-1).unsqueeze(0)],0)
                             elif v==2:
-                                tokens_= torch.cat([tokens_,torch.cat([aux[-1:],sent[:v]],-1).unsqueeze(0)],0)
+                                tokens_= torch.cat([tokens_,torch.cat([aux[-2:],sent[:v]],-1).unsqueeze(0)],0)
                             else:
                                 tokens_= torch.cat([tokens_,sent[-4:v].unsqueeze(0)],0)
                         print(tokens_)
