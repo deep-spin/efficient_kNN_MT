@@ -50,14 +50,14 @@ class FeatureDataset(data.Dataset):
     def __getitem__(self, idx):
 
         if self.use_freq_fert:
-            freq_1=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-1]]]).unsqueeze(-1)
-            freq_2=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-2]]]).unsqueeze(-1)
-            freq_3=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-3]]]).unsqueeze(-1)
-            freq_4=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-4]]]).unsqueeze(-1)
-            fert_1=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-1]]]).unsqueeze(-1)
-            fert_2=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-2]]]).unsqueeze(-1)
-            fert_3=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-3]]]).unsqueeze(-1)
-            fert_4=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-4]]]).unsqueeze(-1)
+            freq_1=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-1]]])
+            freq_2=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-2]]])
+            freq_3=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-3]]])
+            freq_4=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-4]]])
+            fert_1=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-1]]])
+            fert_2=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-2]]])
+            fert_3=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-3]]])
+            fert_4=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-4]]])
 
             print(freq_1.shape)
             print(self.conf[idx].unsqueeze(-1).shape)
