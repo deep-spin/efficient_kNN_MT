@@ -19,6 +19,7 @@ import pickle
 
 class FeatureDataset(data.Dataset):
     def __init__(self, args, data, freq=None, fert=None, centroids=None):
+        print(data)
         self.features = data['features']
         self.targets = data['targets']
         self.knn_probs = data['knn_probs']
