@@ -430,7 +430,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     conf=torch.max(network_probs, -1).values.unsqueeze(-1)
                     ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
 
-                    dists = torch.cdist(last_hidden, centroids, p=2)
+                    dists = torch.cdist(last_hidden, self.faiss_centroids, p=2)
                     min_dist = dists.min(-1).values
                     min_top32_dist = torch.topk(dists, 32, largest=False, dim=-1).values
 
