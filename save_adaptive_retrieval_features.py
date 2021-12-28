@@ -91,7 +91,7 @@ def main(args, override_args=None):
        	with torch.no_grad():
             model.eval()
             tokens_=None
-            aux=torch.LongTensor([2,2,2])
+            aux=torch.LongTensor([2,2,2]).cuda()
             for i, sample in enumerate(progress):
                 sample = utils.move_to_cuda(sample) if use_cuda else sample
                 features, knn_prob, network_prob, tokens = task.forward_and_get_hidden_state_step(sample, model, use_knn_datastore=True)  # [B, T, H]
