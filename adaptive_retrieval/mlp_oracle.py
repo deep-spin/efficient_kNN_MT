@@ -104,6 +104,8 @@ class MLPOracle(nn.Module):
             features_cat.append(self.input_layer['min_top32_dist'](min_top32_dist))
             features_cat = torch.cat(features_cat,-1)            
 
+            scores = self.model(features_cat)
+
         else:
             scores = self.model(features)
 
