@@ -48,7 +48,7 @@ class MLPOracle(nn.Module):
 
         self.model = nn.Sequential(*models)
 
-        if use_conf_ent and not use_freq_fert:
+        if use_conf_ent and not use_freq_fert and not use_faiss_centroids:
             input_layer = {}
             ndim = int(ctxt_dim / 2)
             for k in ['conf','ent']:
@@ -72,8 +72,8 @@ class MLPOracle(nn.Module):
             self.loss_ = nn.BCELoss()
 
 
-    def forward(self, features, targets=None, conf=None, ent=None, freq_1=None, freq_2=None, freq_3=None, freq_4=None, fert_1=None, fert_2=None, fert_3=None, fert_4=None):
-        if self.use_conf_ent and not self.use_freq_fert:
+    def forward(self, features, targets=None, conf=None, ent=None, freq_1=None, freq_2=None, freq_3=None, freq_4=None, fert_1=None, fert_2=None, fert_3=None, fert_4=None, min_dist=None, min_top32_dist=None):
+        if self.use_conf_ent and not self.use_freq_fert  and not self..use_faiss_centroids:
             features_cat = [features]
             features_cat.append(self.input_layer['conf'](conf))
             features_cat.append(self.input_layer['ent'](ent))
@@ -95,6 +95,14 @@ class MLPOracle(nn.Module):
             features_cat = torch.cat(features_cat,-1)
 
             scores = self.model(features_cat)
+        elif self.use_conf_ent and self.use_faiss_centroids:
+            features_cat = [features]
+            features_cat.append(self.input_layer['conf'](conf))
+            features_cat.append(self.input_layer['ent'](ent))
+            features_cat.append(self.input_layer['min_dist'](min_dist))
+            features_cat.append(self.input_layer['min_top32_dist'](min_top32_dist))
+            features_cat = torch.cat(features_cat,-1)            
+
         else:
             scores = self.model(features)
 

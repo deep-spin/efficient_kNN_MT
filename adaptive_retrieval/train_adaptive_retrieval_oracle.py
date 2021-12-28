@@ -111,7 +111,7 @@ def validate(val_dataloader, model, args):
 
         if not args.use_conf_ent and not args.use_freq_fert:
             scores, loss = model(features, targets=targets)
-        elif args.use_conf_ent and not args.use_freq_fert:
+        elif args.use_conf_ent and not args.use_freq_fert and not args.use_faiss_centroids:
             scores, loss = model(features, targets=targets, conf=conf, ent=ent)
         elif args.use_conf_ent and args.use_freq_fert:
             scores, loss = model(features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
@@ -251,7 +251,7 @@ for epoch in tqdm(range(args.n_epochs)):
 
         optimizer.zero_grad()
 
-        if not args.use_conf_ent and not args.use_freq_fert:
+        if not args.use_conf_ent and not args.use_freq_fert  and not args.use_faiss_centroids:
             scores, loss = model(features, targets=targets)
         elif args.use_conf_ent and not args.use_freq_fert:
             scores, loss = model(features, targets=targets, conf=conf, ent=ent)
