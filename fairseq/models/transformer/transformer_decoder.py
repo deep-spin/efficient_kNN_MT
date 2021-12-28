@@ -431,8 +431,8 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
 
                     dists = torch.cdist(last_hidden, self.faiss_centroids, p=2)
-                    min_dist = dists.min(-1).values
-                    min_top32_dist = torch.topk(dists, 32, largest=False, dim=-1).values
+                    min_dist = dists.min(-1).values.unsqueeze(-1)
+                    min_top32_dist = torch.topk(dists, 32, largest=False, dim=-1).values.unsqueeze(-1)
 
                     scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist).squeeze(-1)                    
 
