@@ -92,7 +92,7 @@ def main(args, override_args=None):
             model.eval()
             for i, sample in enumerate(progress):
                 sample = utils.move_to_cuda(sample) if use_cuda else sample
-                features, knn_prob, network_prob = task.forward_and_get_hidden_state_step(sample, model, use_knn_datastore=True)  # [B, T, H]
+                features, knn_prob, network_prob, tokens = task.forward_and_get_hidden_state_step(sample, model, use_knn_datastore=True)  # [B, T, H]
                 target = sample['target']  # [B, T]
 
                 # get useful parameters
@@ -117,7 +117,11 @@ def main(args, override_args=None):
                 network_prob = network_prob.contiguous().view(batch_size * seq_len, -1)
                 network_prob = network_prob.index_select(dim=0, index=non_pad_index)
 
-
+                tokens = tokens.contiguous().view(batch_size * seq_len, -1)
+                tokens = tokens.index_select(dim=0, index=non_pad_index)
+                print(tokens.shape)
+                print(target.shape)
+                
                 #targets_file[aux:aux+target.size(0)] = target.cpu().detach().numpy()
                 #features_file[aux:aux+target.size(0)] = features.cpu().detach().numpy()
                 #knn_probs_file[aux:aux+target.size(0)] = knn_prob.squeeze(0).cpu().detach().numpy()
