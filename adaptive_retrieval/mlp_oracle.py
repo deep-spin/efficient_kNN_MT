@@ -61,6 +61,7 @@ class MLPOracle(nn.Module):
             ndim = int(ctxt_dim / 10)
             for k in ['conf','ent','freq_1','freq_2','freq_3','freq_4','fert_1','fert_2','fert_3','fert_4']:
                 input_layer[k] = LeakyReLUNet(1, ndim)
+            self.input_layer = nn.ModuleDict(input_layer)
         elif use_conf_ent and use_faiss_centroids:
             input_layer = {}
             ndim = int(ctxt_dim / 4)
