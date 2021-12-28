@@ -117,11 +117,13 @@ def main(args, override_args=None):
                 network_prob = network_prob.contiguous().view(batch_size * seq_len, -1)
                 network_prob = network_prob.index_select(dim=0, index=non_pad_index)
 
+                print(tokens.shape)
+                for sent in tokens:
+                    print(sent)
+
                 tokens = tokens.contiguous().view(batch_size * seq_len, -1)
                 tokens = tokens.index_select(dim=0, index=non_pad_index)
-                print(tokens.shape)
-                print(target.shape)
-                
+
                 #targets_file[aux:aux+target.size(0)] = target.cpu().detach().numpy()
                 #features_file[aux:aux+target.size(0)] = features.cpu().detach().numpy()
                 #knn_probs_file[aux:aux+target.size(0)] = knn_prob.squeeze(0).cpu().detach().numpy()
