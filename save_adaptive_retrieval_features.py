@@ -123,6 +123,8 @@ def main(args, override_args=None):
                 for sent in tokens:
                     print('\n\n\n')
                     print(sent)
+                    print(aux)
+                    print(sent[v])
                     for v in range(len(sent)):
                         if tokens_ is None:
                             if v==0:
