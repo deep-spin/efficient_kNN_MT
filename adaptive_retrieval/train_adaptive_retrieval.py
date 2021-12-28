@@ -68,11 +68,8 @@ class FeatureDataset(data.Dataset):
                 fert_2=torch.FloatTensor([0])
                 fert_3=torch.FloatTensor([0])
                 fert_4=torch.FloatTensor([0])
-            print(self.conf[idx].shape)
-            print(fert_1.shape)
-            print(fert_2.shape)
 
-            return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda(), freq_1.cuda(), freq_2.cuda(), freq_3.cuda(), freq_4.cuda(), fert_1.cuda(), fert_2.cuda(), fert_3.cuda(), fert_4.cuda()
+            return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda().unsqueeze(-1), self.ent[idx].cuda().unsqueeze(-1), freq_1.cuda(), freq_2.cuda(), freq_3.cuda(), freq_4.cuda(), fert_1.cuda(), fert_2.cuda(), fert_3.cuda(), fert_4.cuda()
 
         elif self.use_faiss_centroids:
             return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda(), self.min_dist[idx].cuda(), self.min_top32_dist[idx].cuda()
