@@ -407,6 +407,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     fert_3=torch.FloatTensor([self.fert_dict[tuple(tokens[:-3])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
                     fert_4=torch.FloatTensor([self.fert_dict[tuple(tokens[:-4])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
 
+                    print(freq_1)
                     
                     knn_lambda = self.lambda_mlp.forward(last_hidden, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4 ).squeeze(-1)
                     
