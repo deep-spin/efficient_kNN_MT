@@ -180,8 +180,6 @@ def main(args, override_args=None):
 
                     tokens_save=torch.cat([tokens_save, tokens_.cpu().data],0)
 
-                print('----------', override_args.adaptive_retrieval_features_path)
-
                 #print(targets_save.shape)
                 #print(conf.shape)
 
