@@ -18,7 +18,7 @@ import faiss
 import pickle
 
 class FeatureDataset(data.Dataset):
-    def __init__(self, args, data):
+    def __init__(self, args, data, freq=None, fert=None, centroids=None):
         self.features = data['features']
         self.targets = data['targets']
         self.knn_probs = data['knn_probs']
@@ -29,6 +29,12 @@ class FeatureDataset(data.Dataset):
 
         self.use_freq_fert = args.use_freq_fert
         self.use_faiss_centroids = args.use_faiss_centroids
+
+        if freq is not None:
+            self.freq_dict = freq
+            self.fert_dict = fert
+        else:
+            self.freq_dict=None
 
         if self.use_faiss_centroids:
             centroids=torch.FloatTensor(centroids)
