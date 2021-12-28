@@ -62,7 +62,9 @@ class FeatureDataset(data.Dataset):
             dists = torch.cdist(self.features, centroids, p=2)
             self.min_dist = dists.min(-1).values.unsqueeze(-1)
             self.min_top32_dist = torch.topk(dists, 32, largest=False, dim=-1).values.unsqueeze(-1)
-            
+            print(self.features.shape)
+            print(self.min_dist.shape)
+            print(self.min_top32_dist.shape)
 
     def __len__(self):
         return len(self.features)
