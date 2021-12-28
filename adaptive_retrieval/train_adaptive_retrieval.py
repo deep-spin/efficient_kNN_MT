@@ -50,7 +50,7 @@ class FeatureDataset(data.Dataset):
     def __getitem__(self, idx):
 
         if self.use_freq_fert:
-
+            print(self.tokens.shape)
             freq_1=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-1]]]).unsqueeze(-1)
             freq_2=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-2]]]).unsqueeze(-1)
             freq_3=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-3]]]).unsqueeze(-1)
