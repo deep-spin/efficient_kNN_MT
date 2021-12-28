@@ -350,6 +350,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 else:
                     self.knn_cache=last_hidden
 
+            """
             if self.use_faiss_centroids:
                 dists = torch.cdist(last_hidden.squeeze(1), self.faiss_centroids, p=2).min(-1)
 
@@ -362,7 +363,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 self.total_possible_searches+=x.size(0)    
 
                 print(self.need_to_search, self.total_possible_searches)
-
+            """
             if self.knn_lambda_type == 'trainable':
                 self.lambda_mlp.eval()
                 if self.knn_use_conf_ent:
@@ -436,9 +437,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     min_dist = dists.min(-1).values.unsqueeze(-1)
                     min_top32_dist = torch.topk(dists, 32, largest=False, dim=-1).values.mean(-1).unsqueeze(-1)
 
-                    print(ent.shape)
-                    print(min_dist.shape)
-                    print(min_top32_dist.shape)
                     scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist).squeeze(-1)                    
 
                 else:
