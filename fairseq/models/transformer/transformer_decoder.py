@@ -494,8 +494,21 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
 
             if features_only:
-                tokens=prev_output_tokens
-                print(tokens.shape)
+                if prev_output_tokens.size(1)==1:
+                    aux=torch.ones(prev_output_tokens.size(0),3).cuda()
+                    aux[:,:]=2
+                    prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
+                elif prev_output_tokens.size(1)==2:
+                    aux=torch.ones(prev_output_tokens.size(0),2).cuda()
+                    aux[:,:]=2
+                    prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
+                elif prev_output_tokens.size(1)==3:
+                    aux=torch.ones(prev_output_tokens.size(0),2).cuda()
+                    aux[:,:]=2
+                    prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
+                elif prev_output_tokens.size(1)>4:
+                    prev_output_tokens=prev_output_tokens[:,-4:].type(torch.LongTensor)
+                print(prev_output_tokens.shape)
                 prob = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
                 return x, extra, knn_prob, prob
 
