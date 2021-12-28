@@ -142,7 +142,7 @@ def main(args, override_args=None):
                                 tokens_= torch.cat([tokens_,torch.cat([aux[-1:],sent[:v+1]],-1).unsqueeze(0)],0)
                             else:
                                 print(v)
-                                print(sent[-4:v+1])
+                                print(sent[:v+1])
                                 tokens_= torch.cat([tokens_,sent[-4:v+1].unsqueeze(0)],0)
                         print(tokens_)
 
