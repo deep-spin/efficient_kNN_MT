@@ -425,6 +425,17 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                     
                     scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4 ).squeeze(-1)
+                elif self.knn_use_conf_ent and self.use_faiss_centroids:
+                    network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
+                    conf=torch.max(network_probs, -1).values.unsqueeze(-1)
+                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
+
+                    dists = torch.cdist(last_hidden, centroids, p=2)
+                    min_dist = dists.min(-1).values
+                    min_top32_dist = torch.topk(dists, 32, largest=False, dim=-1).values
+
+                    scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist).squeeze(-1)                    
+
                 else:
                     scores = self.oracle_mlp.forward(last_hidden).squeeze(-1)
                 indices = (scores < 0.5).nonzero()[:,0]
