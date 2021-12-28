@@ -870,15 +870,15 @@ class EnsembleModel(nn.Module):
             if self.has_incremental_states():
                 decoder_out = model.decoder.forward(
                     tokens,
-                    new_sent,
+                    new_sent=new_sent,
                     encoder_out=encoder_out,
                     incremental_state=incremental_states[i],
                 )
             else:
                 if hasattr(model, "decoder"):
-                    decoder_out = model.decoder.forward(tokens, new_sent, encoder_out=encoder_out)
+                    decoder_out = model.decoder.forward(tokens, new_sent=new_sent, encoder_out=encoder_out)
                 else:
-                    decoder_out = model.forward(tokens, new_sent)
+                    decoder_out = model.forward(tokens, new_sent=new_sent)
 
             attn: Optional[Tensor] = None
             decoder_len = len(decoder_out)
