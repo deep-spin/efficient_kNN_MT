@@ -200,10 +200,12 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             ckpt_path = os.path.join(cfg.knn_oracle_mlp_path)
             ckpt = torch.load(ckpt_path)            
 
-            if cfg.knn_use_conf_ent and not cfg.knn_use_freq_fert:
+            if cfg.knn_use_conf_ent and not cfg.knn_use_freq_fert and not cfg.use_faiss_centroids:
                 self.oracle_mlp = mlp_oracle.MLPOracle(use_conf_ent=True)
             elif cfg.knn_use_conf_ent and cfg.knn_use_freq_fert:
                 self.oracle_mlp = mlp_oracle.MLPOracle(use_conf_ent=True, use_freq_fert=True)
+            elif cfg.knn_use_conf_ent and cfg.use_faiss_centroids:
+                self.oracle_mlp = mlp_oracle.MLPOracle(use_conf_ent=True, use_faiss_centroids=True)
             else:
                 self.oracle_mlp = mlp_oracle.MLPOracle()
 
