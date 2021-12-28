@@ -185,9 +185,6 @@ valid_data = torch.load(args.val_file)
 #network_probs_val_file=torch.from_numpy(network_probs_val_file)
 
 
-training_set = FeatureDataset(train_data)
-val_set = FeatureDataset(valid_data)
-
 #training_set = FeatureDataset(targets_file, features_file, knn_probs_file, network_probs_file)
 #val_set = FeatureDataset(targets_val_file, features_val_file, knn_probs_val_file, network_probs_val_file)
 
