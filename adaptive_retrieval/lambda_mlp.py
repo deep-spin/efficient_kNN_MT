@@ -49,6 +49,8 @@ class LambdaMLP(nn.Module):
 
         self.model = nn.Sequential(*models)
 
+        print(use_conf_ent)
+        print(use_freq_fert)
 
         if use_conf_ent and not use_freq_fert and not use_faiss_centroids:
             input_layer = {}
@@ -107,5 +109,5 @@ class LambdaMLP(nn.Module):
 
         else:
             scores = self.model(features)
-  
+
         return scores
