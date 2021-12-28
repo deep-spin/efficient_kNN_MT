@@ -121,8 +121,6 @@ def main(args, override_args=None):
 
 
                 for sent in tokens:
-                    print('\n\n\n')
-                    print(sent)
                     for v in range(len(sent)):
                         if tokens_ is None:
                             if v==0:
@@ -142,10 +140,12 @@ def main(args, override_args=None):
                                 tokens_= torch.cat([tokens_,torch.cat([aux[-1:],sent[:v+1]],-1).unsqueeze(0)],0)
                             else:
                                 tokens_= torch.cat([tokens_,sent[:v+1][-4:].unsqueeze(0)],0)
-                        print(tokens_)
 
-                tokens = tokens.contiguous().view(batch_size * seq_len, -1)
-                tokens = tokens.index_select(dim=0, index=non_pad_index)
+                tokens_ = tokens_.contiguous().view(batch_size * seq_len, -1)
+                tokens_ = tokens_.index_select(dim=0, index=non_pad_index)
+
+                print(tokens_.shape)
+                print(target.shape)
 
                 #targets_file[aux:aux+target.size(0)] = target.cpu().detach().numpy()
                 #features_file[aux:aux+target.size(0)] = features.cpu().detach().numpy()
