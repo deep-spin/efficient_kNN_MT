@@ -135,13 +135,13 @@ def main(args, override_args=None):
                                 tokens_= sent[-4:v].unsqueeze(0)
                         else:
                             if v==0:
-                                tokens_= torch.cat([tokens_,torch.cat([aux,sent[v].unsqueeze(0)],-1)],0).unsqueeze(0)
+                                tokens_= torch.cat([tokens_,torch.cat([aux,sent[v].unsqueeze(0)],-1).unsqueeze(0)],0)
                             elif v==1:
-                                tokens_= torch.cat([tokens_,torch.cat([aux[-2:],sent[:v]],-1)],0).unsqueeze(0)
+                                tokens_= torch.cat([tokens_,torch.cat([aux[-2:],sent[:v]],-1).unsqueeze(0)],0)
                             elif v==2:
-                                tokens_= torch.cat([tokens_,torch.cat([aux[-1:],sent[:v]],-1)],0).unsqueeze(0)
+                                tokens_= torch.cat([tokens_,torch.cat([aux[-1:],sent[:v]],-1).unsqueeze(0)],0)
                             else:
-                                tokens_= torch.cat([tokens_,sent[-4:v]],0).unsqueeze(0)
+                                tokens_= torch.cat([tokens_,sent[-4:v].unsqueeze(0)],0)
                         print(tokens_)
 
                 tokens = tokens.contiguous().view(batch_size * seq_len, -1)
