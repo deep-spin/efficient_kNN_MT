@@ -424,6 +424,8 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                     self.need_to_search += knn_lambda.size(0) - indices.size(0)
                     self.total_possible_searches+=knn_lambda.size(0)
+
+                    print(self.need_to_search, self.total_possible_searches)
                 
             else:
                 knn_lambda = self.knn_datastore.get_lambda()
