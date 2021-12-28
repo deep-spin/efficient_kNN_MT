@@ -227,7 +227,7 @@ if args.arch == 'mlp':
                 hidden_units=args.hidden_units,
                 nlayers=args.nlayers,
                 dropout=args.dropout,
-                use_conf_ent=args.use_conf_ent
+                use_conf_ent=args.use_conf_ent,
                 use_freq_fert=args.use_freq_fert,
                 use_faiss_centroids=args.use_faiss_centroids,)
 
