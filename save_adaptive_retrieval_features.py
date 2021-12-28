@@ -122,8 +122,8 @@ def main(args, override_args=None):
 
                 for sent in tokens:
                     print('\n\n\n')
+                    print(sent)
                     for v in range(len(sent)):
-                        print(sent)
                         if tokens_ is None:
                             if v==0:
                                 tokens_= torch.cat([aux,sent[v].unsqueeze(0)],-1).unsqueeze(0)
@@ -141,11 +141,6 @@ def main(args, override_args=None):
                             elif v==2:
                                 tokens_= torch.cat([tokens_,torch.cat([aux[-1:],sent[:v+1]],-1).unsqueeze(0)],0)
                             else:
-                                print(v)
-                                print(sent[:v+1])
-                                print(sent[:v+1][-4:])
-                                print(sent[:v+1][-4:].shape)
-                                print(tokens_.shape)
                                 tokens_= torch.cat([tokens_,sent[:v+1][-4:].unsqueeze(0)],0)
                         print(tokens_)
 
