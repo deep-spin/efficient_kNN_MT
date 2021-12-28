@@ -306,7 +306,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         if self.use_knn_datastore:
             if self.use_knn_cache or self.knn_search_prediction or self.knn_lambda_threshold>0 or self.knn_search_every or self.use_faiss_centroids:
                 mask = torch.ones(last_hidden.size(0), dtype=torch.bool)
-                knn_probs=torch.zeros(last_hidden.size(0), 1, 42024)#.cuda()
+                knn_probs=torch.zeros(last_hidden.size(0), 1, 42024).cuda()
 
             if self.knn_search_every>0:
                 if new_sent:
@@ -388,7 +388,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
             if self.knn_search_prediction:
                 self.oracle_mlp.eval()
-                if self.knn_use_conf_ent and not self.knn_use_freq_fert:
+                if self.knn_use_conf_ent and not self.knn_use_freq_fert and not self.use_faiss_centroids:
                     network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
                     conf=torch.max(network_probs, -1).values.unsqueeze(-1)
                     ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
@@ -475,7 +475,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 knn_index = 0
                 tgt_index = 0
                 
-                knn_probs=torch.zeros(x.size(0), 1, 42024)#.cuda()
+                knn_probs=torch.zeros(x.size(0), 1, 42024).cuda()
             
                 return x, extra, knn_probs, knn_lambda, knn_dists, knn_index
 
