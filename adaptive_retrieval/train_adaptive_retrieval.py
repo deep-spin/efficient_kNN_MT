@@ -15,6 +15,7 @@ from collections import Counter, OrderedDict
 
 from lambda_mlp import LambdaMLP
 import faiss
+import pickle
 
 class FeatureDataset(data.Dataset):
     def __init__(self, args, data):
