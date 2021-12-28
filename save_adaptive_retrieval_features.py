@@ -143,9 +143,6 @@ def main(args, override_args=None):
                 tokens_ = tokens_.contiguous().view(batch_size * seq_len, -1)
                 tokens_ = tokens_.index_select(dim=0, index=non_pad_index)
 
-                print(tokens_.shape)
-                print(target.shape)
-
                 #targets_file[aux:aux+target.size(0)] = target.cpu().detach().numpy()
                 #features_file[aux:aux+target.size(0)] = features.cpu().detach().numpy()
                 #knn_probs_file[aux:aux+target.size(0)] = knn_prob.squeeze(0).cpu().detach().numpy()
@@ -170,6 +167,8 @@ def main(args, override_args=None):
                     conf=torch.max(network_prob, -1).values.cpu().data
 
                     ent=torch.distributions.Categorical(network_prob).entropy().cpu().data
+
+                    tokens_save=tokens_.cpu().data
                 else:
                     targets_save = torch.cat([targets_save, target.cpu().data],0)
                     features_save = torch.cat([features_save, features.cpu().data],0)
@@ -179,10 +178,12 @@ def main(args, override_args=None):
                     conf=torch.cat([conf, torch.max(network_prob, -1).values.cpu().data],0)
                     ent=torch.cat([ent, torch.distributions.Categorical(network_prob).entropy().cpu().data],0)
 
+                    tokens_save=torch.cat([tokens_save, tokens_.cpu(.data)],0)
+
                 #print(targets_save.shape)
                 #print(conf.shape)
 
-        feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save, 'conf': conf, 'ent': ent}
+        feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_prob_save, 'network_probs': network_prob_save, 'conf': conf, 'ent': ent, 'tokens': tokens}
         torch.save(feats, override_args.adaptive_retrieval_features_path)
 
         #torch.save(targets_save, override_args.adaptive_retrieval_features_path+'_targets')
