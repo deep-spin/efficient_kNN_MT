@@ -22,6 +22,7 @@ class MLPOracle(nn.Module):
 
         self.use_conf_ent = use_conf_ent 
         self.use_freq_fert = use_freq_fert
+        self.use_faiss_centroids = use_faiss_centroids
         self.compute_loss = compute_loss
 
         if use_conf_ent and not use_freq_fert:    
