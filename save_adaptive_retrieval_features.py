@@ -90,6 +90,8 @@ def main(args, override_args=None):
         aux=0
        	with torch.no_grad():
             model.eval()
+            tokens_=None
+            aux=torch.LongTensor([2,2,2])
             for i, sample in enumerate(progress):
                 sample = utils.move_to_cuda(sample) if use_cuda else sample
                 features, knn_prob, network_prob, tokens = task.forward_and_get_hidden_state_step(sample, model, use_knn_datastore=True)  # [B, T, H]
@@ -117,9 +119,30 @@ def main(args, override_args=None):
                 network_prob = network_prob.contiguous().view(batch_size * seq_len, -1)
                 network_prob = network_prob.index_select(dim=0, index=non_pad_index)
 
-                print(tokens.shape)
+
                 for sent in tokens:
+                    print('\n\n\n')
                     print(sent)
+                    for v in range(len(sent)):
+                        if tokens_ is None:
+                            if v==0:
+                                tokens_= torch.cat([aux,sent[v]],-1)
+                            elif v==1:
+                                tokens_= torch.cat([aux[-2:],sent[:v]],-1)
+                            elif v==2:
+                                tokens_= torch.cat([aux[-1:],sent[:v]],-1)
+                            else:
+                                tokens_= sent[-4:v]
+                        else:
+                            if v==0:
+                                tokens_= torch.cat([tokens_,torch.cat([aux,sent[v]],-1)],0)
+                            elif v==1:
+                                tokens_= torch.cat([tokens_,torch.cat([aux[-2:],sent[:v]],-1)],0)
+                            elif v==2:
+                                tokens_= torch.cat([tokens_,torch.cat([aux[-1:],sent[:v]],-1)],0)
+                            else:
+                                tokens_= torch.cat([tokens_,sent[-4:v]],0)
+                        print(tokens_)
 
                 tokens = tokens.contiguous().view(batch_size * seq_len, -1)
                 tokens = tokens.index_select(dim=0, index=non_pad_index)
