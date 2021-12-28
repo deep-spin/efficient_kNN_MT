@@ -14,23 +14,60 @@ from tqdm import tqdm
 from collections import Counter, OrderedDict
 
 from lambda_mlp import LambdaMLP
-
+import faiss
 
 class FeatureDataset(data.Dataset):
-    def __init__(self, data):
+    def __init__(self, args, data):
         self.features = data['features']
         self.targets = data['targets']
         self.knn_probs = data['knn_probs']
         self.network_probs = data['network_probs']
         self.conf = data['conf']
         self.ent = data['ent']
+        self.tokens = data['tokens']
+
+        self.use_freq_fert = args.use_freq_fert
+        self.use_faiss_centroids = args.use_faiss_centroids
+
+        if self.use_faiss_centroids:
+            centroids=torch.FloatTensor(centroids)
+            
+            dists = torch.cdist(self.features, centroids, p=2)
+            self.min_dist = dists.min(-1).values.unsqueeze(-1)
+            self.min_top32_dist = torch.topk(dists, 32, largest=False, dim=-1).values.mean(-1).unsqueeze(-1)
 
 
     def __len__(self):
         return len(self.features)
 
     def __getitem__(self, idx):
-        return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda()
+
+        if self.use_freq_fert:
+            try:
+                freq_1=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-1]]])
+                freq_2=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-2]]])
+                freq_3=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-3]]])
+                freq_4=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-4]]])
+                fert_1=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-1]]])
+                fert_2=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-2]]])
+                fert_3=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-3]]])
+                fert_4=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-4]]])
+            except:
+                freq_1=torch.FloatTensor([0])
+                freq_2=torch.FloatTensor([0])
+                freq_3=torch.FloatTensor([0])
+                freq_4=torch.FloatTensor([0])
+                fert_1=torch.FloatTensor([0])
+                fert_2=torch.FloatTensor([0])
+                fert_3=torch.FloatTensor([0])
+                fert_4=torch.FloatTensor([0])
+
+        return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda(), freq_1.cuda(), freq_2.cuda(), freq_3.cuda(), freq_4.cuda(), fert_1.cuda(), fert_2.cuda(), fert_3.cuda(), fert_4.cuda()
+
+        elif self.use_faiss_centroids:
+            return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda(), self.min_dist[idx].cuda(), self.min_top32_dist[idx].cuda()
+        else:
+            return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda()
 
 #class FeatureDataset(data.Dataset):
 #    def __init__(self, targets, features, knn_probs, network_probs):
@@ -51,34 +88,25 @@ def validate(val_dataloader, model, args):
     running_loss = 0.
     nsamples = 0
     for i, sample in enumerate(val_dataloader):
-        features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
-
-        #for v in range(len(targets)):
-        #	if v==0:
-        #		network_prob = network_probs[v][targets[v]].unsqueeze(0)
-        #		knn_prob = knn_probs[v][targets[v]].unsqueeze(0)
-        #	else:
-        #		network_prob = torch.cat([network_prob, network_probs[v][targets[v]].unsqueeze(0)],0)
-        #		knn_prob = torch.cat([knn_prob, knn_probs[v][targets[v]].unsqueeze(0)],0)
-
-
-
-
-        if not args.use_conf_ent:
-        	log_weight = model(features)
+        if args.use_freq_fert:
+            features, targets, knn_probs, network_probs, conf, ent, freq_1, freq_2, freq_3, freq_4, fert_1, fert_2, fert_3, fert_4 = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7], sample[8], sample[9], sample[10], sample[11], sample[12], sample[13]
+        elif args.use_faiss_centroids:
+            features, targets, knn_probs, network_probs, conf, ent, min_dist, min_top32_dist = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7]
         else:
-        	#conf=torch.max(network_probs, -1).values.unsqueeze(-1)
-        	#ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
-        	log_weight = model(features, conf, ent)
-        
-        #log_weight = torch.log(torch.FloatTensor([.4,.6])).cuda().unsqueeze(0)
+            features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
+
+        if not args.use_conf_ent and not args.use_freq_fert:
+            log_weight = model(features, targets=targets)
+        elif args.use_conf_ent and not args.use_freq_fert and not args.use_faiss_centroids:
+            log_weight = model(features, targets=targets, conf=conf, ent=ent)
+        elif args.use_conf_ent and args.use_freq_fert:
+            log_weight = model(features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
+        elif args.use_conf_ent and args.use_faiss_centroids:
+            log_weight = model(features, targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
+
         
         knn_probs=torch.clamp(knn_probs, min=1e-12)
         cross_entropy = log_weight + torch.stack((torch.log(network_probs), torch.log(knn_probs)), dim=-1)
-
-        #print('lambda', torch.exp(log_weight))
-        #print('network_prob', network_prob)
-        #print('knn_prob', knn_prob)
 
         # (B,)
         cross_entropy = -torch.logsumexp(cross_entropy, dim=-1)
@@ -105,8 +133,10 @@ parser = argparse.ArgumentParser(description='')
 parser.add_argument('--train_file', type=str, default=None)
 parser.add_argument('--val_file', type=str, default=None)
 parser.add_argument('--use_conf_ent', action='store_true')
-parser.add_argument('--train_others', type=str, default=None,help='use a specified file for other features if specified')
-parser.add_argument('--val_others', type=str, default=None,help='use a specified file for other features if specified')
+parser.add_argument('--use_freq_fert', action='store_true')
+parser.add_argument('--use_faiss_centroids', action='store_true')
+parser.add_argument('--train_faiss_index', type=str, default=None)
+parser.add_argument('--valid_faiss_index', type=str, default=None)
 parser.add_argument('--seed', type=int, default=1,help='the random seed')
 
 # training arguments
@@ -114,7 +144,6 @@ parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
 parser.add_argument('--l1', type=float, default=0, help='l1 regularization coefficient')
 parser.add_argument('--n_epochs', type=int, default=10)
 parser.add_argument('--batch-size', type=int, default=64, help='batch size')
-parser.add_argument('--ngram', type=int, default=0, help='the ngram features to use')
 
 
 # model hyperparameters
@@ -161,13 +190,35 @@ val_set = FeatureDataset(valid_data)
 #training_set = FeatureDataset(targets_file, features_file, knn_probs_file, network_probs_file)
 #val_set = FeatureDataset(targets_val_file, features_val_file, knn_probs_val_file, network_probs_val_file)
 
-train_dataloader = torch.utils.data.DataLoader(training_set,
-                                               batch_size=args.batch_size,
-                                               shuffle=True,)
+if args.use_freq_fert:
+    freq_file=pickle.load(open(args.freq_fert_path+'freq_cache_id.pickle','rb'))
+    fert_file=pickle.load(open(args.freq_fert_path+'fertility_cache_id.pickle','rb'))
 
-val_dataloader = torch.utils.data.DataLoader(val_set,
-                                             batch_size=args.batch_size,
-                                             shuffle=False,)
+    training_set = FeatureDataset(args, train_data, freq=freq_file, fert=fert_file)
+    val_set = FeatureDataset(args, valid_data, freq=freq_file, fert=fert_file)
+
+    train_dataloader = torch.utils.data.DataLoader(training_set, batch_size=args.batch_size, shuffle=True)
+    val_dataloader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=False)
+
+elif args.use_faiss_centroids:
+    index_train = faiss.read_index(args.train_faiss_index + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
+    index_valid = faiss.read_index(args.valid_faiss_index + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
+    
+    centroids_train = index_train.quantizer.reconstruct_n(0, index_train.nlist)
+    centroids_valid = index_valid.quantizer.reconstruct_n(0, index_valid.nlist)
+
+    training_set = FeatureDataset(args, train_data, centroids=centroids_train)
+    val_set = FeatureDataset(args, valid_data, centroids=centroids_valid)
+
+    train_dataloader = torch.utils.data.DataLoader(training_set, batch_size=args.batch_size, shuffle=True)
+    val_dataloader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=False)
+    
+else:
+    training_set = FeatureDataset(args, train_data)
+    val_set = FeatureDataset(args, valid_data)
+
+    train_dataloader = torch.utils.data.DataLoader(training_set, batch_size=args.batch_size, shuffle=True)
+    val_dataloader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=False)
 
 
 
@@ -176,7 +227,9 @@ if args.arch == 'mlp':
                 hidden_units=args.hidden_units,
                 nlayers=args.nlayers,
                 dropout=args.dropout,
-                use_conf_ent=args.use_conf_ent)
+                use_conf_ent=args.use_conf_ent
+                use_freq_fert=args.use_freq_fert,
+                use_faiss_centroids=args.use_faiss_centroids,)
 
 if args.load_model:
     ckpt_path = os.path.join(args.load_model, 'checkpoint_best.pt')
@@ -198,26 +251,23 @@ for epoch in tqdm(range(args.n_epochs)):
     nsamples = 0
 
     for i, sample in enumerate(tqdm(train_dataloader)):
-        features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
-
-        #for v in range(len(targets)):
-        	#if v==0:
-        	#	network_prob = network_probs[v][targets[v]].unsqueeze(0)
-        	#	knn_prob = knn_probs[v][targets[v]].unsqueeze(0)
-        	#else:
-        	#	network_prob = torch.cat([network_prob, network_probs[v][targets[v]].unsqueeze(0)],0)
-        	#	knn_prob = torch.cat([knn_prob, knn_probs[v][targets[v]].unsqueeze(0)],0)
-
+        if args.use_freq_fert:
+            features, targets, knn_probs, network_probs, conf, ent, freq_1, freq_2, freq_3, freq_4, fert_1, fert_2, fert_3, fert_4 = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7], sample[8], sample[9], sample[10], sample[11], sample[12], sample[13]
+        elif args.use_faiss_centroids:
+            features, targets, knn_probs, network_probs, conf, ent, min_dist, min_top32_dist = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7]
+        else:
+            features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
 
         optimizer.zero_grad()
 
-        # (B x 2): log probability
-        if not args.use_conf_ent:
-        	log_weight = model(features)
-        else:
-        	#conf=torch.max(network_probs, -1).values.unsqueeze(-1)
-        	#ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
-        	log_weight = model(features, conf, ent)
+        if not args.use_conf_ent and not args.use_freq_fert:
+            log_weight = model(features, targets=targets)
+        elif args.use_conf_ent and not args.use_freq_fert and not args.use_faiss_centroids:
+            log_weight = model(features, targets=targets, conf=conf, ent=ent)
+        elif args.use_conf_ent and args.use_freq_fert:
+            log_weight = model(features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
+        elif args.use_conf_ent and args.use_faiss_centroids:
+            log_weight = model(features, targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
 
         knn_probs=torch.clamp(knn_probs, min=1e-12)
         cross_entropy = log_weight + torch.stack((torch.log(network_probs), torch.log(knn_probs)), dim=-1)
@@ -236,12 +286,6 @@ for epoch in tqdm(range(args.n_epochs)):
         running_loss += loss.item() * bsz
         nsamples += bsz
 
-        #if i%500==0:
-        #	val_loss = validate(val_dataloader, model, args)
-        #	if val_loss <= best_loss:
-        #		best_loss = val_loss
-        #		torch.save(model.state_dict(), os.path.join(args.output_dir, 'checkpoint_best.pt'))
-        #	model.train()
     
     report_loss = running_loss / nsamples
     print(f'\n epoch: {epoch}, step: {i},  training loss: {report_loss:.3f}')
