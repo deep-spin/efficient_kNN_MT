@@ -28,7 +28,7 @@ class MLPOracle(nn.Module):
         if use_conf_ent and not use_freq_fert:    
             input_dim=int(ctxt_dim)*2
         elif use_conf_ent and use_freq_fert:    
-            input_dim=2044
+            input_dim=2048
         elif use_conf_ent and use_faiss_centroids:
             input_dim=int(ctxt_dim)*2
         else:
