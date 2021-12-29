@@ -140,7 +140,7 @@ def validate(val_dataloader, model, args):
                 total_search+=1
             elif targets[t]==1:
                 total_search+=1
-                
+
             if targets[t]==0 and scores[t]<=0.5:
                 rights_not_search+=1
                 total_not_search+=1
@@ -153,6 +153,10 @@ def validate(val_dataloader, model, args):
     acc_search = rights_search / total_search
     acc_not_search = rights_not_search / total_not_search
 
+    print('rights', rights)
+    print('rights_search', rights_search)
+    print('rights_not_search', rights_not_search)
+    
     print(f"\n val loss: {val_loss:.3f}, val acc: {acc:.3f}, val acc search: {acc_search:.3f}, val acc not search: {acc_not_search:.3f}")
 
     return val_loss
