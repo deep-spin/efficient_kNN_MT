@@ -100,6 +100,10 @@ def validate(val_dataloader, model, args):
     running_loss = 0.
     nsamples = 0
     rights = 0
+    rights_search = 0
+    rights_not_search = 0
+    total_search = 0
+    total_not_search = 0
     for i, sample in enumerate(val_dataloader):
         if args.use_freq_fert:
             features, targets, knn_probs, network_probs, conf, ent, freq_1, freq_2, freq_3, freq_4, fert_1, fert_2, fert_3, fert_4 = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7], sample[8], sample[9], sample[10], sample[11], sample[12], sample[13]
@@ -131,11 +135,25 @@ def validate(val_dataloader, model, args):
         for t in range(len(targets)):
         	if targets[t]==1 and scores[t]>0.5 or targets[t]==0 and scores[t]<=0.5:
         		rights+=1
+            if targets[t]==1 and scores[t]>0.5:
+                rights_search+=1
+                total_search+=1
+            elif targets[t]==1:
+                total_search+=1
+                
+            if targets[t]==0 and scores[t]<=0.5:
+                rights_not_search+=1
+                total_not_search+=1
+            elif targets[t]==0:
+                total_not_search+=1
+
 
     val_loss = running_loss / nsamples
     acc = rights / nsamples
+    acc_search = rights_search / total_search
+    acc_not_search = rights_not_search / total_not_search
 
-    print(f"\n val loss: {val_loss:.3f}, val acc: {acc:.3f}")
+    print(f"\n val loss: {val_loss:.3f}, val acc: {acc:.3f}, val acc search: {acc_search:.3f}, val acc not search: {acc_not_search:.3f}")
 
     return val_loss
 
@@ -165,7 +183,8 @@ parser.add_argument('--nlayers', type=int, default=4, help='number of layers')
 parser.add_argument('--dropout', type=float, default=.2, help='dropout')
 
 parser.add_argument('--output-dir', type=str)
-parser.add_argument('--load-model', type=str, default=None, help='load model checkpoint')
+parser.add_argument('--valid', action='store_true')
+parser.add_argument('--load_model', type=str, default=None, help='load model checkpoint')
 
 args = parser.parse_args()
 
@@ -233,52 +252,56 @@ print(model)
 optimizer = optim.Adam(model.parameters(), lr=args.lr)
 model.train()
 
+if args.valid:
+    _ = validate(val_dataloader, model, args)
+else:
+    best_loss = 1e5
+    for epoch in tqdm(range(args.n_epochs)):
+        running_loss = 0.
+        nsamples = 0
+        rights = 0
 
-best_loss = 1e5
-for epoch in tqdm(range(args.n_epochs)):
-    running_loss = 0.
-    nsamples = 0
-    rights = 0
+        for i, sample in enumerate(tqdm(train_dataloader)):
+            if args.use_freq_fert:
+                features, targets, knn_probs, network_probs, conf, ent, freq_1, freq_2, freq_3, freq_4, fert_1, fert_2, fert_3, fert_4 = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7], sample[8], sample[9], sample[10], sample[11], sample[12], sample[13]
+            elif args.use_faiss_centroids:
+                features, targets, knn_probs, network_probs, conf, ent, min_dist, min_top32_dist = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7]
+            else:
+                features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
 
-    for i, sample in enumerate(tqdm(train_dataloader)):
-        if args.use_freq_fert:
-            features, targets, knn_probs, network_probs, conf, ent, freq_1, freq_2, freq_3, freq_4, fert_1, fert_2, fert_3, fert_4 = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7], sample[8], sample[9], sample[10], sample[11], sample[12], sample[13]
-        elif args.use_faiss_centroids:
-            features, targets, knn_probs, network_probs, conf, ent, min_dist, min_top32_dist = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7]
-        else:
-            features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
+            optimizer.zero_grad()
 
-        optimizer.zero_grad()
+            if not args.use_conf_ent and not args.use_freq_fert:
+                scores, loss = model(features, targets=targets)
+            elif args.use_conf_ent and not args.use_freq_fert and not args.use_faiss_centroids:
+                scores, loss = model(features, targets=targets, conf=conf, ent=ent)
+            elif args.use_conf_ent and args.use_freq_fert:
+                scores, loss = model(features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
+            elif args.use_conf_ent and args.use_faiss_centroids:
+                scores, loss = model(features, targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
 
-        if not args.use_conf_ent and not args.use_freq_fert:
-            scores, loss = model(features, targets=targets)
-        elif args.use_conf_ent and not args.use_freq_fert and not args.use_faiss_centroids:
-            scores, loss = model(features, targets=targets, conf=conf, ent=ent)
-        elif args.use_conf_ent and args.use_freq_fert:
-            scores, loss = model(features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
-        elif args.use_conf_ent and args.use_faiss_centroids:
-            scores, loss = model(features, targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
+            #if args.l1 > 0:
+            #    loss = loss + args.l1 * torch.abs(log_weight.exp()[:,1]).sum() / log_weight.size(0)
 
-        #if args.l1 > 0:
-        #    loss = loss + args.l1 * torch.abs(log_weight.exp()[:,1]).sum() / log_weight.size(0)
+            loss.backward()
+            optimizer.step()
 
-        loss.backward()
-        optimizer.step()
+            bsz = len(targets)
+            running_loss += loss.item() * bsz
+            nsamples += bsz
 
-        bsz = len(targets)
-        running_loss += loss.item() * bsz
-        nsamples += bsz
+            for t in range(len(targets)):
+            	if targets[t]==1 and scores[t]>0.5 or targets[t]==0 and scores[t]<=0.5:
+            		rights+=1
 
-        for t in range(len(targets)):
-        	if targets[t]==1 and scores[t]>0.5 or targets[t]==0 and scores[t]<=0.5:
-        		rights+=1
+        acc = rights / nsamples
+        report_loss = running_loss / nsamples
+        print(f'\n epoch: {epoch}, step: {i},  training loss: {report_loss:.3f}, training acc: {acc:.3f}')
 
-    acc = rights / nsamples
-    report_loss = running_loss / nsamples
-    print(f'\n epoch: {epoch}, step: {i},  training loss: {report_loss:.3f}, training acc: {acc:.3f}')
+        val_loss = validate(val_dataloader, model, args)
 
-    val_loss = validate(val_dataloader, model, args)
+        torch.save(model.state_dict(), os.path.join(args.output_dir, 'checkpoint_'+str(epoch)+'.pt'))
 
-    torch.save(model.state_dict(), os.path.join(args.output_dir, 'checkpoint_'+str(epoch)+'.pt'))
+        model.train()
 
-    model.train()
+
