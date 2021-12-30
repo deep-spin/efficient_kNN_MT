@@ -245,8 +245,7 @@ if args.arch == 'mlp':
                 )
 
 if args.load_model:
-    ckpt_path = os.path.join(args.load_model, 'checkpoint_best.pt')
-    ckpt = torch.load(ckpt_path)
+    ckpt = torch.load(args.load_model)
     model.load_state_dict(ckpt)
     print(f"loaded model ckpt from {ckpt_path} at epoch {ckpt['epoch']}")
 
