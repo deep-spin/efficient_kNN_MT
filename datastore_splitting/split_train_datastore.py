@@ -23,7 +23,7 @@ parser.add_argument('--num_keys_to_add_at_a_time', default=1000000, type=int,
 parser.add_argument('--starting_point', type=int, default=0, help='index to start adding keys at')
 parser.add_argument('--use_gpu', default=False, action='store_true')
 parser.add_argument("--pca", default=0, type=int)
-parser.add_argument("--n_datastores", default=0, type=int)
+parser.add_argument("--n_datastores", default=16, type=int)
 parser.add_argument("--n_examples_train_kmeans", default=10000000, type=int)
 parser.add_argument("--kmeans_iter", default=50, type=int)
 
