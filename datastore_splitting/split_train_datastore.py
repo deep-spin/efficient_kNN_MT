@@ -59,7 +59,7 @@ np.random.seed(args.seed)
 
 index_dim = args.pca if args.pca > 0 else args.dimension
 
-
+print('--------------', vals.shape)
 random_sample = np.random.choice(np.arange(vals.shape[0]), size=[min(args.n_examples_train_kmeans, vals.shape[0])], replace=False)
 kmeans = faiss.Kmeans(index_dim, args.n_datastores, niter=args.kmeans_iter, verbose=True, min_points_per_centroid=10000)
 
@@ -67,8 +67,6 @@ kmeans.train(keys[random_sample].astype(np.float32))
 
 _, I = kmeans.index.search(keys, 1)
 
-print(kmeans.centroids)
-print(kmeans.centroids.shape)
 np.save(args.faiss_index+'centroids', kmeans.centroids)
 
 log_file = open(args.faiss_index+'log', 'w')
