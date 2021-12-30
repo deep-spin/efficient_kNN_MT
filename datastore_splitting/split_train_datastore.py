@@ -66,10 +66,9 @@ kmeans = faiss.Kmeans(index_dim, args.n_datastores, niter=args.kmeans_iter, verb
 kmeans.train(keys[random_sample].astype(np.float32))
 
 _, I = kmeans.index.search(keys, 1)
-print(I)
 
-log_file = open(args.faiss_index+'_log', 'w')
-if not os.path.exists(args.faiss_index + ".trained"):
+log_file = open(args.faiss_index+'log', 'w')
+if not os.path.exists(args.faiss_index + "0_faiss_index.trained"):
     quantizer = faiss.IndexFlatL2(index_dim)
 
     if args.pca>0:
@@ -86,9 +85,7 @@ if not os.path.exists(args.faiss_index + ".trained"):
 
         print('Training Index', i)
 
-        print((I==i).nonzero())
         idx = (I==i).nonzero()[0]
-        print(idx)
 
         keys_ = keys[idx]
         vals_ = vals[idx]
@@ -103,12 +100,12 @@ if not os.path.exists(args.faiss_index + ".trained"):
         print('Writing index after training')
         start = time.time()
 
-        faiss.write_index(indexes[i], args.faiss_index + '_' + str(i) + ".trained")
+        faiss.write_index(indexes[i], args.faiss_index + str(i) + "_faiss_index.trained")
         
         print('Writing index took {} s'.format(time.time() - start))        
 
         print('Adding Keys')
-        index = faiss.read_index(args.faiss_index + '_' + str(i) + ".trained")
+        index = faiss.read_index(args.faiss_index + str(i) + "_faiss_index.trained")
 
         start = args.starting_point
         start_time = time.time()
@@ -123,14 +120,14 @@ if not os.path.exists(args.faiss_index + ".trained"):
             if (start % 1000000) == 0:
                 print('Added %d tokens so far' % start)
                 print('Writing Index', start)
-                faiss.write_index(indexes[i], args.faiss_index+ '_' + str(i))
+                faiss.write_index(indexes[i], args.faiss_index+ str(i) + "_faiss_index")
 
             print("Adding total %d keys" % end)
             print('Adding took {} s'.format(time.time() - start_time))
             print('Writing Index')
             start = time.time()
 
-            faiss.write_index(indexes[i], args.faiss_index+ '_' + str(i))
+            faiss.write_index(indexes[i], args.faiss_index+ str(i) + "_faiss_index")
 
             print('Writing index took {} s'.format(time.time() - start))
             
