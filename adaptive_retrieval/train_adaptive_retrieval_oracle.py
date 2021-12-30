@@ -134,7 +134,7 @@ def validate(val_dataloader, model, args):
         
         for t in range(len(targets)):
             if targets[t]==1 and scores[t]>0.5 or targets[t]==0 and scores[t]<=0.5:
-        		rights+=1
+                rights+=1
             
             if targets[t]==1 and scores[t]>0.5:
                 rights_search+=1
