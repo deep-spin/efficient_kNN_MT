@@ -72,7 +72,7 @@ print(kmeans.centroids.shape)
 np.save(args.faiss_index+'centroids', kmeans.centroids)
 
 log_file = open(args.faiss_index+'log', 'w')
-if not os.path.exists(args.faiss_index + "0_faiss_index.trained"):
+if not os.path.exists(args.faiss_index + "15_faiss_index.trained"):
     quantizer = faiss.IndexFlatL2(index_dim)
 
     if args.pca>0:
