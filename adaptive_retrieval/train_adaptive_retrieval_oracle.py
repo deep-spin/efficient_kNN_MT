@@ -156,7 +156,7 @@ def validate(val_dataloader, model, args):
     print('rights', rights)
     print('rights_search', rights_search)
     print('rights_not_search', rights_not_search)
-    
+
     print(f"\n val loss: {val_loss:.3f}, val acc: {acc:.3f}, val acc search: {acc_search:.3f}, val acc not search: {acc_not_search:.3f}")
 
     return val_loss
