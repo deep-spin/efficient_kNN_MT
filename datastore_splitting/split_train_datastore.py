@@ -94,6 +94,9 @@ if not os.path.exists(args.faiss_index + "15_faiss_index.trained"):
         keys_ = keys[idx]
         vals_ = vals[idx]
 
+        log_file.write('index ' + str(i) + ':' + str(vals_.shape[0]) + '\n\n')
+        print(vals_.shape)
+
         random_sample = np.random.choice(np.arange(vals_.shape[0]), size=[min(1000000, vals_.shape[0])], replace=False)
         start = time.time()
 
@@ -135,4 +138,4 @@ if not os.path.exists(args.faiss_index + "15_faiss_index.trained"):
 
             print('Writing index took {} s'.format(time.time() - start))
             
-            log_file.write('index ' + str(i) + ':' + str(vals_.shape[0]) + '\n\n')
+            
