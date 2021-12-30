@@ -133,8 +133,9 @@ def validate(val_dataloader, model, args):
         nsamples += len(targets)
         
         for t in range(len(targets)):
-        	if targets[t]==1 and scores[t]>0.5 or targets[t]==0 and scores[t]<=0.5:
+            if targets[t]==1 and scores[t]>0.5 or targets[t]==0 and scores[t]<=0.5:
         		rights+=1
+            
             if targets[t]==1 and scores[t]>0.5:
                 rights_search+=1
                 total_search+=1
