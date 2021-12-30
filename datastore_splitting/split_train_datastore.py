@@ -66,7 +66,7 @@ kmeans = faiss.Kmeans(index_dim, args.n_datastores, niter=args.kmeans_iter, verb
 kmeans.train(keys[random_sample].astype(np.float32))
 
 _, I = kmeans.index.search(keys, 1)
-
+print(I)
 
 log_file = open(args.faiss_index+'_log', 'w')
 if not os.path.exists(args.faiss_index + ".trained"):
@@ -88,7 +88,7 @@ if not os.path.exists(args.faiss_index + ".trained"):
 
         idx = (I==i).nonzero()[:,0]
         print(idx)
-        
+
         keys_ = keys[idx]
         vals_ = vals[idx]
 
