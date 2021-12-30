@@ -63,7 +63,7 @@ index_dim = args.pca if args.pca > 0 else args.dimension
 random_sample = np.random.choice(np.arange(vals.shape[0]), size=[min(args.n_examples_train_kmeans, vals.shape[0])], replace=False)
 kmeans = faiss.Kmeans(index_dim, args.n_datastores, niter=args.kmeans_iter, verbose=True)
 
-kmeans.train(x)
+kmeans.train(keys[random_sample].astype(np.float32))
 
 D, _ = kmeans.index.search(vals, 1)
 
@@ -89,7 +89,7 @@ if not os.path.exists(args.faiss_index + ".trained"):
         random_sample = np.random.choice(np.arange(multi_vals[i].shape[0]), size=[min(1000000, multi_vals[i].shape[0])], replace=False)
         start = time.time()
 
-        indexes[i].train(keys[random_sample].astype(np.float32))
+        indexes[i].train(multi_keys[i][random_sample].astype(np.float32))
 
         print('Training took {} s'.format(time.time() - start))
 
