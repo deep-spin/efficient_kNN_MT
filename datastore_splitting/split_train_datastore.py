@@ -87,7 +87,7 @@ if not os.path.exists(args.faiss_index + ".trained"):
         print('Training Index', i)
 
         print((I==i).nonzero())
-        idx = (I==i).nonzero()[:,0]
+        idx = (I==i).nonzero()[0]
         print(idx)
 
         keys_ = keys[idx]
