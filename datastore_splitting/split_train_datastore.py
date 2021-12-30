@@ -65,9 +65,8 @@ kmeans = faiss.Kmeans(index_dim, args.n_datastores, niter=args.kmeans_iter, verb
 
 kmeans.train(keys[random_sample].astype(np.float32))
 
-D, _ = kmeans.index.search(keys, 1)
+_, I = kmeans.index.search(keys, 1)
 
-print(D.shape)
 
 log_file = open(args.faiss_index+'_log', 'w')
 if not os.path.exists(args.faiss_index + ".trained"):
@@ -87,10 +86,16 @@ if not os.path.exists(args.faiss_index + ".trained"):
 
         print('Training Index', i)
 
-        random_sample = np.random.choice(np.arange(multi_vals[i].shape[0]), size=[min(1000000, multi_vals[i].shape[0])], replace=False)
+        idx = (I==i).nonzero()[:,0]
+        print(idx)
+        
+        keys_ = keys[idx]
+        vals_ = vals[idx]
+
+        random_sample = np.random.choice(np.arange(vals_.shape[0]), size=[min(1000000, vals_.shape[0])], replace=False)
         start = time.time()
 
-        indexes[i].train(multi_keys[i][random_sample].astype(np.float32))
+        indexes[i].train(keys_[random_sample].astype(np.float32))
 
         print('Training took {} s'.format(time.time() - start))
 
@@ -106,9 +111,9 @@ if not os.path.exists(args.faiss_index + ".trained"):
 
         start = args.starting_point
         start_time = time.time()
-        while start < multi_vals[i].shape[0]:
-            end = min(multi_vals[i].shape[0], start + args.num_keys_to_add_at_a_time)
-            to_add = keys[start:end].copy()
+        while start < vals_.shape[0]:
+            end = min(vals_.shape[0], start + args.num_keys_to_add_at_a_time)
+            to_add = keys_[start:end].copy()
 
             indexes[i].add_with_ids(to_add.astype(np.float32), np.arange(start, end))
 
@@ -128,4 +133,4 @@ if not os.path.exists(args.faiss_index + ".trained"):
 
             print('Writing index took {} s'.format(time.time() - start))
             
-            log_file.write('index ' + str(i) + ':' + str(multi_vals[i].shape[0]) + '\n\n')
+            log_file.write('index ' + str(i) + ':' + str(vals_.shape[0]) + '\n\n')
