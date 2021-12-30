@@ -67,6 +67,10 @@ kmeans.train(keys[random_sample].astype(np.float32))
 
 _, I = kmeans.index.search(keys, 1)
 
+print(kmeans.centroids)
+print(kmeans.centroids.shape)
+torch.save(kmeans.centroids, args.faiss_index+'centroids')
+
 log_file = open(args.faiss_index+'log', 'w')
 if not os.path.exists(args.faiss_index + "0_faiss_index.trained"):
     quantizer = faiss.IndexFlatL2(index_dim)
