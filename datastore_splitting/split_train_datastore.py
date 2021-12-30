@@ -61,7 +61,7 @@ index_dim = args.pca if args.pca > 0 else args.dimension
 
 
 random_sample = np.random.choice(np.arange(vals.shape[0]), size=[min(args.n_examples_train_kmeans, vals.shape[0])], replace=False)
-kmeans = faiss.Kmeans(index_dim, n_datasores, niter=niter, verbose=True)
+kmeans = faiss.Kmeans(index_dim, args.n_datastores, niter=niter, verbose=True)
 
 kmeans.train(x)
 
@@ -77,7 +77,7 @@ if not os.path.exists(args.faiss_index + ".trained"):
     
     indexes = {}
     # Initialize faiss index
-    for i in range(args.n_datasores):
+    for i in range(args.n_datastores):
         indexes[i] = faiss.IndexIVFPQ(quantizer, index_dim, args.ncentroids, args.code_size, 8)
         indexes[i].nprobe = args.probe
 
