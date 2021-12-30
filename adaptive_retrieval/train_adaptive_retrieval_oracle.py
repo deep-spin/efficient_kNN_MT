@@ -247,7 +247,7 @@ if args.arch == 'mlp':
 if args.load_model:
     ckpt = torch.load(args.load_model)
     model.load_state_dict(ckpt)
-    print(f"loaded model ckpt from {args.load_model} at epoch {ckpt['epoch']}")
+    #print(f"loaded model ckpt from {args.load_model} at epoch {ckpt['epoch']}")
 
 if torch.cuda.is_available():
     model.cuda()
