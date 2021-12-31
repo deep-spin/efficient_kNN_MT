@@ -163,7 +163,7 @@ class KNN_Dstore(object):
 
             for i in range(args.multiple_dstores):
                 start = time.time()
-                self.indexes[i] = faiss.read_index(args.dstore_filename + str(i) + '_knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
+                indexes[i] = faiss.read_index(args.dstore_filename + str(i) + '_knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
 
                 print('Reading datastore took {} s'.format(time.time() - start))
                 print('the datastore is {}, size is {}, and dim is {} '.format(args.dstore_filename+str(i), self.dstore_sizes[i], self.dimension))
