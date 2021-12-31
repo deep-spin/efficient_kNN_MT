@@ -172,7 +172,7 @@ class KNN_Dstore(object):
 
                 self.vals[i] = np.memmap(args.dstore_filename + 'vals_' +str(i) +'.npy', dtype=np.int, mode='r',shape=(dstore_sizes[i], 1))
 
-                return indexes
+            return indexes
 
         else:    
             start = time.time()
