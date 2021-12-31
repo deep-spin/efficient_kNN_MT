@@ -283,9 +283,9 @@ class KNN_Dstore(object):
             dists = torch.zeros(dstore_idx.size(0), self.k)
             knns = torch.zeros(dstore_idx.size(0), self.k).long()
             
+            print('----------',self.indexes[i])
             for i in idx.keys():
-                print(self.indexes)
-                print(queries.shape)
+                print(self.indexes[i])
                 x, y = self.indexes[i].search(queries[idx[i]], self.k)
                 dists[idx[i]], knns[idx[i]] = self.indexes[i].search(queries[idx[i]], self.k)
 
