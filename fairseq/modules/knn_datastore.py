@@ -276,7 +276,7 @@ class KNN_Dstore(object):
             idx={}
             for i in range(len(dstore_idx)):
                 print(dstore_idx[i].item())
-                if dstore_idx[i].item() in idx.keys():
+                if dstore_idx[i].item() not in idx.keys():
                     idx[dstore_idx[i].item()]=[i]
                 else:
                     idx[dstore_idx[i].item()].append(i)
