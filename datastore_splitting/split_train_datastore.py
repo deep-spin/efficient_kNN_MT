@@ -4,6 +4,7 @@ import numpy as np
 import faiss
 import time
 import ctypes
+import pickle
 
 # the implementation refers to knnlm
 
@@ -36,16 +37,12 @@ res = faiss.StandardGpuResources()
 # load the saved keys and values
 if args.dstore_fp16:
     print('load dstore fp16', args.dstore_size, args.dimension)
-    keys = np.memmap(args.dstore_mmap + 'keys.npy', dtype=np.float16, mode='r', 
-                        shape=(args.dstore_size, args.dimension))
-    vals = np.memmap(args.dstore_mmap + 'vals.npy', dtype=np.int, mode='r', 
-                        shape=(args.dstore_size, 1))
+    keys = np.memmap(args.dstore_mmap + 'keys.npy', dtype=np.float16, mode='r', shape=(args.dstore_size, args.dimension))
+    vals = np.memmap(args.dstore_mmap + 'vals.npy', dtype=np.int, mode='r', shape=(args.dstore_size, 1))
 else:
     print(args.dstore_mmap + 'keys.npy')
-    keys = np.memmap(args.dstore_mmap + 'keys.npy', dtype=np.float32, mode='r', 
-                        shape=(args.dstore_size, args.dimension))
-    vals = np.memmap(args.dstore_mmap + 'vals.npy', dtype=np.int, mode='r', 
-                        shape=(args.dstore_size, 1))
+    keys = np.memmap(args.dstore_mmap + 'keys.npy', dtype=np.float32, mode='r', shape=(args.dstore_size, args.dimension))
+    vals = np.memmap(args.dstore_mmap + 'vals.npy', dtype=np.int, mode='r', shape=(args.dstore_size, 1))
 
 print('done.')
 
@@ -68,8 +65,8 @@ _, I = kmeans.index.search(keys, 1)
 
 np.save(args.faiss_index+'centroids', kmeans.centroids)
 
-log_file = open(args.faiss_index+'log', 'w')
-if not os.path.exists(args.faiss_index + "15_faiss_index.trained"):
+dstore_sizes=[]
+if not os.path.exists(args.faiss_index + "15_knn_index.trained"):
     quantizer = faiss.IndexFlatL2(index_dim)
 
     if args.pca>0:
@@ -92,8 +89,11 @@ if not os.path.exists(args.faiss_index + "15_faiss_index.trained"):
         keys_ = keys[idx]
         vals_ = vals[idx]
 
-        log_file.write('index ' + str(i) + ':' + str(vals_.shape[0]) + '\n\n')
-        print(vals_.shape)
+        dstore_sizes.append(vals_.shape[0])
+
+        dstore_vals = np.memmap(args.faiss_index + '/vals_' + str(i) '.npy', dtype=np.int, mode='w+', shape=(vals_.shape[0], 1))
+        dstore_vals = vals_
+        dstore_vals.flush()
 
         random_sample = np.random.choice(np.arange(vals_.shape[0]), size=[min(1000000, vals_.shape[0])], replace=False)
         start = time.time()
@@ -105,12 +105,12 @@ if not os.path.exists(args.faiss_index + "15_faiss_index.trained"):
         print('Writing index after training')
         start = time.time()
 
-        faiss.write_index(indexes[i], args.faiss_index + str(i) + "_faiss_index.trained")
+        faiss.write_index(indexes[i], args.faiss_index + str(i) + "_knn_index.trained")
         
         print('Writing index took {} s'.format(time.time() - start))        
 
         print('Adding Keys')
-        index = faiss.read_index(args.faiss_index + str(i) + "_faiss_index.trained")
+        index = faiss.read_index(args.faiss_index + str(i) + "_knn_index.trained")
 
         start = args.starting_point
         start_time = time.time()
@@ -125,15 +125,17 @@ if not os.path.exists(args.faiss_index + "15_faiss_index.trained"):
             if (start % 1000000) == 0:
                 print('Added %d tokens so far' % start)
                 print('Writing Index', start)
-                faiss.write_index(indexes[i], args.faiss_index+ str(i) + "_faiss_index")
+                faiss.write_index(indexes[i], args.faiss_index+ str(i) + "_knn_index")
 
             print("Adding total %d keys" % end)
             print('Adding took {} s'.format(time.time() - start_time))
             print('Writing Index')
             start = time.time()
 
-            faiss.write_index(indexes[i], args.faiss_index+ str(i) + "_faiss_index")
+            faiss.write_index(indexes[i], args.faiss_index+ str(i) + "_knn_index")
 
             print('Writing index took {} s'.format(time.time() - start))
             
             
+with open(args.faiss_index + 'dstore_sizes', wb) as f:
+    pickle.dump(dstore_sizes, f)

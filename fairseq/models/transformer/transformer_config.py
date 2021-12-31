@@ -251,7 +251,7 @@ class TransformerConfig(FairseqDataclass):
     knn_temperature_value: float = field(default=10)
     only_train_knn_parameters: bool = field(default=False)
     pruned_datastore: bool = field(default=False)
-    multiple_dstores: bool = field(default=False)
+    multiple_dstores: int = field(default=0)
     use_faiss_centroids: bool = field(default=False)
 
     

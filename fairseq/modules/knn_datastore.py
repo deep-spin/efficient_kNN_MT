@@ -5,6 +5,7 @@ from torch_scatter import scatter
 import time
 import math
 import faiss.contrib.torch_utils
+import pickle
 
 class KNN_Dstore(object):
 
@@ -20,7 +21,11 @@ class KNN_Dstore(object):
         self.pruned_datastore = args.pruned_datastore
         self.vocab_size = trg_vocab_size
 
-        self.index = self.setup_faiss(args)
+        if args.multiple_dstores>0:
+            self.multiple_dstores=True
+            self.indexes = self.setup_faiss(args)
+        else:
+            self.index = self.setup_faiss(args)
 
         self.time_for_retrieve = 0.
         self.retrieve_count = 0.
@@ -147,43 +152,47 @@ class KNN_Dstore(object):
         if not args.dstore_filename:
             raise ValueError('Cannot build a datastore without the data.')
 
-        start = time.time()
-        index = faiss.read_index(args.dstore_filename + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
+        
 
-        if self.use_gpu_to_search:
-            print('put index from cpu to gpu')
-            res = faiss.StandardGpuResources()
-            self.res = res
-            co = faiss.GpuClonerOptions()
-            co.useFloat16 = True
-            index = faiss.index_cpu_to_gpu(res, 0, index, co)
-
-        print('Reading datastore took {} s'.format(time.time() - start))
-        print('the datastore is {}, size is {}, and dim is {} '.format(args.dstore_filename, self.dstore_size, self.dimension))
-
-        index.nprobe = args.probe
-
-        if args.multiple_dstores:
-            self.keys=[]
-            self.vals=[]
+        if args.multiple_dstores>0:
+            self.vals={}
+            indexes={}
             if self.pruned_datastore:
                 self.weights=[]
             
-            for i in range(len(args.multiple_dstores_path)):
-                path = args.multiple_dstores_path[i]
-                dstore_size = args.multiple_dstores_sizes[i]
-                if args.dstore_fp16:
-                    if not args.no_load_keys:
-                        self.keys.append(np.memmap(path + 'keys.npy', dtype=np.float16, mode='r',shape=(dstore_size, self.dimension)))
-                    self.vals.append(np.memmap(path + 'vals.npy', dtype=np.int, mode='r',shape=(dstore_size, 1)))
-                else:
-                    if not args.no_load_keys:
-                        self.keys.append(np.memmap(path + 'keys.npy', dtype=np.float32, mode='r',shape=(dstore_size, self.dimension)))
-                    self.vals.append(np.memmap(path + 'vals.npy', dtype=np.int, mode='r',shape=(dstore_size, 1)))
-                if self.pruned_datastore:
-                    self.weights.append(np.memmap(path+'weights.npy', dtype=np.int, mode='r', shape=(dstore_size, 1)))
+            with open(args.dstore_filename+'dstore_sizes', 'rb') as f:
+                dstore_sizes=pickle.load(f)
+
+            for i in range(len(args.multiple_dstores)):
+                start = time.time()
+                self.indexes[i] = faiss.read_index(args.dstore_filename + str(i) + '_knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
+
+                print('Reading datastore took {} s'.format(time.time() - start))
+                print('the datastore is {}, size is {}, and dim is {} '.format(args.dstore_filename+str(i), self.dstore_sizes[i], self.dimension))
+
+                indexes[i].nprobe = args.probe
+
+                self.vals[i] = np.memmap(args.dstore_filename + 'vals.npy', dtype=np.int, mode='r',shape=(dstore_sizes[i], 1))
+
+                return indexes
 
         else:    
+            start = time.time()
+            index = faiss.read_index(args.dstore_filename + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
+
+            if self.use_gpu_to_search:
+                print('put index from cpu to gpu')
+                res = faiss.StandardGpuResources()
+                self.res = res
+                co = faiss.GpuClonerOptions()
+                co.useFloat16 = True
+                index = faiss.index_cpu_to_gpu(res, 0, index, co)
+
+            print('Reading datastore took {} s'.format(time.time() - start))
+            print('the datastore is {}, size is {}, and dim is {} '.format(args.dstore_filename, self.dstore_size, self.dimension))
+
+            index.nprobe = args.probe
+
             if args.dstore_fp16:
                 print('Keys are fp16 and vals are int32')
                 if not args.no_load_keys:
@@ -262,17 +271,20 @@ class KNN_Dstore(object):
 
         raise ValueError("Invalid knn similarity function!")
 
-    def get_knns(self, queries):
+    def get_knns(self, queries, dstore_idx=None):
 
         # move query to numpy, if faiss version < 1.6.5
         # numpy_queries = queries.detach().cpu().float().numpy()
 
-        dists, knns = self.index.search(queries, self.k)
+        if self.multiple_dstores:
+            dists, knns = self.indexes[dstore_idx].search(queries, self.k)
+        else:
+            dists, knns = self.index.search(queries, self.k)
 
         return dists, knns
 
 
-    def retrieve(self, queries):
+    def retrieve(self, queries, dstore_idx=None):
 
         # queries  are [Batch, seq len, Hid Size]
 
@@ -280,13 +292,19 @@ class KNN_Dstore(object):
         bsz = queries.size(0)
         seq_len = queries.size(1)
 
-        dists, knns = self.get_knns(queries.contiguous().view(-1, queries.size(-1)).cpu())  # [Batch * seq len, K]
-        # move retireval results to torch tensor from numpy, if faiss version < 1.6.5
-        #knns = torch.from_numpy(knns).to(queries.device)
-        #dists = torch.from_numpy(dists).to(queries.device)  # [Batch size * seq len, k]
+        if self.multiple_dstores
+            dists, knns = self.get_knns(queries.contiguous().view(-1, queries.size(-1)).cpu(), dstore_idx=dstore_idx)  # [Batch * seq len, K]
+            tgt_idx = torch.from_numpy(self.vals[dstore_idx][knns]).to(queries.device).squeeze(-1)  # [Batch size * Seq len, K]
+
+        else:
+            dists, knns = self.get_knns(queries.contiguous().view(-1, queries.size(-1)).cpu())  # [Batch * seq len, K]
         
-        tgt_idx = torch.from_numpy(self.vals[knns]).to(queries.device).squeeze(-1)  # [Batch size * Seq len, K]
-        #tgt_idx = self.vals[knns].to(queries.device).squeeze(-1)
+            # move retireval results to torch tensor from numpy, if faiss version < 1.6.5
+            #knns = torch.from_numpy(knns).to(queries.device)
+            #dists = torch.from_numpy(dists).to(queries.device)  # [Batch size * seq len, k]
+            
+            tgt_idx = torch.from_numpy(self.vals[knns]).to(queries.device).squeeze(-1)  # [Batch size * Seq len, K]
+            #tgt_idx = self.vals[knns].to(queries.device).squeeze(-1)
         
         tgt_idx = tgt_idx.view(bsz, seq_len, -1)  # [B, S, K]
 
