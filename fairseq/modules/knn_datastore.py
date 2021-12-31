@@ -166,7 +166,7 @@ class KNN_Dstore(object):
                 indexes[i] = faiss.read_index(args.dstore_filename + str(i) + '_knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
 
                 print('Reading datastore took {} s'.format(time.time() - start))
-                print('the datastore is {}, size is {}, and dim is {} '.format(args.dstore_filename+str(i), self.dstore_sizes[i], self.dimension))
+                print('the datastore is {}, size is {}, and dim is {} '.format(args.dstore_filename+str(i), dstore_sizes[i], self.dimension))
 
                 indexes[i].nprobe = args.probe
 
