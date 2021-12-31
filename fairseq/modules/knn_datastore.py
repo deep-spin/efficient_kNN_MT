@@ -307,8 +307,8 @@ class KNN_Dstore(object):
             tgt_idx = torch.zeros(dstore_idx.size(0), self.k).long()
             for i in self.idx_dstores.keys():
                 print(self.idx_dstores[i])
-                print(self.vals[self.idx_dstores[i]])
-                print(self.vals[self.idx_dstores[i]][knns[self.idx_dstores[i]]])
+                print(self.vals[i])
+                print(self.vals[i][knns[self.idx_dstores[i]]])
                 tgt_idx[self.idx_dstores[i]] = torch.from_numpy(self.vals[self.idx_dstores[i]][knns[self.idx_dstores[i]]]).to(queries.device).squeeze(-1)  # [Batch size * Seq len, K]
 
         else:
