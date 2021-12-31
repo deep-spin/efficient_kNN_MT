@@ -25,6 +25,7 @@ class KNN_Dstore(object):
             self.multiple_dstores=True
             self.indexes = self.setup_faiss(args)
         else:
+            self.multiple_dstores=False
             self.index = self.setup_faiss(args)
 
         self.time_for_retrieve = 0.
