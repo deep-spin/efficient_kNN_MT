@@ -333,7 +333,7 @@ class KNN_Dstore(object):
         re_compute_dists = self.dist_func(distance, knn_index, queries, function=self.sim_func)  # [B, S, K]
 
         if self.pruned_datastore:
-            weights = re_compute_dists.new_tensor(self.weights[knn_index]).squeeze(-1)
+            weights = re_compute_dists.new_tensor(self.weights[knn_index.cpu()]).squeeze(-1)
             re_compute_dists = re_compute_dists + weights
 
         scaled_dists = re_compute_dists / temperature
