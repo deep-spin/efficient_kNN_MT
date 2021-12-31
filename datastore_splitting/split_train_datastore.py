@@ -137,5 +137,5 @@ if not os.path.exists(args.faiss_index + "15_knn_index.trained"):
             print('Writing index took {} s'.format(time.time() - start))
             
             
-with open(args.faiss_index + 'dstore_sizes', wb) as f:
+with open(args.faiss_index + 'dstore_sizes', 'wb') as f:
     pickle.dump(dstore_sizes, f)
