@@ -304,7 +304,7 @@ class KNN_Dstore(object):
         if self.multiple_dstores:
             dists, knns = self.get_knns(queries.contiguous().view(-1, queries.size(-1)).cpu(), dstore_idx=dstore_idx)  # [Batch * seq len, K]
             
-            tgt_idx = torch.zeros(dstore_idx.size(0), self.k).long()
+            tgt_idx = torch.zeros(dstore_idx.size(0), self.k).long().to(queries.device)
             for i in self.idx_dstores.keys():
                 tgt_idx[self.idx_dstores[i]] = torch.from_numpy(self.vals[i][knns[self.idx_dstores[i]]]).to(queries.device).squeeze(-1)  # [Batch size * Seq len, K]
 
