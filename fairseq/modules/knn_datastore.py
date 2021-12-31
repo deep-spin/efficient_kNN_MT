@@ -281,7 +281,7 @@ class KNN_Dstore(object):
                     idx[dstore_idx[i].item()].append(i)
 
             dists = torch.zeros(dstore_idx.size(0), self.k)
-            knn = torch.zeros(dstore_idx.size(0), self.k)
+            knns = torch.zeros(dstore_idx.size(0), self.k)
 
             for i in idx.keys():
                 dists[idx[i]], knns[idx[i]] = self.indexes[i].search(queries[idx[i]], self.k)
