@@ -92,7 +92,7 @@ if not os.path.exists(args.faiss_index + "15_knn_index.trained"):
         dstore_sizes.append(vals_.shape[0])
 
         dstore_vals = np.memmap(args.faiss_index + '/vals_' + str(i) + '.npy', dtype=np.int, mode='w+', shape=(vals_.shape[0], 1))
-        dstore_vals = vals_
+        dstore_vals[:] = vals_
         dstore_vals.flush()
 
         random_sample = np.random.choice(np.arange(vals_.shape[0]), size=[min(1000000, vals_.shape[0])], replace=False)
