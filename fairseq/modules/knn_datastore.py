@@ -275,14 +275,13 @@ class KNN_Dstore(object):
         if self.multiple_dstores:
             idx={}
             for i in range(len(dstore_idx)):
-                print(dstore_idx[i].item())
                 if dstore_idx[i].item() not in idx.keys():
                     idx[dstore_idx[i].item()]=[i]
                 else:
                     idx[dstore_idx[i].item()].append(i)
 
-            dists = torch.zeros(dstore_idx.size(0), self.k.size(0))
-            knn = torch.zeros(dstore_idx.size(0), self.k.size(0))
+            dists = torch.zeros(dstore_idx.size(0), self.k)
+            knn = torch.zeros(dstore_idx.size(0), self.k)
 
             for i in idx.keys():
                 dists[idx[i]], knns[idx[i]] = self.indexes[i].search(queries[idx[i]], self.k)
