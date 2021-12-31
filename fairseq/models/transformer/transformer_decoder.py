@@ -508,7 +508,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             if ((self.knn_lambda_threshold == 0 and not self.knn_search_prediction and not self.use_knn_cache and not self.use_faiss_centroids) or last_hidden.size(0) > 0) and self.searching:
                 if self.multiple_dstores>0:
                     dstore_idx = torch.cdist(last_hidden.squeeze(1), self.dstore_centroids, p=2).min(-1).indices
-                    print(dstore_idx)
                     knn_search_result = self.knn_datastore.retrieve(last_hidden, dstore_idx)
                 else:
                     knn_search_result = self.knn_datastore.retrieve(last_hidden)
