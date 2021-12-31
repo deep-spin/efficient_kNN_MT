@@ -273,21 +273,19 @@ class KNN_Dstore(object):
         # numpy_queries = queries.detach().cpu().float().numpy()
 
         if self.multiple_dstores:
-            idx={}
+            self.idx_dstores={}
             for i in range(len(dstore_idx)):
                 if dstore_idx[i].item() not in idx.keys():
-                    idx[dstore_idx[i].item()]=[i]
+                    self.idx_dstoresidx[dstore_idx[i].item()]=[i]
                 else:
-                    idx[dstore_idx[i].item()].append(i)
+                    self.idx_dstoresidx[dstore_idx[i].item()].append(i)
 
             dists = torch.zeros(dstore_idx.size(0), self.k)
             knns = torch.zeros(dstore_idx.size(0), self.k).long()
             
-            print('----------',self.indexes)
-            for i in idx.keys():
-                print(self.indexes[i])
-                x, y = self.indexes[i].search(queries[idx[i]], self.k)
-                dists[idx[i]], knns[idx[i]] = self.indexes[i].search(queries[idx[i]], self.k)
+            for i in self.idx_dstores.keys():
+                x, y = self.indexes[i].search(queries[self.idx_dstores[i]], self.k)
+                dists[self.idx_dstores[i]], knns[self.idx_dstores[i]] = self.indexes[i].search(queries[self.idx_dstores[i]], self.k)
 
         else:
             dists, knns = self.index.search(queries, self.k)
@@ -305,7 +303,11 @@ class KNN_Dstore(object):
 
         if self.multiple_dstores:
             dists, knns = self.get_knns(queries.contiguous().view(-1, queries.size(-1)).cpu(), dstore_idx=dstore_idx)  # [Batch * seq len, K]
-            tgt_idx = torch.from_numpy(self.vals[dstore_idx][knns]).to(queries.device).squeeze(-1)  # [Batch size * Seq len, K]
+            
+            print(self.vals)
+            tgt_idx = torch.zeros(dstore_idx.size(0), self.k).long()
+            for i in self.idx_dstores.keys(:)
+                tgt_idx[self.idx_dstores[i]] = torch.from_numpy(self.vals[self.idx_dstores[i]][knns[self.idx_dstores[i]]]).to(queries.device).squeeze(-1)  # [Batch size * Seq len, K]
 
         else:
             dists, knns = self.get_knns(queries.contiguous().view(-1, queries.size(-1)).cpu())  # [Batch * seq len, K]
