@@ -18,7 +18,6 @@ class KNN_Dstore(object):
         self.sim_func = args.knn_sim_func
         self.dstore_fp16 = args.dstore_fp16
         self.use_gpu_to_search = args.use_gpu_to_search
-        self.pruned_datastore = args.pruned_datastore
         self.vocab_size = trg_vocab_size
 
         if args.multiple_dstores>0:
@@ -158,8 +157,6 @@ class KNN_Dstore(object):
         if args.multiple_dstores>0:
             self.vals={}
             indexes={}
-            if self.pruned_datastore:
-                self.weights=[]
             
             with open(args.dstore_filename+'dstore_sizes', 'rb') as f:
                 dstore_sizes=pickle.load(f)
@@ -205,9 +202,7 @@ class KNN_Dstore(object):
                     self.keys = np.memmap(args.dstore_filename + 'keys.npy', dtype=np.float32, mode='r',shape=(self.dstore_size, self.dimension))
 
                 self.vals = np.memmap(args.dstore_filename + 'vals.npy', dtype=np.int, mode='r',shape=(self.dstore_size, 1))
-            if self.pruned_datastore:
-                self.weights = np.memmap(args.dstore_filename+'weights.npy', dtype=np.int, mode='r', shape=(self.dstore_size, 1))
-
+           
         # If you wish to load all the keys into memory
         # CAUTION: Only do this if your RAM can handle it!
         if args.move_dstore_to_mem:
@@ -331,10 +326,6 @@ class KNN_Dstore(object):
 
         # update the dist and compute each neighbor weight, neg distance
         re_compute_dists = self.dist_func(distance, knn_index, queries, function=self.sim_func)  # [B, S, K]
-
-        if self.pruned_datastore:
-            weights = re_compute_dists.new_tensor(self.weights[knn_index.cpu()]).squeeze(-1)
-            re_compute_dists = re_compute_dists + weights
 
         scaled_dists = re_compute_dists / temperature
         knn_weight = torch.softmax(scaled_dists, dim=-1).unsqueeze(-1)  # [B, S, K, 1]

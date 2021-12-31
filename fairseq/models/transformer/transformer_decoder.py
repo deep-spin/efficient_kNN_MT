@@ -32,6 +32,7 @@ from fairseq.modules.knn_datastore import KNN_Dstore
 import pickle
 from collections import Counter, OrderedDict
 import os
+import numpy as np
 
 # rewrite name for backward compatibility in `make_generation_fast_`
 def module_name_fordropout(module_name: str) -> str:
@@ -173,6 +174,10 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.use_faiss_centroids=cfg.use_faiss_centroids
         if self.use_faiss_centroids:
             self.faiss_centroids = self.knn_datastore.get_faiss_centroids().cuda()
+
+        self.multiple_dstores = cfg.multiple_dstores
+        if self.multiple_dstores > 0:
+            self.dstore_centroids=torch.FloatTensor(np.load(cfg.dstore_filename+'centroids.npy')).cuda()
 
         self.analyse=False
 
@@ -490,7 +495,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                 else:
                     scores = self.oracle_mlp.forward(last_hidden).squeeze(-1)
-                indices = (scores < 0.7).nonzero()[:,0]
+                indices = (scores < 0.5).nonzero()[:,0]
                 
                 mask[indices] = False
                 last_hidden=last_hidden[mask]
@@ -501,7 +506,11 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 print(self.need_to_search, self.total_possible_searches)
 
             if ((self.knn_lambda_threshold == 0 and not self.knn_search_prediction and not self.use_knn_cache and not self.use_faiss_centroids) or last_hidden.size(0) > 0) and self.searching:
-                knn_search_result = self.knn_datastore.retrieve(last_hidden)
+                if self.multiple_dstores>0:
+                    dstore_idx = torch.cdist(last_hidden.squeeze(1), self.dstore_centroids, p=2).min(-1).values
+                    knn_search_result = self.knn_datastore.retrieve(last_hidden, dstore_idx)
+                else:
+                    knn_search_result = self.knn_datastore.retrieve(last_hidden)
 
                 knn_dists = knn_search_result['distance']  # [batch, seq len, k]  # we need do sort
                 knn_index = knn_search_result['knn_index']
