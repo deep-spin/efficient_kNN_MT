@@ -289,7 +289,7 @@ class KNN_Dstore(object):
 
             values = []
             for i in self.idx_dstores.keys():
-                values.extend((queries[self.idx_dstores[i]], i))            
+                values.append((queries[self.idx_dstores[i]], i))            
             
             print(values)
 
