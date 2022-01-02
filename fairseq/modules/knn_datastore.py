@@ -6,7 +6,6 @@ import time
 import math
 import faiss.contrib.torch_utils
 import pickle
-from torch.multiprocessing import Pool
 
 class KNN_Dstore(object):
 
@@ -24,6 +23,7 @@ class KNN_Dstore(object):
         if args.multiple_dstores>0:
             self.multiple_dstores=True
             self.indexes = self.setup_faiss(args)
+            torch.multiprocessing.set_start_method('spawn', force=True)
         else:
             self.multiple_dstores=False
             self.index = self.setup_faiss(args)
@@ -293,7 +293,7 @@ class KNN_Dstore(object):
             
             #print(values)
 
-            with Pool(processes=8) as pool:
+            with torch.multiprocessing.Pool(processes=8) as pool:
                 res = pool.starmap(self.search, values)
                 print(res)
 
