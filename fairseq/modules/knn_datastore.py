@@ -295,6 +295,8 @@ class KNN_Dstore(object):
 
             with torch.multiprocessing.Pool(processes=8) as pool:
                 res = pool.starmap(self.search, values)
+                print('\n')
+                print('---------------')
                 print(res)
 
             """
