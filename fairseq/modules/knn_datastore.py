@@ -287,7 +287,7 @@ class KNN_Dstore(object):
             dists = torch.zeros(dstore_idx.size(0), self.k)
             knns = torch.zeros(dstore_idx.size(0), self.k).long()
 
-            values = ()
+            values = []
             for i in self.idx_dstores.keys():
                 values.extend((queries[self.idx_dstores[i]], i))            
             
