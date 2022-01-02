@@ -59,7 +59,8 @@ index_dim = args.pca if args.pca > 0 else args.dimension
 random_sample = np.random.choice(np.arange(vals.shape[0]), size=[min(args.n_examples_train_kmeans, vals.shape[0])], replace=False)
 kmeans = faiss.Kmeans(index_dim, args.n_datastores, niter=args.kmeans_iter, verbose=True)
 
-kmeans.train(keys[random_sample].astype(np.float32)) # keys.astype(np.float32))
+#kmeans.train(keys[random_sample].astype(np.float32)) # keys.astype(np.float32))
+kmeans.train(keys.astype(np.float32))
 
 _, I = kmeans.index.search(keys, 1)
 

@@ -31,7 +31,6 @@ CUDA_VISIBLE_DEVICES=1 python fast_knn_nmt/custom_fairseq/train/generate.py /med
 export PYTHONPATH=$PYTHONPATH:.
 
 
-python3 datastore_splitting/split_train_datastore.py --dstore_mmap=/media/hdd1/pam/mt/data/joint_multi_domain/medical/datastore_32/ --dstore_size=6903141 --faiss_index=/media/hdd1/pam/mt/data/joint_multi_domain/medical/datastore_32/datastore_splitting/16_256/ --ncentroids=256
-
+python3 datastore_splitting/split_train_datastore.py --dstore_mmap=/media/hdd1/pam/mt/data/joint_multi_domain/medical/datastore_32/ --dstore_size=6903141 --faiss_index=/media/hdd1/pam/mt/data/joint_multi_domain/medical/datastore_32/datastore_splitting/16/ 
 
 CUDA_VISIBLE_DEVICES=1 python3 generate_knnmt.py /media/hdd1/pam/mt/data/joint_multi_domain/medical/data-bin/ --path /media/hdd1/pam/mt/models/wmt19.de-en/wmt19.de-en.pt --arch transformer_wmt19_de_en_with_datastore --gen-subset=valid --beam 5 --batch-size=8 --source-lang de --target-lang en --scoring sacrebleu --max-tokens 4096 --tokenizer moses --remove-bpe --model-overrides "{'load_knn_datastore': True, 'use_knn_datastore': True, 'dstore_filename': '/media/hdd1/pam/mt/data/joint_multi_domain/medical/datastore_32/datastore_splitting/16/', 'dstore_fp16': False, 'k': 8, 'probe': 32, 'faiss_metric_type': 'l2', 'use_gpu_to_search': False, 'move_dstore_to_mem': True, 'no_load_keys': True,'knn_lambda_type': 'fix', 'knn_lambda_value': 0.8, 'knn_lambda_use_conf_ent': False, 'knn_temperature_type': 'fix', 'knn_temperature_value': 10, 'multiple_dstores': 16}" --quiet
