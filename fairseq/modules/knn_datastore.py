@@ -7,6 +7,9 @@ import math
 import faiss.contrib.torch_utils
 import pickle
 
+from threading import Thread
+
+
 class KNN_Dstore(object):
 
     def __init__(self, args, trg_vocab_size):
@@ -268,8 +271,11 @@ class KNN_Dstore(object):
 
         raise ValueError("Invalid knn similarity function!")
 
+    #def search(self, queries, idx):
+    #    return self.indexes[idx].search(queries, self.k)
+
     def search(self, queries, idx):
-        return self.indexes[idx].search(queries, self.k)
+        self.dists[self.idx_dstores[i]], self.knns[self.idx_dstores[i]] = self.indexes[idx].search(queries, self.k)
 
     def get_knns(self, queries, dstore_idx=None):
 
@@ -284,27 +290,36 @@ class KNN_Dstore(object):
                 else:
                     self.idx_dstores[dstore_idx[i].item()].append(i)
 
-            dists = torch.zeros(dstore_idx.size(0), self.k)
-            knns = torch.zeros(dstore_idx.size(0), self.k).long()
+            self.dists = torch.zeros(dstore_idx.size(0), self.k)
+            self.knns = torch.zeros(dstore_idx.size(0), self.k).long()
 
+            threads = [None] * len(self.idx_dstores.keys())
+            j=0
+            for i in self.idx_dstores.keys():
+                threads[j] = Thread(target=self.search, args=(queries[self.idx_dstores[i]], i))
+                threads[j].start()
+                j+=1
+
+            for i in range(len(threads)):
+                threads[i].join()
+
+            """
             values = []
             for i in self.idx_dstores.keys():
                 values.append((queries[self.idx_dstores[i]], i))            
 
-            with torch.multiprocessing.pool.ThreadPool(processes=24) as pool:
-                res = pool.starmap(self.search, values)
 
-            #with torch.multiprocessing.Pool(processes=24) as pool:
-            #    res = pool.starmap(self.search, values)
+            with torch.multiprocessing.Pool(processes=24) as pool:
+                res = pool.starmap(self.search, values)
 
             j=0
             for i in self.idx_dstores.keys():
                 dists[self.idx_dstores[i]], knns[self.idx_dstores[i]] = res[j]
                 j+=1
+            """
 
             """
             for i in self.idx_dstores.keys():
-                x, y = self.indexes[i].search(queries[self.idx_dstores[i]], self.k)
                 dists[self.idx_dstores[i]], knns[self.idx_dstores[i]] = self.indexes[i].search(queries[self.idx_dstores[i]], self.k)
             """
         else:
