@@ -324,8 +324,8 @@ class KNN_Dstore(object):
             """
         else:
             dists, knns = self.index.search(queries, self.k)
-
-        return dists, knns
+            return dists, knns
+        return self.dists, self.knns
 
 
     def retrieve(self, queries, dstore_idx=None):
