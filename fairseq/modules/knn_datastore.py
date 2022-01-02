@@ -294,7 +294,7 @@ class KNN_Dstore(object):
             print(values)
 
             with Pool(processes=8) as pool:
-                res = pool.starmap(search, values)
+                res = pool.starmap(self.search, values)
                 print(res)
 
             #for i in self.idx_dstores.keys():
