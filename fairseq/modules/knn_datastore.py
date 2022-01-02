@@ -268,7 +268,7 @@ class KNN_Dstore(object):
 
         raise ValueError("Invalid knn similarity function!")
 
-    def search(self, queries, idx)
+    def search(self, queries, idx):
         return self.indexes[idx].search(queries, self.k)
 
     def get_knns(self, queries, dstore_idx=None):
@@ -294,7 +294,7 @@ class KNN_Dstore(object):
             print(values)
 
             with Pool(processes=8) as pool:
-                res = pool.starmap(power, values)
+                res = pool.starmap(search, values)
                 print(res)
 
             #for i in self.idx_dstores.keys():
