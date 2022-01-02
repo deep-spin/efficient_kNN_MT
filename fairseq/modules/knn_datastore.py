@@ -275,7 +275,7 @@ class KNN_Dstore(object):
     #    return self.indexes[idx].search(queries, self.k)
 
     def search(self, queries, idx):
-        self.dists[self.idx_dstores[i]], self.knns[self.idx_dstores[i]] = self.indexes[idx].search(queries, self.k)
+        self.dists[self.idx_dstores[idx]], self.knns[self.idx_dstores[idx]] = self.indexes[idx].search(queries, self.k)
 
     def get_knns(self, queries, dstore_idx=None):
 
