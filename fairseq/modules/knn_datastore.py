@@ -291,7 +291,7 @@ class KNN_Dstore(object):
             for i in self.idx_dstores.keys():
                 values.extend((queries[self.idx_dstores[i]], i))            
             
-            #print(values)
+            print(values)
 
             with torch.multiprocessing.Pool(processes=8) as pool:
                 res = pool.starmap(self.search, values)
