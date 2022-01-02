@@ -6,6 +6,7 @@ import time
 import math
 import faiss.contrib.torch_utils
 import pickle
+from multiprocessing import Pool
 
 class KNN_Dstore(object):
 
@@ -267,6 +268,9 @@ class KNN_Dstore(object):
 
         raise ValueError("Invalid knn similarity function!")
 
+    def search(self, queries, idx)
+        return self.indexes[idx].search(queries, self.k)
+
     def get_knns(self, queries, dstore_idx=None):
 
         # move query to numpy, if faiss version < 1.6.5
@@ -282,10 +286,20 @@ class KNN_Dstore(object):
 
             dists = torch.zeros(dstore_idx.size(0), self.k)
             knns = torch.zeros(dstore_idx.size(0), self.k).long()
-            
+
+            values = ()
             for i in self.idx_dstores.keys():
-                x, y = self.indexes[i].search(queries[self.idx_dstores[i]], self.k)
-                dists[self.idx_dstores[i]], knns[self.idx_dstores[i]] = self.indexes[i].search(queries[self.idx_dstores[i]], self.k)
+                values.extend((queries[self.idx_dstores[i]], i))            
+            
+            print(values)
+
+            with Pool(processes=8) as pool:
+                res = pool.starmap(power, values)
+                print(res)
+
+            #for i in self.idx_dstores.keys():
+            #    x, y = self.indexes[i].search(queries[self.idx_dstores[i]], self.k)
+            #    dists[self.idx_dstores[i]], knns[self.idx_dstores[i]] = self.indexes[i].search(queries[self.idx_dstores[i]], self.k)
 
         else:
             dists, knns = self.index.search(queries, self.k)
