@@ -281,6 +281,8 @@ else:
         total_search = 0
         total_not_search = 0
 
+        _ = validate(val_dataloader, model, args)
+
         for i, sample in enumerate(tqdm(train_dataloader)):
             if args.use_freq_fert:
                 features, targets, knn_probs, network_probs, conf, ent, freq_1, freq_2, freq_3, freq_4, fert_1, fert_2, fert_3, fert_4 = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7], sample[8], sample[9], sample[10], sample[11], sample[12], sample[13]
