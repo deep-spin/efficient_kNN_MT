@@ -324,8 +324,7 @@ else:
         print('search', rights_search, total_search)
         print('not_search', rights_not_search, total_not_search)
         
-        print(f'\n epoch: {epoch}, step: {i},  training loss: {report_loss:.3f}, training acc: {acc:.3f}')
-
+        print(f'\n epoch: {epoch}, step: {i},  training loss: {report_loss:.3f}, training acc: {acc:.3f}, training acc search: {acc_search:.3f}, training acc not search: {acc_not_search:.3f}')
         val_loss = validate(val_dataloader, model, args)
 
         torch.save(model.state_dict(), os.path.join(args.output_dir, 'checkpoint_'+str(epoch)+'.pt'))
