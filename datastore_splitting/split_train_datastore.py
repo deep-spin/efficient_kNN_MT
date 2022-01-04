@@ -62,7 +62,13 @@ kmeans = faiss.Kmeans(index_dim, args.n_datastores, niter=args.kmeans_iter, verb
 #kmeans.train(keys[random_sample].astype(np.float32)) # keys.astype(np.float32))
 kmeans.train(keys.astype(np.float32))
 
+print('finished training kmeans')
+
 _, I = kmeans.index.search(keys, 1)
+
+print('finish searching')
+
+print(kmeans.centroids.shape)
 
 np.save(args.faiss_index+'centroids', kmeans.centroids)
 
