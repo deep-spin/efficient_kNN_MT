@@ -33,7 +33,7 @@ class MLPOracle(nn.Module):
         elif use_conf_ent and use_faiss_centroids and self.use_context:
             input_dim=int(ctxt_dim)*2
         elif use_conf_ent and use_freq_fert:
-            input_dim=1044
+            input_dim=1020
         elif use_conf_ent and use_faiss_centroids:
             input_dim=int(ctxt_dim)
         else:

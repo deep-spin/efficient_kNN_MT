@@ -377,15 +377,15 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 self.lambda_mlp.eval()
                 if self.knn_use_conf_ent and not self.knn_use_freq_fert and not self.use_faiss_centroids:
                     network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
-                    conf=torch.log(torch.max(network_probs, -1).values)
-                    ent=torch.log(torch.distributions.Categorical(network_probs).entropy())
+                    conf=torch.max(network_probs, -1).values
+                    ent=torch.distributions.Categorical(network_probs).entropy()
 
                     knn_lambda = self.lambda_mlp.forward(last_hidden, conf, ent)
 
                 elif self.knn_use_conf_ent and self.knn_use_freq_fert:
                     network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
-                    conf=torch.log(torch.max(network_probs, -1).values.unsqueeze(-1))
-                    ent=torch.log(torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1))
+                    conf=torch.max(network_probs, -1).values.unsqueeze(-1)
+                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
                     
                     if prev_output_tokens.size(1)==1:
                         aux=torch.ones(prev_output_tokens.size(0),3).cuda()
@@ -416,12 +416,12 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     
                 elif self.knn_use_conf_ent and self.use_faiss_centroids:
                     network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
-                    conf=torch.log(torch.max(network_probs, -1).values.unsqueeze(-1))
-                    ent=torch.log(torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1))
+                    conf=torch.max(network_probs, -1).values.unsqueeze(-1)
+                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
 
                     dists = torch.cdist(last_hidden, self.faiss_centroids, p=2)
-                    min_dist = torch.log(dists.min(-1).values.unsqueeze(-1))
-                    min_top32_dist = torch.log(torch.topk(dists, 32, largest=False, dim=-1).values.mean(-1).unsqueeze(-1))
+                    min_dist = dists.min(-1).values.unsqueeze(-1)
+                    min_top32_dist = torch.topk(dists, 32, largest=False, dim=-1).values.mean(-1).unsqueeze(-1)
 
                     knn_lambda = self.lambda_mlp.forward(last_hidden, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist).squeeze(-1)                     
                 else:
@@ -447,13 +447,13 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 self.oracle_mlp.eval()
                 if self.knn_use_conf_ent and not self.knn_use_freq_fert and not self.use_faiss_centroids:
                     network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
-                    conf=torch.log(torch.max(network_probs, -1).values.unsqueeze(-1))
-                    ent=torch,log(torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1))
+                    conf=torch.max(network_probs, -1).values.unsqueeze(-1)
+                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
                     scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent).squeeze(-1)
                 elif self.knn_use_conf_ent and self.knn_use_freq_fert:
                     network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
-                    conf=torch.log(torch.max(network_probs, -1).values.unsqueeze(-1))
-                    ent=torch.log(torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1))
+                    conf=torch.max(network_probs, -1).values.unsqueeze(-1)
+                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
                     
                     if prev_output_tokens.size(1)==1:
                         aux=torch.ones(prev_output_tokens.size(0),3).cuda()
@@ -484,12 +484,12 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4 ).squeeze(-1)
                 elif self.knn_use_conf_ent and self.use_faiss_centroids:
                     network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
-                    conf=torch.log(torch.max(network_probs, -1).values.unsqueeze(-1))
-                    ent=torch.log(torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1))
+                    conf=torch.max(network_probs, -1).values.unsqueeze(-1)
+                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
 
                     dists = torch.cdist(last_hidden, self.faiss_centroids, p=2)
-                    min_dist = torch.log(dists.min(-1).values.unsqueeze(-1))
-                    min_top32_dist = torch.log(torch.topk(dists, 32, largest=False, dim=-1).values.mean(-1).unsqueeze(-1))
+                    min_dist = dists.min(-1).values.unsqueeze(-1)
+                    min_top32_dist = torch.topk(dists, 32, largest=False, dim=-1).values.mean(-1).unsqueeze(-1)
 
                     scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist).squeeze(-1)                    
 
