@@ -68,31 +68,35 @@ _, I = kmeans.index.search(keys, 1)
 
 print('finish searching')
 
-print(kmeans.centroids.shape)
+
+centroids=kmeans.centroids
+print(centroids.shape)
+centroids=np.delete(centroids, 0)
+print(centroids.shape)
 
 np.save(args.faiss_index+'centroids', kmeans.centroids)
 
 dstore_sizes=[]
-if not os.path.exists(args.faiss_index + "15_knn_index.trained"):
-    quantizer = faiss.IndexFlatL2(index_dim)
+quantizer = faiss.IndexFlatL2(index_dim)
 
-    if args.pca>0:
-        pca_matrix = faiss.PCAMatrix(args.dimension, args.pca, 0, True)
-    
-    indexes = {}
-    # Initialize faiss index
-    for i in range(args.n_datastores):
-        indexes[i] = faiss.IndexIVFPQ(quantizer, index_dim, args.ncentroids, args.code_size, 8)
-        indexes[i].nprobe = args.probe
+if args.pca>0:
+    pca_matrix = faiss.PCAMatrix(args.dimension, args.pca, 0, True)
 
-        if args.pca > 0:
-            indexes[i] = faiss.IndexPreTransform(pca_matrix, indexes[i])
+indexes = {}
+# Initialize faiss index
+for i in range(args.n_datastores):
+    indexes[i] = faiss.IndexIVFPQ(quantizer, index_dim, args.ncentroids, args.code_size, 8)
+    indexes[i].nprobe = args.probe
 
-        print('\n')
-        print('Training Index', i)
+    if args.pca > 0:
+        indexes[i] = faiss.IndexPreTransform(pca_matrix, indexes[i])
 
-        idx = (I==i).nonzero()[0]
+    print('\n')
+    print('Training Index', i)
 
+    idx = (I==i).nonzero()[0]
+
+    if len(idx)>4096:
         keys_ = keys[idx]
         vals_ = vals[idx]
 
@@ -142,6 +146,8 @@ if not os.path.exists(args.faiss_index + "15_knn_index.trained"):
             faiss.write_index(indexes[i], args.faiss_index+ str(i) + "_knn_index")
 
             print('Writing index took {} s'.format(time.time() - start))
+    else:
+
             
             
 with open(args.faiss_index + 'dstore_sizes', 'wb') as f:
