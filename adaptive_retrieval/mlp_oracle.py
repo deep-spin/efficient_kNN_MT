@@ -124,6 +124,7 @@ class MLPOracle(nn.Module):
             features_cat = []
             features_cat.append(self.input_layer['conf'](conf))
             features_cat.append(self.input_layer['ent'](ent))
+            features_cat = torch.cat(features_cat,-1)
 
             scores = self.model(features_cat)
         elif self.use_conf_ent and self.use_freq_fert and not self.use_faiss_centroids:
