@@ -326,7 +326,7 @@ class KNN_Dstore(object):
                 j+=1
             """
 
-            
+            print('------')
             for i in self.idx_dstores.keys():
                 print(self.indexes[i])
                 self.indexes[i] = faiss.index_cpu_to_gpu(self.res, 0, self.indexes[i], self.co)
