@@ -328,6 +328,7 @@ class KNN_Dstore(object):
 
             
             for i in self.idx_dstores.keys():
+                print(self.indexes[i])
                 self.indexes[i] = faiss.index_cpu_to_gpu(self.res, 0, self.indexes[i], self.co)
                 self.dists[self.idx_dstores[i]], self.knns[self.idx_dstores[i]] = self.indexes[i].search(queries[self.idx_dstores[i]], self.k)
             
