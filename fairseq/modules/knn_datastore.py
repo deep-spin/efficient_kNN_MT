@@ -215,37 +215,37 @@ class KNN_Dstore(object):
 
                 self.vals = np.memmap(args.dstore_filename + 'vals.npy', dtype=np.int, mode='r',shape=(self.dstore_size, 1))
            
-        # If you wish to load all the keys into memory
-        # CAUTION: Only do this if your RAM can handle it!
-        if args.move_dstore_to_mem:
-            print('Loading to memory...')
-            start = time.time()
+            # If you wish to load all the keys into memory
+            # CAUTION: Only do this if your RAM can handle it!
+            if args.move_dstore_to_mem:
+                print('Loading to memory...')
+                start = time.time()
 
-            if not args.no_load_keys:
-                del self.keys
-                self.keys_from_memmap = np.memmap(args.dstore_filename + '/keys.npy',
-                                                  dtype=np.float16 if args.dstore_fp16 else np.float32, mode='r',
-                                                  shape=(self.dstore_size, self.dimension))
-                self.keys = np.zeros((self.dstore_size, self.dimension),
-                                     dtype=np.float16 if args.dstore_fp16 else np.float32)
-                self.keys = self.keys_from_memmap[:]
-                self.keys = self.keys.astype(np.float16 if args.dstore_fp16 else np.float32)
+                if not args.no_load_keys:
+                    del self.keys
+                    self.keys_from_memmap = np.memmap(args.dstore_filename + '/keys.npy',
+                                                      dtype=np.float16 if args.dstore_fp16 else np.float32, mode='r',
+                                                      shape=(self.dstore_size, self.dimension))
+                    self.keys = np.zeros((self.dstore_size, self.dimension),
+                                         dtype=np.float16 if args.dstore_fp16 else np.float32)
+                    self.keys = self.keys_from_memmap[:]
+                    self.keys = self.keys.astype(np.float16 if args.dstore_fp16 else np.float32)
 
-            del self.vals
-            self.vals_from_memmap = np.memmap(args.dstore_filename + 'vals.npy',
-                                              dtype=np.int, mode='r',
-                                              shape=(self.dstore_size, 1))
-            self.vals = np.zeros((self.dstore_size, 1), dtype=np.int)
-            self.vals = self.vals_from_memmap[:]
-            self.vals = self.vals.astype(np.int)
+                del self.vals
+                self.vals_from_memmap = np.memmap(args.dstore_filename + 'vals.npy',
+                                                  dtype=np.int, mode='r',
+                                                  shape=(self.dstore_size, 1))
+                self.vals = np.zeros((self.dstore_size, 1), dtype=np.int)
+                self.vals = self.vals_from_memmap[:]
+                self.vals = self.vals.astype(np.int)
 
-            if self.use_gpu_to_search:
-                self.vals = torch.from_numpy(self.vals)
-                if torch.cuda.is_available():
-                    print('put vals to gpu')
-                    self.vals = self.vals.cuda()
+                if self.use_gpu_to_search:
+                    self.vals = torch.from_numpy(self.vals)
+                    if torch.cuda.is_available():
+                        print('put vals to gpu')
+                        self.vals = self.vals.cuda()
 
-            print('Loading to memory took {} s'.format(time.time() - start))
+                print('Loading to memory took {} s'.format(time.time() - start))
 
         return index
 
