@@ -70,11 +70,8 @@ print('finish searching')
 
 
 centroids=kmeans.centroids
-print(centroids.shape)
-centroids=np.delete(centroids, 0, axis=0)
-print(centroids.shape)
 
-np.save(args.faiss_index+'centroids', kmeans.centroids)
+
 
 dstore_sizes=[]
 quantizer = faiss.IndexFlatL2(index_dim)
@@ -83,13 +80,8 @@ if args.pca>0:
     pca_matrix = faiss.PCAMatrix(args.dimension, args.pca, 0, True)
 
 indexes = {}
-# Initialize faiss index
+j=0
 for i in range(args.n_datastores):
-    indexes[i] = faiss.IndexIVFPQ(quantizer, index_dim, args.ncentroids, args.code_size, 8)
-    indexes[i].nprobe = args.probe
-
-    if args.pca > 0:
-        indexes[i] = faiss.IndexPreTransform(pca_matrix, indexes[i])
 
     print('\n')
     print('Training Index', i)
@@ -97,31 +89,40 @@ for i in range(args.n_datastores):
     idx = (I==i).nonzero()[0]
 
     if len(idx)>4096:
+
+        indexes[j] = faiss.IndexIVFPQ(quantizer, index_dim, args.ncentroids, args.code_size, 8)
+        indexes[j].nprobe = args.probe
+
+        if args.pca > 0:
+            indexes[j] = faiss.IndexPreTransform(pca_matrix, indexes[j])
+
         keys_ = keys[idx]
         vals_ = vals[idx]
 
         dstore_sizes.append(vals_.shape[0])
 
-        dstore_vals = np.memmap(args.faiss_index + '/vals_' + str(i) + '.npy', dtype=np.int, mode='w+', shape=(vals_.shape[0], 1))
+        dstore_vals = np.memmap(args.faiss_index + '/vals_' + str(j) + '.npy', dtype=np.int, mode='w+', shape=(vals_.shape[0], 1))
         dstore_vals[:] = vals_
         dstore_vals.flush()
 
         random_sample = np.random.choice(np.arange(vals_.shape[0]), size=[min(1000000, vals_.shape[0])], replace=False)
         start = time.time()
 
-        indexes[i].train(keys_[random_sample].astype(np.float32))
+        indexes[j].train(keys_[random_sample].astype(np.float32))
 
         print('Training took {} s'.format(time.time() - start))
 
         print('Writing index after training')
         start = time.time()
 
-        faiss.write_index(indexes[i], args.faiss_index + str(i) + "_knn_index.trained")
+        faiss.write_index(indexes[j], args.faiss_index + str(j) + "_knn_index.trained")
         
         print('Writing index took {} s'.format(time.time() - start))        
 
         print('Adding Keys')
-        index = faiss.read_index(args.faiss_index + str(i) + "_knn_index.trained")
+        index = faiss.read_index(args.faiss_index + str(j) + "_knn_index.trained")
+
+        
 
         start = args.starting_point
         start_time = time.time()
@@ -129,25 +130,31 @@ for i in range(args.n_datastores):
             end = min(vals_.shape[0], start + args.num_keys_to_add_at_a_time)
             to_add = keys_[start:end].copy()
 
-            indexes[i].add_with_ids(to_add.astype(np.float32), np.arange(start, end))
+            indexes[j].add_with_ids(to_add.astype(np.float32), np.arange(start, end))
 
             start += args.num_keys_to_add_at_a_time
 
             if (start % 1000000) == 0:
                 print('Added %d tokens so far' % start)
                 print('Writing Index', start)
-                faiss.write_index(indexes[i], args.faiss_index+ str(i) + "_knn_index")
+                faiss.write_index(indexes[j], args.faiss_index+ str(j) + "_knn_index")
 
             print("Adding total %d keys" % end)
             print('Adding took {} s'.format(time.time() - start_time))
             print('Writing Index')
             start = time.time()
 
-            faiss.write_index(indexes[i], args.faiss_index+ str(i) + "_knn_index")
+            faiss.write_index(indexes[j], args.faiss_index+ str(j) + "_knn_index")
 
             print('Writing index took {} s'.format(time.time() - start))
-    #else:
 
+        j+=1
+
+    else:
+        centroids=np.delete(centroids, i, axis=0)
+
+
+np.save(args.faiss_index+'centroids', centroids)
             
             
 with open(args.faiss_index + 'dstore_sizes', 'wb') as f:
