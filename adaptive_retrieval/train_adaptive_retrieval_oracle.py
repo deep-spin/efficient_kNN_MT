@@ -299,20 +299,20 @@ else:
             nsamples += bsz
 
             for t in range(len(targets)):
-            if targets[t]==1 and scores[t]>0.5 or targets[t]==0 and scores[t]<=0.5:
-                rights+=1
-            
-            if targets[t]==1 and scores[t]>0.5:
-                rights_search+=1
-                total_search+=1
-            elif targets[t]==1:
-                total_search+=1
+                if targets[t]==1 and scores[t]>0.5 or targets[t]==0 and scores[t]<=0.5:
+                    rights+=1
+                
+                if targets[t]==1 and scores[t]>0.5:
+                    rights_search+=1
+                    total_search+=1
+                elif targets[t]==1:
+                    total_search+=1
 
-            if targets[t]==0 and scores[t]<=0.5:
-                rights_not_search+=1
-                total_not_search+=1
-            elif targets[t]==0:
-                total_not_search+=1
+                if targets[t]==0 and scores[t]<=0.5:
+                    rights_not_search+=1
+                    total_not_search+=1
+                elif targets[t]==0:
+                    total_not_search+=1
 
         acc = rights / nsamples
         report_loss = running_loss / nsamples
