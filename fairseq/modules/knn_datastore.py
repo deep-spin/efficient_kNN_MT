@@ -327,9 +327,9 @@ class KNN_Dstore(object):
             """
 
             for i in self.idx_dstores.keys():
-                self.indexes[i] = faiss.index_cpu_to_gpu(self.res, 0, self.indexes[i], self.co)
+                #self.indexes[i] = faiss.index_cpu_to_gpu(self.res, 0, self.indexes[i], self.co)
                 self.dists[self.idx_dstores[i]], self.knns[self.idx_dstores[i]] = self.indexes[i].search(queries[self.idx_dstores[i]], self.k)
-                self.indexes[i] = faiss.index_gpu_to_cpu(self.indexes[i])
+                #self.indexes[i] = faiss.index_gpu_to_cpu(self.indexes[i])
 
             #self.dists, self.knns = self.indexes[0].search(queries, self.k)
         else:
@@ -360,8 +360,10 @@ class KNN_Dstore(object):
             #knns = torch.from_numpy(knns).to(queries.device)
             #dists = torch.from_numpy(dists).to(queries.device)  # [Batch size * seq len, k]
             
-            tgt_idx = torch.from_numpy(self.vals[knns]).to(queries.device).squeeze(-1)  # [Batch size * Seq len, K]
-            #tgt_idx = self.vals[knns].to(queries.device).squeeze(-1)
+            if not args.use_gpu_to_search:
+                tgt_idx = torch.from_numpy(self.vals[knns]).to(queries.device).squeeze(-1)  # [Batch size * Seq len, K]
+            else:
+                tgt_idx = self.vals[knns].to(queries.device).squeeze(-1)
         
         tgt_idx = tgt_idx.view(bsz, seq_len, -1)  # [B, S, K]
 
