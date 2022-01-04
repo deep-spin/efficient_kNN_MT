@@ -158,14 +158,14 @@ class KNN_Dstore(object):
 
         
 
-        if args.multiple_dstores>0:
+        if self.multiple_dstores:
             self.vals={}
             indexes={}
             
             with open(args.dstore_filename+'dstore_sizes', 'rb') as f:
                 dstore_sizes=pickle.load(f)
 
-            for i in range(args.multiple_dstores):
+            for i in range(len(dstore_sizes)):
                 start = time.time()
                 indexes[i] = faiss.read_index(args.dstore_filename + str(i) + '_knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
 

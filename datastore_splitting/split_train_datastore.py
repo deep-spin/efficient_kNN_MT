@@ -81,6 +81,7 @@ if args.pca>0:
 
 indexes = {}
 j=0
+aux=0
 for i in range(args.n_datastores):
 
     print('\n')
@@ -151,7 +152,8 @@ for i in range(args.n_datastores):
         j+=1
 
     else:
-        centroids=np.delete(centroids, i, axis=0)
+        centroids=np.delete(centroids, i-aux, axis=0)
+        aux+=1
 
 
 np.save(args.faiss_index+'centroids', centroids)
