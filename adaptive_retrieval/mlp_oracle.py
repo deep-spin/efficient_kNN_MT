@@ -17,20 +17,25 @@ class LeakyReLUNet(nn.Module):
 
 
 class MLPOracle(nn.Module):
-    def __init__(self, hidden_units=128, nlayers=4, dropout=0.5, ctxt_dim=1024, activation='relu', use_conf_ent=False, use_freq_fert=False, compute_loss=False, use_faiss_centroids=False, loss='cross_entropy'):
+    def __init__(self, hidden_units=128, nlayers=4, dropout=0.5, ctxt_dim=1024, activation='relu', use_conf_ent=False, use_freq_fert=False, compute_loss=False, use_faiss_centroids=False, loss='cross_entropy', use_context=False):
         super().__init__()
 
         self.use_conf_ent = use_conf_ent 
         self.use_freq_fert = use_freq_fert
         self.use_faiss_centroids = use_faiss_centroids
+        self.use_context = use_context
         self.compute_loss = compute_loss
 
-        if use_conf_ent and not use_freq_fert:    
+        if use_conf_ent and not use_freq_fert and self.use_context:    
             input_dim=int(ctxt_dim)*2
-        elif use_conf_ent and use_freq_fert:    
+        elif use_conf_ent and use_freq_fert and self.use_context:    
             input_dim=2044
-        elif use_conf_ent and use_faiss_centroids:
+        elif use_conf_ent and use_faiss_centroids and self.use_context:
             input_dim=int(ctxt_dim)*2
+        elif use_conf_ent and use_freq_fert:
+            input_dim=1044
+        elif use_conf_ent and use_faiss_centroids:
+            input_dim=int(ctxt_dim)
         else:
             input_dim=ctxt_dim
 
@@ -83,15 +88,15 @@ class MLPOracle(nn.Module):
                 self.loss_ = nn.MSELoss()
 
 
-    def forward(self, features, targets=None, conf=None, ent=None, freq_1=None, freq_2=None, freq_3=None, freq_4=None, fert_1=None, fert_2=None, fert_3=None, fert_4=None, min_dist=None, min_top32_dist=None):
-        if self.use_conf_ent and not self.use_freq_fert  and not self.use_faiss_centroids:
+    def forward(self, features=None, targets=None, conf=None, ent=None, freq_1=None, freq_2=None, freq_3=None, freq_4=None, fert_1=None, fert_2=None, fert_3=None, fert_4=None, min_dist=None, min_top32_dist=None):
+        if self.use_conf_ent and not self.use_freq_fert  and not self.use_faiss_centroids and self.use_context:
             features_cat = [features]
             features_cat.append(self.input_layer['conf'](conf))
             features_cat.append(self.input_layer['ent'](ent))
             features_cat = torch.cat(features_cat,-1)
 
             scores = self.model(features_cat)
-        elif self.use_conf_ent and self.use_freq_fert:
+        elif self.use_conf_ent and self.use_freq_fert and self.use_context:
             features_cat = [features]
             features_cat.append(self.input_layer['conf'](conf))
             features_cat.append(self.input_layer['ent'](ent))
@@ -106,8 +111,34 @@ class MLPOracle(nn.Module):
             features_cat = torch.cat(features_cat,-1)
 
             scores = self.model(features_cat)
-        elif self.use_conf_ent and self.use_faiss_centroids:
+        elif self.use_conf_ent and self.use_faiss_centroids and self.use_context:
             features_cat = [features]
+            features_cat.append(self.input_layer['conf'](conf))
+            features_cat.append(self.input_layer['ent'](ent))
+            features_cat.append(self.input_layer['min_dist'](min_dist))
+            features_cat.append(self.input_layer['min_top32_dist'](min_top32_dist))
+            features_cat = torch.cat(features_cat,-1)            
+
+            scores = self.model(features_cat)
+
+        elif self.use_conf_ent and self.use_freq_fert:
+            features_cat = []
+            features_cat.append(self.input_layer['conf'](conf))
+            features_cat.append(self.input_layer['ent'](ent))
+            features_cat.append(self.input_layer['freq_1'](freq_1))
+            features_cat.append(self.input_layer['freq_2'](freq_2))
+            features_cat.append(self.input_layer['freq_3'](freq_3))
+            features_cat.append(self.input_layer['freq_4'](freq_4))
+            features_cat.append(self.input_layer['fert_1'](fert_1))
+            features_cat.append(self.input_layer['fert_2'](fert_2))
+            features_cat.append(self.input_layer['fert_3'](fert_3))
+            features_cat.append(self.input_layer['fert_4'](fert_4))
+            features_cat = torch.cat(features_cat,-1)
+
+            scores = self.model(features_cat)
+
+        elif self.use_conf_ent and self.use_faiss_centroids:
+            features_cat = []
             features_cat.append(self.input_layer['conf'](conf))
             features_cat.append(self.input_layer['ent'](ent))
             features_cat.append(self.input_layer['min_dist'](min_dist))

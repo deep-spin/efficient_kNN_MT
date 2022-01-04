@@ -112,14 +112,22 @@ def validate(val_dataloader, model, args):
         else:
             features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
 
-        if not args.use_conf_ent and not args.use_freq_fert:
-            scores, loss = model(features, targets=targets)
+        if not args.use_conf_ent and not args.use_freq_fert and args.use_context:
+            scores, loss = model(features=features, targets=targets)
+        elif args.use_conf_ent and not args.use_freq_fert and not args.use_faiss_centroids and args.use_context:
+            scores, loss = model(features=features, targets=targets, conf=conf, ent=ent)
+        elif args.use_conf_ent and args.use_freq_fert and args.use_context:
+            scores, loss = model(features=features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
+        elif args.use_conf_ent and args.use_faiss_centroids and args.use_context:
+            scores, loss = model(features=features, targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
         elif args.use_conf_ent and not args.use_freq_fert and not args.use_faiss_centroids:
-            scores, loss = model(features, targets=targets, conf=conf, ent=ent)
+            scores, loss = model(targets=targets, conf=conf, ent=ent)
         elif args.use_conf_ent and args.use_freq_fert:
-            scores, loss = model(features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
+            scores, loss = model(targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
         elif args.use_conf_ent and args.use_faiss_centroids:
-            scores, loss = model(features, targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
+            scores, loss = model(targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
+
+            
 
         # (B,)
         ent_loss = loss
@@ -154,9 +162,9 @@ def validate(val_dataloader, model, args):
     acc_search = rights_search / total_search
     acc_not_search = rights_not_search / total_not_search
 
-    print('rights', rights)
-    print('search', rights_search, total_search)
-    print('not_search', rights_not_search, total_not_search)
+    #print('rights', rights)
+    #print('search', rights_search, total_search)
+    #print('not_search', rights_not_search, total_not_search)
 
     print(f"\n val loss: {val_loss:.3f}, val acc: {acc:.3f}, val acc search: {acc_search:.3f}, val acc not search: {acc_not_search:.3f}")
 
@@ -171,6 +179,7 @@ parser.add_argument('--freq_fert_path', type=str, default=None)
 parser.add_argument('--use_conf_ent', action='store_true')
 parser.add_argument('--use_freq_fert', action='store_true')
 parser.add_argument('--use_faiss_centroids', action='store_true')
+parser.add_argument('--use_context', action='store_true')
 parser.add_argument('--train_faiss_index', type=str, default=None)
 parser.add_argument('--valid_faiss_index', type=str, default=None)
 parser.add_argument('--seed', type=int, default=1,help='the random seed')
@@ -242,6 +251,7 @@ if args.arch == 'mlp':
                 use_conf_ent=args.use_conf_ent,
                 use_freq_fert=args.use_freq_fert,
                 use_faiss_centroids=args.use_faiss_centroids,
+                use_context=args.use_context,
                 compute_loss=True,
                 loss=args.loss
                 )
@@ -281,14 +291,21 @@ else:
 
             optimizer.zero_grad()
 
-            if not args.use_conf_ent and not args.use_freq_fert:
-                scores, loss = model(features, targets=targets)
+            if not args.use_conf_ent and not args.use_freq_fert and args.use_context:
+                scores, loss = model(features=features, targets=targets)
+            elif args.use_conf_ent and not args.use_freq_fert and not args.use_faiss_centroids and args.use_context:
+                scores, loss = model(features=features, targets=targets, conf=conf, ent=ent)
+            elif args.use_conf_ent and args.use_freq_fert and args.use_context:
+                scores, loss = model(features=features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
+            elif args.use_conf_ent and args.use_faiss_centroids and args.use_context:
+                scores, loss = model(features=features, targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
             elif args.use_conf_ent and not args.use_freq_fert and not args.use_faiss_centroids:
-                scores, loss = model(features, targets=targets, conf=conf, ent=ent)
+                scores, loss = model(targets=targets, conf=conf, ent=ent)
             elif args.use_conf_ent and args.use_freq_fert:
-                scores, loss = model(features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
+                scores, loss = model(targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
             elif args.use_conf_ent and args.use_faiss_centroids:
-                scores, loss = model(features, targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
+                scores, loss = model(targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
+
 
             #if args.l1 > 0:
             #    loss = loss + args.l1 * torch.abs(log_weight.exp()[:,1]).sum() / log_weight.size(0)
@@ -322,9 +339,9 @@ else:
         acc_search = rights_search / total_search
         acc_not_search = rights_not_search / total_not_search
 
-        print('rights', rights)
-        print('search', rights_search, total_search)
-        print('not_search', rights_not_search, total_not_search)
+        #print('rights', rights)
+        #print('search', rights_search, total_search)
+        #print('not_search', rights_not_search, total_not_search)
         
         print(f'\n epoch: {epoch}, step: {i},  training loss: {report_loss:.3f}, training acc: {acc:.3f}, training acc search: {acc_search:.3f}, training acc not search: {acc_not_search:.3f}')
         val_loss = validate(val_dataloader, model, args)
