@@ -177,6 +177,7 @@ parser.add_argument('--seed', type=int, default=1,help='the random seed')
 
 # training arguments
 parser.add_argument('--lr', type=float, default=1e-4, help='learning rate')
+parser.add_argument('--loss', type=str, default='cross_entropy')
 parser.add_argument('--l1', type=float, default=0, help='l1 regularization coefficient')
 parser.add_argument('--n_epochs', type=int, default=10)
 parser.add_argument('--batch-size', type=int, default=64, help='batch size')
@@ -241,7 +242,8 @@ if args.arch == 'mlp':
                 use_conf_ent=args.use_conf_ent,
                 use_freq_fert=args.use_freq_fert,
                 use_faiss_centroids=args.use_faiss_centroids,
-                compute_loss=True
+                compute_loss=True,
+                loss=args.loss
                 )
 
 if args.load_model:
