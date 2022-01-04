@@ -159,7 +159,7 @@ class KNN_Dstore(object):
         
 
         if self.multiple_dstores:
-            self.vals={}
+            self.vals_={}
             indexes={}
             
             if self.use_gpu_to_search:
@@ -182,7 +182,22 @@ class KNN_Dstore(object):
 
                 indexes[i].nprobe = args.probe
 
-                self.vals[i] = np.memmap(args.dstore_filename + 'vals_' +str(i) +'.npy', dtype=np.int, mode='r',shape=(dstore_sizes[i], 1))
+                self.vals_[i] = np.memmap(args.dstore_filename + 'vals_' +str(i) +'.npy', dtype=np.int, mode='r',shape=(dstore_sizes[i], 1))
+
+            if args.move_dstore_to_mem:
+                print('Loading to memory...')
+                start = time.time()
+
+            self.vals={}
+            for i in range(len(dstore_sizes)):
+                self.vals[i] = np.zeros((dstore_sizes[i], 1), dtype=np.int)
+                self.vals[i] = self.vals_[i][:]
+                self.vals[i] = self.vals[i].astype(np.int)
+
+                print('Loading to memory took {} s'.format(time.time() - start))
+            else:
+                self.vals=self.vals_
+
 
             return indexes
 
