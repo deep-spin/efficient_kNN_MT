@@ -360,7 +360,7 @@ class KNN_Dstore(object):
             #knns = torch.from_numpy(knns).to(queries.device)
             #dists = torch.from_numpy(dists).to(queries.device)  # [Batch size * seq len, k]
             
-            if not args.use_gpu_to_search:
+            if not self.use_gpu_to_search:
                 tgt_idx = torch.from_numpy(self.vals[knns]).to(queries.device).squeeze(-1)  # [Batch size * Seq len, K]
             else:
                 tgt_idx = self.vals[knns].to(queries.device).squeeze(-1)
