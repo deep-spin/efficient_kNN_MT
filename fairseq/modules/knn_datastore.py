@@ -26,7 +26,7 @@ class KNN_Dstore(object):
         if args.multiple_dstores>0:
             self.multiple_dstores=True
             self.indexes = self.setup_faiss(args)
-            torch.multiprocessing.set_start_method('spawn', force=True)
+            #torch.multiprocessing.set_start_method('spawn', force=True)
         else:
             self.multiple_dstores=False
             self.index = self.setup_faiss(args)
