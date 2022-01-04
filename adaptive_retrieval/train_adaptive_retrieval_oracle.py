@@ -264,6 +264,10 @@ else:
         running_loss = 0.
         nsamples = 0
         rights = 0
+        rights_search = 0
+        rights_not_search = 0
+        total_search = 0
+        total_not_search = 0
 
         for i, sample in enumerate(tqdm(train_dataloader)):
             if args.use_freq_fert:
@@ -295,11 +299,31 @@ else:
             nsamples += bsz
 
             for t in range(len(targets)):
-            	if targets[t]==1 and scores[t]>0.5 or targets[t]==0 and scores[t]<=0.5:
-            		rights+=1
+            if targets[t]==1 and scores[t]>0.5 or targets[t]==0 and scores[t]<=0.5:
+                rights+=1
+            
+            if targets[t]==1 and scores[t]>0.5:
+                rights_search+=1
+                total_search+=1
+            elif targets[t]==1:
+                total_search+=1
+
+            if targets[t]==0 and scores[t]<=0.5:
+                rights_not_search+=1
+                total_not_search+=1
+            elif targets[t]==0:
+                total_not_search+=1
 
         acc = rights / nsamples
         report_loss = running_loss / nsamples
+
+        acc_search = rights_search / total_search
+        acc_not_search = rights_not_search / total_not_search
+
+        print('rights', rights)
+        print('search', rights_search, total_search)
+        print('not_search', rights_not_search, total_not_search)
+        
         print(f'\n epoch: {epoch}, step: {i},  training loss: {report_loss:.3f}, training acc: {acc:.3f}')
 
         val_loss = validate(val_dataloader, model, args)
