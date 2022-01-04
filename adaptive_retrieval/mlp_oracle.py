@@ -43,7 +43,7 @@ class MLPOracle(nn.Module):
             if activation == 'relu':
                 models.append(nn.ReLU())
 
-        if nlayers=0:
+        if nlayers==0:
             hidden_units=input_dim
 
         models.append(nn.Linear(hidden_units, 1))
