@@ -38,12 +38,13 @@ class MLPOracle(nn.Module):
         if activation == 'relu':
             models.append(nn.ReLU())
 
-        for _ in range(nlayers-1):
-            models.extend([nn.Linear(hidden_units, hidden_units), nn.Dropout(p=dropout)])
-            if activation == 'relu':
-                models.append(nn.ReLU())
+        if nlayers>0:
+            for _ in range(nlayers-1):
+                models.extend([nn.Linear(hidden_units, hidden_units), nn.Dropout(p=dropout)])
+                if activation == 'relu':
+                    models.append(nn.ReLU())
 
-        if nlayers==0:
+        else:
             hidden_units=input_dim
 
         models.append(nn.Linear(hidden_units, 1))
