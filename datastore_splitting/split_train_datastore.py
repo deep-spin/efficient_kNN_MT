@@ -71,7 +71,7 @@ print('finish searching')
 
 centroids=kmeans.centroids
 print(centroids.shape)
-centroids=np.delete(centroids, 0)
+centroids=np.delete(centroids, 0, axis=0)
 print(centroids.shape)
 
 np.save(args.faiss_index+'centroids', kmeans.centroids)
