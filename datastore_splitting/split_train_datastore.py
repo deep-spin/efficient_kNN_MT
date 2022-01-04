@@ -146,7 +146,7 @@ for i in range(args.n_datastores):
             faiss.write_index(indexes[i], args.faiss_index+ str(i) + "_knn_index")
 
             print('Writing index took {} s'.format(time.time() - start))
-    else:
+    #else:
 
             
             
