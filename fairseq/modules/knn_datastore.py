@@ -290,8 +290,8 @@ class KNN_Dstore(object):
                 else:
                     self.idx_dstores[dstore_idx[i].item()].append(i)
 
-            #self.dists = torch.zeros(dstore_idx.size(0), self.k)
-            #self.knns = torch.zeros(dstore_idx.size(0), self.k).long()
+            self.dists = torch.zeros(dstore_idx.size(0), self.k)
+            self.knns = torch.zeros(dstore_idx.size(0), self.k).long()
 
             #threads = [None] * len(self.idx_dstores.keys())
             #j=0
