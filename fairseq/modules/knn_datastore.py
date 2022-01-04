@@ -188,16 +188,15 @@ class KNN_Dstore(object):
                 print('Loading to memory...')
                 start = time.time()
 
-            self.vals={}
-            for i in range(len(dstore_sizes)):
-                self.vals[i] = np.zeros((dstore_sizes[i], 1), dtype=np.int)
-                self.vals[i] = self.vals_[i][:]
-                self.vals[i] = self.vals[i].astype(np.int)
+                self.vals={}
+                for i in range(len(dstore_sizes)):
+                    self.vals[i] = np.zeros((dstore_sizes[i], 1), dtype=np.int)
+                    self.vals[i] = self.vals_[i][:]
+                    self.vals[i] = self.vals[i].astype(np.int)
 
-                print('Loading to memory took {} s'.format(time.time() - start))
+                    print('Loading to memory took {} s'.format(time.time() - start))
             else:
                 self.vals=self.vals_
-
 
             return indexes
 
