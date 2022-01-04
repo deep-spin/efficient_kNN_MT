@@ -162,6 +162,14 @@ class KNN_Dstore(object):
             self.vals={}
             indexes={}
             
+            if self.use_gpu_to_search:
+                print('put index from cpu to gpu')
+                res = faiss.StandardGpuResources()
+                self.res = res
+                self.co = faiss.GpuClonerOptions()
+                self.co.useFloat16 = True
+                #index = faiss.index_cpu_to_gpu(res, 0, index, co)
+
             with open(args.dstore_filename+'dstore_sizes', 'rb') as f:
                 dstore_sizes=pickle.load(f)
 
@@ -320,6 +328,7 @@ class KNN_Dstore(object):
 
             
             for i in self.idx_dstores.keys():
+                self.indexex[i] = faiss.index_cpu_to_gpu(self.res, 0, self.indexes[i], self.co)
                 self.dists[self.idx_dstores[i]], self.knns[self.idx_dstores[i]] = self.indexes[i].search(queries[self.idx_dstores[i]], self.k)
             
             #self.dists, self.knns = self.indexes[0].search(queries, self.k)
