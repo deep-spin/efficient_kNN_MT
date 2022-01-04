@@ -37,8 +37,8 @@ class FeatureDataset(data.Dataset):
         self.targets = torch.FloatTensor([item for sublist in targets for item in sublist]).unsqueeze(-1)
         self.knn_probs = torch.cat(knn_probs, 0).unsqueeze(-1)
         self.network_probs = torch.cat(network_probs, 0).unsqueeze(-1)
-       	self.conf = torch.cat(conf, 0).unsqueeze(-1)
-       	self.ent = torch.cat(ent, 0).unsqueeze(-1)
+       	self.conf = torch.log(torch.cat(conf, 0).unsqueeze(-1))
+       	self.ent = torch.log(torch.cat(ent, 0).unsqueeze(-1))
 
         self.use_freq_fert = args.use_freq_fert
         self.use_faiss_centroids = args.use_faiss_centroids
@@ -60,8 +60,8 @@ class FeatureDataset(data.Dataset):
             centroids=torch.FloatTensor(centroids)
             
             dists = torch.cdist(self.features, centroids, p=2)
-            self.min_dist = dists.min(-1).values.unsqueeze(-1)
-            self.min_top32_dist = torch.topk(dists, 32, largest=False, dim=-1).values.mean(-1).unsqueeze(-1)
+            self.min_dist = torch.log(dists.min(-1).values.unsqueeze(-1))
+            self.min_top32_dist = torch.log(torch.topk(dists, 32, largest=False, dim=-1).values.mean(-1).unsqueeze(-1))
 
     def __len__(self):
         return len(self.features)
