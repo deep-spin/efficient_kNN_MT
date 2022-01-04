@@ -177,7 +177,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
         self.multiple_dstores = cfg.multiple_dstores
         if self.multiple_dstores > 0:
-            self.dstore_centroids=torch.FloatTensor(np.load(cfg.dstore_filename+'centroids.npy'))#.cuda()
+            self.dstore_centroids=torch.FloatTensor(np.load(cfg.dstore_filename+'centroids.npy')).cuda()
 
         self.analyse=False
 
