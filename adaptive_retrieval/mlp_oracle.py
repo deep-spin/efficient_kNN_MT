@@ -34,11 +34,12 @@ class MLPOracle(nn.Module):
         else:
             input_dim=ctxt_dim
 
-        models = [nn.Linear(input_dim, hidden_units), nn.Dropout(p=dropout)]
-        if activation == 'relu':
-            models.append(nn.ReLU())
-
+        
         if nlayers>0:
+            models = [nn.Linear(input_dim, hidden_units), nn.Dropout(p=dropout)]
+            if activation == 'relu':
+                models.append(nn.ReLU())
+        
             for _ in range(nlayers-1):
                 models.extend([nn.Linear(hidden_units, hidden_units), nn.Dropout(p=dropout)])
                 if activation == 'relu':
@@ -47,7 +48,7 @@ class MLPOracle(nn.Module):
         else:
             hidden_units=input_dim
 
-        models.append(nn.Linear(hidden_units, 1))
+        models=[nn.Linear(hidden_units, 1)]
 
         models.append(nn.Sigmoid())
 
