@@ -79,7 +79,7 @@ class MLPOracle(nn.Module):
         if self.compute_loss:
             if loss=='cross_entropy':
                 self.loss_ = nn.BCELoss()
-            elif loss='mse':
+            elif loss=='mse':
                 self.loss_ = nn.MSELoss()
 
 
