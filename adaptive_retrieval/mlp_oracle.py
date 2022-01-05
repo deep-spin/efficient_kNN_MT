@@ -163,7 +163,7 @@ class MLPOracle(nn.Module):
 
             scores = self.model(features_cat)
 
-        elif self.use_conf_ent and self.use_faiss_centroids and not self.use_freq_fert:
+        elif self.use_conf_ent and self.use_faiss_centroids and  self.use_freq_fert:
             features_cat = []
             features_cat.append(self.input_layer['conf'](conf))
             features_cat.append(self.input_layer['ent'](ent))
