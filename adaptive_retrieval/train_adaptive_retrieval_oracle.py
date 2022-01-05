@@ -60,15 +60,15 @@ class FeatureDataset(data.Dataset):
             centroids=torch.FloatTensor(centroids)
             
             dists = torch.cdist(self.features, centroids, p=2)
-            self.min_dist = dists.min(-1).values.unsqueeze(-1)
-            self.min_top32_dist = torch.topk(dists, 32, largest=False, dim=-1).values.mean(-1).unsqueeze(-1)
+            self.min_dist = torch.log(dists.min(-1).values.unsqueeze(-1))
+            self.min_top32_dist = torch.log(torch.topk(dists, 32, largest=False, dim=-1).values.mean(-1).unsqueeze(-1))
 
     def __len__(self):
         return len(self.features)
 
     def __getitem__(self, idx):
         
-        if self.use_freq_fert:
+        if self.use_freq_fert and not self.use_faiss_centroids:
             try:
                 freq_1=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-1]]])
                 freq_2=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-2]]])
@@ -90,8 +90,29 @@ class FeatureDataset(data.Dataset):
 
             return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda(), freq_1.cuda(), freq_2.cuda(), freq_3.cuda(), freq_4.cuda(), fert_1.cuda(), fert_2.cuda(), fert_3.cuda(), fert_4.cuda()
 
-        elif self.use_faiss_centroids:
+        elif self.use_faiss_centroids and not self.use_freq_fert:
             return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda(), self.min_dist[idx].cuda(), self.min_top32_dist[idx].cuda()
+        elif self.use_freq_fert and self.use_faiss_centroids:
+            try:
+                freq_1=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-1]]])
+                freq_2=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-2]]])
+                freq_3=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-3]]])
+                freq_4=torch.FloatTensor([self.freq_dict[self.tokens[idx][:-4]]])
+                fert_1=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-1]]])
+                fert_2=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-2]]])
+                fert_3=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-3]]])
+                fert_4=torch.FloatTensor([self.fert_dict[self.tokens[idx][:-4]]])
+            except:
+                freq_1=torch.FloatTensor([0])
+                freq_2=torch.FloatTensor([0])
+                freq_3=torch.FloatTensor([0])
+                freq_4=torch.FloatTensor([0])
+                fert_1=torch.FloatTensor([0])
+                fert_2=torch.FloatTensor([0])
+                fert_3=torch.FloatTensor([0])
+                fert_4=torch.FloatTensor([0])
+
+            return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda(), freq_1.cuda(), freq_2.cuda(), freq_3.cuda(), freq_4.cuda(), fert_1.cuda(), fert_2.cuda(), fert_3.cuda(), fert_4.cuda(), self.min_dist[idx].cuda(), self.min_top32_dist[idx].cuda()
         else:
             return self.features[idx].cuda(), self.targets[idx].cuda(), self.knn_probs[idx].cuda(), self.network_probs[idx].cuda(), self.conf[idx].cuda(), self.ent[idx].cuda()
 
@@ -105,10 +126,12 @@ def validate(val_dataloader, model, args):
     total_search = 0
     total_not_search = 0
     for i, sample in enumerate(val_dataloader):
-        if args.use_freq_fert:
+        if args.use_freq_fert and not args.use_faiss_centroids:
             features, targets, knn_probs, network_probs, conf, ent, freq_1, freq_2, freq_3, freq_4, fert_1, fert_2, fert_3, fert_4 = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7], sample[8], sample[9], sample[10], sample[11], sample[12], sample[13]
-        elif args.use_faiss_centroids:
+        elif args.use_faiss_centroids and not args.use_freq_fert:
             features, targets, knn_probs, network_probs, conf, ent, min_dist, min_top32_dist = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7]
+        elif args.use_faiss_centroids and args.use_freq_fert:
+            features, targets, knn_probs, network_probs, conf, ent, freq_1, freq_2, freq_3, freq_4, fert_1, fert_2, fert_3, fert_4, min_dist, min_top32_dist = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7], sample[8], sample[9], sample[10], sample[11], sample[12], sample[13], sample[14], sample[15]
         else:
             features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
 
@@ -122,11 +145,12 @@ def validate(val_dataloader, model, args):
             scores, loss = model(features=features, targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
         elif args.use_conf_ent and not args.use_freq_fert and not args.use_faiss_centroids:
             scores, loss = model(targets=targets, conf=conf, ent=ent)
-        elif args.use_conf_ent and args.use_freq_fert:
+        elif args.use_conf_ent and args.use_freq_fert and not args.use_faiss_centroids:
             scores, loss = model(targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
-        elif args.use_conf_ent and args.use_faiss_centroids:
+        elif args.use_conf_ent and args.use_faiss_centroids and not args.use_freq_fert:
             scores, loss = model(targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
-
+        elif args.use_conf_ent and args.use_faiss_centroids and args.use_freq_fert:
+            scores, loss = model(targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4, , min_dist=min_dist, min_top32_dist=min_top32_dist)
             
 
         # (B,)
@@ -284,10 +308,12 @@ else:
         _ = validate(val_dataloader, model, args)
 
         for i, sample in enumerate(tqdm(train_dataloader)):
-            if args.use_freq_fert:
+            if args.use_freq_fert and not args.use_faiss_centroids:
                 features, targets, knn_probs, network_probs, conf, ent, freq_1, freq_2, freq_3, freq_4, fert_1, fert_2, fert_3, fert_4 = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7], sample[8], sample[9], sample[10], sample[11], sample[12], sample[13]
-            elif args.use_faiss_centroids:
+            elif args.use_faiss_centroids and not args.use_freq_fert:
                 features, targets, knn_probs, network_probs, conf, ent, min_dist, min_top32_dist = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7]
+            elif args.use_faiss_centroids and args.use_freq_fert:
+                features, targets, knn_probs, network_probs, conf, ent, freq_1, freq_2, freq_3, freq_4, fert_1, fert_2, fert_3, fert_4, min_dist, min_top32_dist = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5], sample[6], sample[7], sample[8], sample[9], sample[10], sample[11], sample[12], sample[13], sample[14], sample[15]
             else:
                 features, targets, knn_probs, network_probs, conf, ent = sample[0], sample[1], sample[2], sample[3], sample[4], sample[5]
 
@@ -303,10 +329,13 @@ else:
                 scores, loss = model(features=features, targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
             elif args.use_conf_ent and not args.use_freq_fert and not args.use_faiss_centroids:
                 scores, loss = model(targets=targets, conf=conf, ent=ent)
-            elif args.use_conf_ent and args.use_freq_fert:
+            elif args.use_conf_ent and args.use_freq_fert and not args.use_faiss_centroids:
                 scores, loss = model(targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
-            elif args.use_conf_ent and args.use_faiss_centroids:
+            elif args.use_conf_ent and args.use_faiss_centroids and not args.use_freq_fert:
                 scores, loss = model(targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
+            elif args.use_conf_ent and args.use_faiss_centroids and args.use_freq_fert:
+                scores, loss = model(targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4, , min_dist=min_dist, min_top32_dist=min_top32_dist)
+        
 
 
             #if args.l1 > 0:

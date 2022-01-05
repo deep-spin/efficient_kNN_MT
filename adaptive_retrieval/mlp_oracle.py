@@ -26,15 +26,17 @@ class MLPOracle(nn.Module):
         self.use_context = use_context
         self.compute_loss = compute_loss
 
-        if use_conf_ent and not use_freq_fert and self.use_context:    
+        if use_conf_ent and not use_freq_fert and use_context:    
             input_dim=int(ctxt_dim)*2
-        elif use_conf_ent and use_freq_fert and self.use_context:    
+        elif use_conf_ent and use_freq_fert and use_context and not use_faiss_centroids:    
             input_dim=2044
-        elif use_conf_ent and use_faiss_centroids and self.use_context:
+        elif use_conf_ent and use_faiss_centroids and use_context and not use_freq_fert:
             input_dim=int(ctxt_dim)*2
-        elif use_conf_ent and use_freq_fert:
+        elif use_conf_ent and use_freq_fert and not use_faiss_centroids:
             input_dim=1020
-        elif use_conf_ent and use_faiss_centroids:
+        elif use_conf_ent and use_faiss_centroids and not use_freq_fert:
+            input_dim=int(ctxt_dim)
+        elif use_conf_ent and use_faiss_centroids and use_freq_fert:
             input_dim=int(ctxt_dim)
         else:
             input_dim=ctxt_dim
@@ -67,18 +69,26 @@ class MLPOracle(nn.Module):
                 input_layer[k] = LeakyReLUNet(1, ndim)
 
             self.input_layer = nn.ModuleDict(input_layer)
-        elif use_conf_ent and use_freq_fert:
+        elif use_conf_ent and use_freq_fert and not use_faiss_centroids:
             input_layer = {}
             ndim = int(ctxt_dim / 10)
             for k in ['conf','ent','freq_1','freq_2','freq_3','freq_4','fert_1','fert_2','fert_3','fert_4']:
                 input_layer[k] = LeakyReLUNet(1, ndim)
             self.input_layer = nn.ModuleDict(input_layer)
-        elif use_conf_ent and use_faiss_centroids:
+        elif use_conf_ent and use_faiss_centroids and not use_freq_fert:
             input_layer = {}
             ndim = int(ctxt_dim / 4)
             for k in ['conf','ent','min_dist', 'min_top32_dist']:
                 input_layer[k] = LeakyReLUNet(1, ndim)
 
+            self.input_layer = nn.ModuleDict(input_layer)
+
+        elif use_conf_ent and use_faiss_centroids and use_freq_fert:
+            input_layer = {}
+            ndim = int(ctxt_dim / 12)
+            for k in ['conf','ent','freq_1','freq_2','freq_3','freq_4','fert_1','fert_2','fert_3','fert_4','min_dist', 'min_top32_dist']:
+                input_layer[k] = LeakyReLUNet(1, ndim)
+            
             self.input_layer = nn.ModuleDict(input_layer)
 
         if self.compute_loss:
@@ -143,7 +153,7 @@ class MLPOracle(nn.Module):
 
             scores = self.model(features_cat)
 
-        elif self.use_conf_ent and self.use_faiss_centroids:
+        elif self.use_conf_ent and self.use_faiss_centroids and not self.use_freq_fert:
             features_cat = []
             features_cat.append(self.input_layer['conf'](conf))
             features_cat.append(self.input_layer['ent'](ent))
@@ -152,6 +162,25 @@ class MLPOracle(nn.Module):
             features_cat = torch.cat(features_cat,-1)            
 
             scores = self.model(features_cat)
+
+        elif self.use_conf_ent and self.use_faiss_centroids and not self.use_freq_fert:
+            features_cat = []
+            features_cat.append(self.input_layer['conf'](conf))
+            features_cat.append(self.input_layer['ent'](ent))
+            features_cat.append(self.input_layer['freq_1'](freq_1))
+            features_cat.append(self.input_layer['freq_2'](freq_2))
+            features_cat.append(self.input_layer['freq_3'](freq_3))
+            features_cat.append(self.input_layer['freq_4'](freq_4))
+            features_cat.append(self.input_layer['fert_1'](fert_1))
+            features_cat.append(self.input_layer['fert_2'](fert_2))
+            features_cat.append(self.input_layer['fert_3'](fert_3))
+            features_cat.append(self.input_layer['fert_4'](fert_4))
+            features_cat.append(self.input_layer['min_dist'](min_dist))
+            features_cat.append(self.input_layer['min_top32_dist'](min_top32_dist))
+            features_cat = torch.cat(features_cat,-1)
+
+            scores = self.model(features_cat)
+
 
         else:
             scores = self.model(features)
