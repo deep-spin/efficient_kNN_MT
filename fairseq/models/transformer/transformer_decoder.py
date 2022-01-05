@@ -196,9 +196,9 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             
             if cfg.knn_use_conf_ent and not cfg.knn_use_freq_fert and not cfg.use_faiss_centroids:
                 self.lambda_mlp = lambda_mlp.LambdaMLP(use_conf_ent=True)
-            elif cfg.knn_use_conf_ent and cfg.knn_use_freq_fert:
+            elif cfg.knn_use_conf_ent and cfg.knn_use_freq_fert and not cfg.use_faiss_centroids:
                 self.lambda_mlp = lambda_mlp.LambdaMLP(use_conf_ent=True, use_freq_fert=True)
-            elif cfg.knn_use_conf_ent and cfg.use_faiss_centroids:
+            elif cfg.knn_use_conf_ent and cfg.use_faiss_centroids and not cfg.knn_use_freq_fert:
                 self.lambda_mlp = lambda_mlp.LambdaMLP(use_conf_ent=True, use_faiss_centroids=True)
             else:
                 self.lambda_mlp = lambda_mlp.LambdaMLP()
@@ -210,13 +210,15 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             ckpt = torch.load(ckpt_path)            
 
             if cfg.knn_use_conf_ent and not cfg.knn_use_freq_fert and not cfg.use_faiss_centroids:
-                self.oracle_mlp = mlp_oracle.MLPOracle(use_conf_ent=True)
-            elif cfg.knn_use_conf_ent and cfg.knn_use_freq_fert:
-                self.oracle_mlp = mlp_oracle.MLPOracle(use_conf_ent=True, use_freq_fert=True)
-            elif cfg.knn_use_conf_ent and cfg.use_faiss_centroids:
-                self.oracle_mlp = mlp_oracle.MLPOracle(use_conf_ent=True, use_faiss_centroids=True)
+                self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True)
+            elif cfg.knn_use_conf_ent and cfg.knn_use_freq_fert and not cfg.use_faiss_centroids:
+                self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True, use_freq_fert=True)
+            elif cfg.knn_use_conf_ent and cfg.use_faiss_centroids and not cfg.knn_use_freq_fert:
+                self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True, use_faiss_centroids=True)
+            elif cfg.knn_use_conf_ent and cfg.use_faiss_centroids and cfg.knn_use_freq_fert:
+                self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True, use_faiss_centroids=True)
             else:
-                self.oracle_mlp = mlp_oracle.MLPOracle()
+                self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True)
 
             self.oracle_mlp.load_state_dict(ckpt)
 
@@ -450,7 +452,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     conf=torch.max(network_probs, -1).values.unsqueeze(-1)
                     ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
                     scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent).squeeze(-1)
-                elif self.knn_use_conf_ent and self.knn_use_freq_fert:
+                elif self.knn_use_conf_ent and self.knn_use_freq_fert and not self.use_faiss_centroids:
                     network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
                     conf=torch.max(network_probs, -1).values.unsqueeze(-1)
                     ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
@@ -482,7 +484,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                     
                     scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4 ).squeeze(-1)
-                elif self.knn_use_conf_ent and self.use_faiss_centroids:
+                elif self.knn_use_conf_ent and self.use_faiss_centroids and not self.knn_use_freq_fert:
                     network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
                     conf=torch.max(network_probs, -1).values.unsqueeze(-1)
                     ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
@@ -492,6 +494,44 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     min_top32_dist = torch.topk(dists, 32, largest=False, dim=-1).values.mean(-1).unsqueeze(-1)
 
                     scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist).squeeze(-1)                    
+
+                elif self.knn_use_conf_ent and self.use_faiss_centroids and self.knn_use_freq_fert:
+                    network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
+                    conf=torch.max(network_probs, -1).values.unsqueeze(-1)
+                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
+                    
+                    if prev_output_tokens.size(1)==1:
+                        aux=torch.ones(prev_output_tokens.size(0),3).cuda()
+                        aux[:,:]=2
+                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
+                    elif prev_output_tokens.size(1)==2:
+                        aux=torch.ones(prev_output_tokens.size(0),2).cuda()
+                        aux[:,:]=2
+                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
+                    elif prev_output_tokens.size(1)==3:
+                        aux=torch.ones(prev_output_tokens.size(0),2).cuda()
+                        aux[:,:]=2
+                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
+                    elif prev_output_tokens.size(1)>4:
+                        prev_output_tokens=prev_output_tokens[:,-4:].type(torch.LongTensor)
+
+                    dists = torch.cdist(last_hidden, self.faiss_centroids, p=2)
+                    min_dist = torch.log(dists.min(-1).values.unsqueeze(-1))
+                    min_top32_dist = torch.log(torch.topk(dists, 32, largest=False, dim=-1).values.mean(-1).unsqueeze(-1))
+                    
+                    freq_1=torch.FloatTensor([self.freq_dict[tuple(tokens[:-1])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
+                    freq_2=torch.FloatTensor([self.freq_dict[tuple(tokens[:-2])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
+                    freq_3=torch.FloatTensor([self.freq_dict[tuple(tokens[:-3])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
+                    freq_4=torch.FloatTensor([self.freq_dict[tuple(tokens[:-4])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
+
+                    fert_1=torch.FloatTensor([self.fert_dict[tuple(tokens[:-1])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
+                    fert_2=torch.FloatTensor([self.fert_dict[tuple(tokens[:-2])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
+                    fert_3=torch.FloatTensor([self.fert_dict[tuple(tokens[:-3])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
+                    fert_4=torch.FloatTensor([self.fert_dict[tuple(tokens[:-4])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
+
+                    
+                    scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4, min_dist=min_dist, min_top32_dist=min_top32_dist).squeeze(-1)                    
+
 
                 else:
                     scores = self.oracle_mlp.forward(last_hidden).squeeze(-1)
