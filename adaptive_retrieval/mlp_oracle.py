@@ -213,10 +213,6 @@ class MLPOracle(nn.Module):
                 for i in range(len(targets)):
                     if targets[i]==0:
                         weights[i]=.25
-                print(weights)
-                print(weights.shape)
-                print(targets.shape)
-                print(scores.shape)
                 self.loss_ = self.loss_ = nn.BCELoss(weight=weights)
 
             loss = self.loss_(scores.squeeze(-1), targets.squeeze(-1))
