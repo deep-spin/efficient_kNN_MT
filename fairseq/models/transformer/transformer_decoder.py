@@ -216,7 +216,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             elif cfg.knn_use_conf_ent and cfg.use_faiss_centroids and not cfg.knn_use_freq_fert:
                 self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True, use_faiss_centroids=True)
             elif cfg.knn_use_conf_ent and cfg.use_faiss_centroids and cfg.knn_use_freq_fert:
-                self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True, use_faiss_centroids=True)
+                self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True, use_faiss_centroids=True, use_freq_fert=True)
             else:
                 self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True)
 
