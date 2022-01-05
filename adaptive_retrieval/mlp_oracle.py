@@ -214,6 +214,7 @@ class MLPOracle(nn.Module):
                     if targets[i]==0:
                         weights[i]=.25
                 print(weights)
+                print(weights.shape)
                 self.loss_ = self.loss_ = nn.BCELoss(weight=weights)
 
             loss = self.loss_(scores, targets)
