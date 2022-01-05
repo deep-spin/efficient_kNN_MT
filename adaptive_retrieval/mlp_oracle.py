@@ -209,7 +209,7 @@ class MLPOracle(nn.Module):
 
         if self.compute_loss:
             if self.loss_function=='weighted_cross_entropy':
-                weights = torch.ones(targets.size(0))
+                weights = torch.ones(targets.size(0)).cuda()
                 for i in range(len(targets)):
                     if targets[i]==0:
                         weights[i]=.25
