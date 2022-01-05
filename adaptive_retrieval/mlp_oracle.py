@@ -219,7 +219,7 @@ class MLPOracle(nn.Module):
                 print(scores.shape)
                 self.loss_ = self.loss_ = nn.BCELoss(weight=weights)
 
-            loss = self.loss_(scores, targets)
+            loss = self.loss_(scores.squeeze(-1), targets.squeeze(-1))
             return scores, loss
         else:
             return scores
