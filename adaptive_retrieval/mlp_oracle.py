@@ -212,7 +212,7 @@ class MLPOracle(nn.Module):
                 weights = torch.ones(targets.size(0)).cuda()
                 for i in range(len(targets)):
                     if targets[i]==0:
-                        weights[i]=.25
+                        weights[i]=.5
                 loss_ = loss_ = nn.BCELoss(weight=weights)
                 loss = loss_(scores.squeeze(-1), targets.squeeze(-1))
             else:
