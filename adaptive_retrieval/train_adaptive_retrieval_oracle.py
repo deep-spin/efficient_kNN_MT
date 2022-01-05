@@ -139,10 +139,12 @@ def validate(val_dataloader, model, args):
             scores, loss = model(features=features, targets=targets)
         elif args.use_conf_ent and not args.use_freq_fert and not args.use_faiss_centroids and args.use_context:
             scores, loss = model(features=features, targets=targets, conf=conf, ent=ent)
-        elif args.use_conf_ent and args.use_freq_fert and args.use_context:
+        elif args.use_conf_ent and args.use_freq_fert and args.use_context and not args.use_faiss_centroids:
             scores, loss = model(features=features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
-        elif args.use_conf_ent and args.use_faiss_centroids and args.use_context:
+        elif args.use_conf_ent and args.use_faiss_centroids and args.use_context and not args.use_freq_fert:
             scores, loss = model(features=features, targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
+        elif args.use_conf_ent and args.use_faiss_centroids and args.use_freq_fert and args.use_context:
+            scores, loss = model(features=features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4, min_dist=min_dist, min_top32_dist=min_top32_dist)
         elif args.use_conf_ent and not args.use_freq_fert and not args.use_faiss_centroids:
             scores, loss = model(targets=targets, conf=conf, ent=ent)
         elif args.use_conf_ent and args.use_freq_fert and not args.use_faiss_centroids:
@@ -340,10 +342,12 @@ else:
                 scores, loss = model(features=features, targets=targets)
             elif args.use_conf_ent and not args.use_freq_fert and not args.use_faiss_centroids and args.use_context:
                 scores, loss = model(features=features, targets=targets, conf=conf, ent=ent)
-            elif args.use_conf_ent and args.use_freq_fert and args.use_context:
+            elif args.use_conf_ent and args.use_freq_fert and args.use_context and not args.use_faiss_centroids:
                 scores, loss = model(features=features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4)
-            elif args.use_conf_ent and args.use_faiss_centroids and args.use_context:
+            elif args.use_conf_ent and args.use_faiss_centroids and args.use_context and not args.use_freq_fert:
                 scores, loss = model(features=features, targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
+            elif args.use_conf_ent and args.use_faiss_centroids and args.use_freq_fert and args.use_context:
+                scores, loss = model(features=features, targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4, min_dist=min_dist, min_top32_dist=min_top32_dist)
             elif args.use_conf_ent and not args.use_freq_fert and not args.use_faiss_centroids:
                 scores, loss = model(targets=targets, conf=conf, ent=ent)
             elif args.use_conf_ent and args.use_freq_fert and not args.use_faiss_centroids:
@@ -352,7 +356,6 @@ else:
                 scores, loss = model(targets=targets, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist)
             elif args.use_conf_ent and args.use_faiss_centroids and args.use_freq_fert:
                 scores, loss = model(targets=targets, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4, min_dist=min_dist, min_top32_dist=min_top32_dist)
-        
 
 
             #if args.l1 > 0:

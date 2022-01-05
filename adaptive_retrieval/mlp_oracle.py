@@ -32,6 +32,8 @@ class MLPOracle(nn.Module):
             input_dim=2044
         elif use_conf_ent and use_faiss_centroids and use_context and not use_freq_fert:
             input_dim=int(ctxt_dim)*2
+        elif use_conf_ent and use_faiss_centroids and use_context and use_freq_fert:
+            input_dim=2044
         elif use_conf_ent and use_freq_fert and not use_faiss_centroids:
             input_dim=1020
         elif use_conf_ent and use_faiss_centroids and not use_freq_fert:
@@ -121,7 +123,7 @@ class MLPOracle(nn.Module):
             features_cat = torch.cat(features_cat,-1)
 
             scores = self.model(features_cat)
-        elif self.use_conf_ent and self.use_faiss_centroids and self.use_context:
+        elif self.use_conf_ent and self.use_faiss_centroids and not self.use_freq_fert and self.use_context:
             features_cat = [features]
             features_cat.append(self.input_layer['conf'](conf))
             features_cat.append(self.input_layer['ent'](ent))
@@ -130,6 +132,25 @@ class MLPOracle(nn.Module):
             features_cat = torch.cat(features_cat,-1)            
 
             scores = self.model(features_cat)
+
+        elif self.use_conf_ent and self.use_faiss_centroids and  self.use_freq_fert and self.use_context:
+            features_cat = [features]
+            features_cat.append(self.input_layer['conf'](conf))
+            features_cat.append(self.input_layer['ent'](ent))
+            features_cat.append(self.input_layer['freq_1'](freq_1))
+            features_cat.append(self.input_layer['freq_2'](freq_2))
+            features_cat.append(self.input_layer['freq_3'](freq_3))
+            features_cat.append(self.input_layer['freq_4'](freq_4))
+            features_cat.append(self.input_layer['fert_1'](fert_1))
+            features_cat.append(self.input_layer['fert_2'](fert_2))
+            features_cat.append(self.input_layer['fert_3'](fert_3))
+            features_cat.append(self.input_layer['fert_4'](fert_4))
+            features_cat.append(self.input_layer['min_dist'](min_dist))
+            features_cat.append(self.input_layer['min_top32_dist'](min_top32_dist))
+            features_cat = torch.cat(features_cat,-1)
+
+            scores = self.model(features_cat)
+
         elif self.use_conf_ent and not self.use_freq_fert and not self.use_faiss_centroids:
             features_cat = []
             features_cat.append(self.input_layer['conf'](conf))
@@ -180,7 +201,6 @@ class MLPOracle(nn.Module):
             features_cat = torch.cat(features_cat,-1)
 
             scores = self.model(features_cat)
-
 
         else:
             scores = self.model(features)
