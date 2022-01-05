@@ -237,7 +237,7 @@ valid_data = torch.load(args.val_file)
 
 
 
-if args.use_freq_fert:
+if args.use_freq_fert and not args.use_faiss_centroids:
     freq_file=pickle.load(open(args.freq_fert_path+'freq_cache_id.pickle','rb'))
     fert_file=pickle.load(open(args.freq_fert_path+'fertility_cache_id.pickle','rb'))
 
@@ -247,7 +247,7 @@ if args.use_freq_fert:
     train_dataloader = torch.utils.data.DataLoader(training_set, batch_size=args.batch_size, shuffle=True)
     val_dataloader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=False)
 
-elif args.use_faiss_centroids:
+elif args.use_faiss_centroids and not args.use_freq_fert:
     index_train = faiss.read_index(args.train_faiss_index + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
     index_valid = faiss.read_index(args.valid_faiss_index + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
     
@@ -260,6 +260,23 @@ elif args.use_faiss_centroids:
     train_dataloader = torch.utils.data.DataLoader(training_set, batch_size=args.batch_size, shuffle=True)
     val_dataloader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=False)
     
+elif args.use_faiss_centroids and args.use_freq_fert:
+    freq_file=pickle.load(open(args.freq_fert_path+'freq_cache_id.pickle','rb'))
+    fert_file=pickle.load(open(args.freq_fert_path+'fertility_cache_id.pickle','rb'))
+
+    index_train = faiss.read_index(args.train_faiss_index + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
+    index_valid = faiss.read_index(args.valid_faiss_index + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
+    
+    centroids_train = index_train.quantizer.reconstruct_n(0, index_train.nlist)
+    centroids_valid = index_valid.quantizer.reconstruct_n(0, index_valid.nlist)
+
+    training_set = FeatureDataset(args, train_data, centroids=centroids_train, freq=freq_file, fert=fert_file)
+    val_set = FeatureDataset(args, valid_data, centroids=centroids_valid, freq=freq_file, fert=fert_file)
+
+    train_dataloader = torch.utils.data.DataLoader(training_set, batch_size=args.batch_size, shuffle=True)
+    val_dataloader = torch.utils.data.DataLoader(val_set, batch_size=args.batch_size, shuffle=False)
+    
+
 else:
     training_set = FeatureDataset(args, train_data)
     val_set = FeatureDataset(args, valid_data)
