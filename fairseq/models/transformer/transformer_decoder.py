@@ -535,7 +535,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                 else:
                     scores = self.oracle_mlp.forward(last_hidden).squeeze(-1)
-                indices = (scores < 0.7).nonzero()[:,0]
+                indices = (scores < 0.5).nonzero()[:,0]
                 
                 mask[indices] = False
                 last_hidden=last_hidden[mask]
@@ -543,7 +543,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 self.need_to_search += scores.size(0) - indices.size(0) 
                 self.total_possible_searches+=scores.size(0)
 
-                print(self.need_to_search, self.total_possible_searches)
+                #print(self.need_to_search, self.total_possible_searches)
 
             if ((self.knn_lambda_threshold == 0 and not self.knn_search_prediction and not self.use_knn_cache and not self.use_faiss_centroids) or last_hidden.size(0) > 0) and self.searching:
                 if self.multiple_dstores>0:
