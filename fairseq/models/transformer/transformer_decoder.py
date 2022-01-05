@@ -535,7 +535,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                 else:
                     scores = self.oracle_mlp.forward(last_hidden).squeeze(-1)
-                indices = (scores < 0.5).nonzero()[:,0]
+                indices = (scores < 0.7).nonzero()[:,0]
                 
                 mask[indices] = False
                 last_hidden=last_hidden[mask]
