@@ -98,6 +98,8 @@ class MLPOracle(nn.Module):
                 self.loss_ = nn.BCELoss()
             elif loss=='mse':
                 self.loss_ = nn.MSELoss()
+            else:
+                self.loss_function=loss
 
 
     def forward(self, features=None, targets=None, conf=None, ent=None, freq_1=None, freq_2=None, freq_3=None, freq_4=None, fert_1=None, fert_2=None, fert_3=None, fert_4=None, min_dist=None, min_top32_dist=None):
@@ -206,6 +208,14 @@ class MLPOracle(nn.Module):
             scores = self.model(features)
 
         if self.compute_loss:
+            if self.loss_function=='weighted_cross_entropy':
+                weights = torch.ones(targets.size(0))
+                for i in range(len(targets)):
+                    if targets[i]==0:
+                        weights[i]=.25
+                print(weights)
+                self.loss_ = self.loss_ = nn.BCELoss(weight=weights)
+
             loss = self.loss_(scores, targets)
             return scores, loss
         else:
