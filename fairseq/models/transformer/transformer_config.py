@@ -245,6 +245,7 @@ class TransformerConfig(FairseqDataclass):
     knn_search_prediction: bool = field(default=False)
     knn_oracle_mlp_path: str = field(default=None)
     knn_oracle_leakyrelu: bool = field(default=False)
+    knn_oracle_nocontext: bool = field(default=False)
     knn_cache: str = field(default=None)
     knn_cache_threshold: int = field(default=0)
     knn_search_every: int = field(default=0)
