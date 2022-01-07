@@ -556,7 +556,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 else:
                     scores = self.oracle_mlp.forward(last_hidden).squeeze(-1)
                 indices = (scores < 0.5).nonzero()[:,0]
-                knn_lambda = torch.ones(last_hidden.size(0), dtype=torch.bool) * knn_lambda
+                knn_lambda = (torch.ones(last_hidden.size(0), dtype=torch.bool) * knn_lambda).unsqueeze(-1)
                 print(knn_lambda.shape)
                 mask[indices] = False
                 knn_lambda[indices] = 0
