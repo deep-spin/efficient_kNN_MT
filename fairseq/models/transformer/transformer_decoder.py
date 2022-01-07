@@ -165,6 +165,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
         self.knn_oracle_mlp_path = cfg.knn_oracle_mlp_path
         self.use_knn_cache = cfg.knn_cache
         self.knn_search_every = cfg.knn_search_every
+        self.knn_search_random = cfg.knn_search_random
         self.searching=True
         if self.use_knn_cache:
             self.knn_cache_threshold = cfg.knn_cache_threshold
@@ -327,7 +328,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
 
         if self.use_knn_datastore:
-            if self.use_knn_cache or self.knn_search_prediction or self.knn_lambda_threshold>0 or self.knn_search_every or self.use_faiss_centroids:
+            if self.use_knn_cache or self.knn_search_prediction or self.knn_lambda_threshold>0 or self.knn_search_every or self.knn_search_random or self.use_faiss_centroids:
                 mask = torch.ones(last_hidden.size(0), dtype=torch.bool)
                 knn_probs=torch.zeros(last_hidden.size(0), 1, 42024).cuda()
 
@@ -343,6 +344,15 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 else:
                     self.knn_step+=1
                     self.searching=True
+            elif self.knn_search_random>0:
+                aux = torch.rand(1)
+                if aux<self.knn_search_random:
+                    self.searching=True
+                else:
+                    self.searching=False
+                    mask[:] = False
+                    if not self.use_knn_cache:
+                        last_hidden=last_hidden[mask]
 
             if self.use_knn_cache:
                 if new_sent:
