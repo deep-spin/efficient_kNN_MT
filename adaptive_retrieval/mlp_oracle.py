@@ -17,13 +17,14 @@ class LeakyReLUNet(nn.Module):
 
 
 class MLPOracle(nn.Module):
-    def __init__(self, hidden_units=128, nlayers=4, dropout=0.5, ctxt_dim=1024, activation='relu', use_conf_ent=False, use_freq_fert=False, compute_loss=False, use_faiss_centroids=False, loss='cross_entropy', use_context=False):
+    def __init__(self, hidden_units=128, nlayers=4, dropout=0.5, ctxt_dim=1024, activation='relu', use_conf_ent=False, use_freq_fert=False, compute_loss=False, use_faiss_centroids=False, loss='cross_entropy', use_context=False, use_leaky_relu=False):
         super().__init__()
 
         self.use_conf_ent = use_conf_ent 
         self.use_freq_fert = use_freq_fert
         self.use_faiss_centroids = use_faiss_centroids
         self.use_context = use_context
+        self.use_leaky_relu = use_leaky_relu
         self.compute_loss = compute_loss
 
         if use_conf_ent and not use_freq_fert and use_context:    
@@ -93,13 +94,13 @@ class MLPOracle(nn.Module):
             
             self.input_layer = nn.ModuleDict(input_layer)
 
+        self.loss_function=loss
         if self.compute_loss:
             if loss=='cross_entropy':
                 self.loss_ = nn.BCELoss()
             elif loss=='mse':
                 self.loss_ = nn.MSELoss()
-            else:
-                self.loss_function=loss
+                
 
 
     def forward(self, features=None, targets=None, conf=None, ent=None, freq_1=None, freq_2=None, freq_3=None, freq_4=None, fert_1=None, fert_2=None, fert_3=None, fert_4=None, min_dist=None, min_top32_dist=None):

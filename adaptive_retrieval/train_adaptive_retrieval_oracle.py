@@ -206,6 +206,7 @@ parser.add_argument('--use_conf_ent', action='store_true')
 parser.add_argument('--use_freq_fert', action='store_true')
 parser.add_argument('--use_faiss_centroids', action='store_true')
 parser.add_argument('--use_context', action='store_true')
+parser.add_argument('--use_leaky_relu', action='store_true')
 parser.add_argument('--train_faiss_index', type=str, default=None)
 parser.add_argument('--valid_faiss_index', type=str, default=None)
 parser.add_argument('--seed', type=int, default=1,help='the random seed')
@@ -265,7 +266,6 @@ elif args.use_faiss_centroids and not args.use_freq_fert:
 elif args.use_faiss_centroids and args.use_freq_fert:
     freq_file=pickle.load(open(args.freq_fert_path+'freq_cache_id.pickle','rb'))
     fert_file=pickle.load(open(args.freq_fert_path+'fertility_cache_id.pickle','rb'))
-
     index_train = faiss.read_index(args.train_faiss_index + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
     index_valid = faiss.read_index(args.valid_faiss_index + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
     
@@ -295,6 +295,7 @@ if args.arch == 'mlp':
                 use_freq_fert=args.use_freq_fert,
                 use_faiss_centroids=args.use_faiss_centroids,
                 use_context=args.use_context,
+                use_leaky_relu=args.use_leaky_relu,
                 compute_loss=True,
                 loss=args.loss
                 )
