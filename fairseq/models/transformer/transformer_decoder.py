@@ -210,13 +210,13 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             ckpt = torch.load(ckpt_path)            
 
             if cfg.knn_use_conf_ent and not cfg.knn_use_freq_fert and not cfg.use_faiss_centroids:
-                self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True)
+                self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True, use_leaky_relu=cfg.knn_oracle_leakyrelu)
             elif cfg.knn_use_conf_ent and cfg.knn_use_freq_fert and not cfg.use_faiss_centroids:
-                self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True, use_freq_fert=True)
+                self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True, use_freq_fert=True, use_leaky_relu=cfg.knn_oracle_leakyrelu)
             elif cfg.knn_use_conf_ent and cfg.use_faiss_centroids and not cfg.knn_use_freq_fert:
-                self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True, use_faiss_centroids=True)
+                self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True, use_faiss_centroids=True, use_leaky_relu=cfg.knn_oracle_leakyrelu)
             elif cfg.knn_use_conf_ent and cfg.use_faiss_centroids and cfg.knn_use_freq_fert:
-                self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True, use_faiss_centroids=True, use_freq_fert=True)
+                self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True, use_faiss_centroids=True, use_freq_fert=True, use_leaky_relu=cfg.knn_oracle_leakyrelu)
             else:
                 self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True)
 
