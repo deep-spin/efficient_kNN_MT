@@ -94,8 +94,6 @@ class FairseqDecoder(nn.Module):
             knn_probs = net_output[2]  # [batch, seq len, vocab size]
             knn_lambda = net_output[3]  # [batch, seq len, 1]
             network_probs = utils.softmax(logits, dim=-1, onnx_trace=self.onnx_trace)  # [batch, seq len, vocab size]
-
-            print(knn_lambda)
             
             probs = network_probs * (1 - knn_lambda) + knn_probs * knn_lambda
             
