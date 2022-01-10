@@ -583,6 +583,8 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 knn_prob = decode_result['prob']
 
                 if self.knn_lambda_threshold > 0 or self.knn_search_prediction or self.use_knn_cache or self.use_faiss_centroids:    
+                    print(knn_prob.shape)
+                    print(mask.shape)
                     knn_probs[mask]=knn_prob
                     if self.use_knn_cache:
                         if self.knn_cache_probs is None:
