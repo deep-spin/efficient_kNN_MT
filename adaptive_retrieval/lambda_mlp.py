@@ -74,7 +74,7 @@ class LambdaMLP(nn.Module):
 
 
     def forward(self, features, targets=None, conf=None, ent=None, freq_1=None, freq_2=None, freq_3=None, freq_4=None, fert_1=None, fert_2=None, fert_3=None, fert_4=None, min_dist=None, min_top32_dist=None):
-
+        print(ent)
         if self.use_conf_ent and not self.use_freq_fert  and not self.use_faiss_centroids:
             features_cat = [features]
             features_cat.append(self.input_layer['conf'](conf))
