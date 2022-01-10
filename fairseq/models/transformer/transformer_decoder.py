@@ -401,9 +401,8 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
                     conf=torch.max(network_probs, -1).values
                     ent=torch.distributions.Categorical(network_probs).entropy()
-                    print(conf.shape)
-                    print(ent.shape)
-                    knn_lambda = self.lambda_mlp.forward(last_hidden, conf=conf, ent=ent)
+                    knn_lambda = self.lambda_mlp.forward(last_hidden, conf=conf.unsqueeze(-1), ent=ent.unsqueeze(-1))
+
                 elif self.knn_use_conf_ent and self.knn_use_freq_fert:
                     network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
                     conf=torch.max(network_probs, -1).values.unsqueeze(-1)
