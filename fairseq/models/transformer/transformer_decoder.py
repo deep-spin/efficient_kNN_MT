@@ -453,7 +453,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                 if self.knn_lambda_threshold>0:
                     indices = (knn_lambda < self.knn_lambda_threshold).nonzero()[:,0]
-                    #knn_lambda[indices]=0
+                    knn_lambda[indices]=0
                     mask[indices] = False
                     last_hidden=last_hidden[mask]
 
