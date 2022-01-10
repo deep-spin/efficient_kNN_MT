@@ -453,14 +453,13 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
                 if self.knn_lambda_threshold>0:
                     indices = (knn_lambda < self.knn_lambda_threshold).nonzero()[:,0]
-                    knn_lambda[indices]=0
                     mask[indices] = False
                     last_hidden=last_hidden[mask]
 
                     self.need_to_search += knn_lambda.size(0) - indices.size(0)
                     self.total_possible_searches+=knn_lambda.size(0)
 
-                    #print(self.need_to_search, self.total_possible_searches)
+                    print(self.need_to_search, self.total_possible_searches)
                 
             else:
                 knn_lambda = self.knn_datastore.get_lambda()
