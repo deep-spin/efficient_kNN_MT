@@ -414,8 +414,9 @@ class KNN_Dstore(object):
         # implemented with pytorch_scatter
         scatter(src=knn_weight.float(), out=knn_tgt_prob, index=tgt_index, dim=-1)
 
+        print(knn_tgt_prob.shape)
         prob = knn_tgt_prob.sum(dim=-2)  # [Batch Size, seq len, vocab size]
-
+        print(prob.shape)
 
         return {'prob': prob}
 
