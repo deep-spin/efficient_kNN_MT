@@ -190,14 +190,10 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             ckpt_path = os.path.join(cfg.knn_lambda_mlp_path)
             ckpt = torch.load(ckpt_path)
 
-            #new_state_dict = OrderedDict()
-            #for key, value in ckpt.items():
-            #    new_key = 'decoder.lambda_mlp.' + key
-            #    new_state_dict[new_key] = value
-            
             if cfg.knn_use_conf_ent and not cfg.knn_use_freq_fert and not cfg.use_faiss_centroids:
                 self.lambda_mlp = lambda_mlp.LambdaMLP(use_conf_ent=True)
             elif cfg.knn_use_conf_ent and cfg.knn_use_freq_fert and not cfg.use_faiss_centroids:
+                print('-----------')
                 self.lambda_mlp = lambda_mlp.LambdaMLP(use_conf_ent=True, use_freq_fert=True)
             elif cfg.knn_use_conf_ent and cfg.use_faiss_centroids and not cfg.knn_use_freq_fert:
                 self.lambda_mlp = lambda_mlp.LambdaMLP(use_conf_ent=True, use_faiss_centroids=True)
@@ -454,7 +450,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                     indices = (knn_lambda < self.knn_lambda_threshold).nonzero()[:,0]
                     mask[indices] = False
                     last_hidden=last_hidden[mask]
-
+                    knn_lambda[indices]=0
                     self.need_to_search += knn_lambda.size(0) - indices.size(0)
                     self.total_possible_searches+=knn_lambda.size(0)
 

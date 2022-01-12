@@ -148,7 +148,7 @@ parser.add_argument('--batch-size', type=int, default=64, help='batch size')
 parser.add_argument('--arch', type=str, choices=['mlp'], default='mlp',help='architectures of the expert model')
 parser.add_argument('--hidden-units', type=int, default=128, help='hidden units')
 parser.add_argument('--nlayers', type=int, default=4, help='number of layers')
-parser.add_argument('--dropout', type=float, default=.5, help='dropout')
+parser.add_argument('--dropout', type=float, default=.2, help='dropout')
 
 parser.add_argument('--output-dir', type=str)
 parser.add_argument('--load-model', type=str, default=None, help='load model checkpoint')
