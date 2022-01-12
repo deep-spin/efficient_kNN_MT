@@ -193,7 +193,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
             if cfg.knn_use_conf_ent and not cfg.knn_use_freq_fert and not cfg.use_faiss_centroids:
                 self.lambda_mlp = lambda_mlp.LambdaMLP(use_conf_ent=True)
             elif cfg.knn_use_conf_ent and cfg.knn_use_freq_fert and not cfg.use_faiss_centroids:
-                print('-----------')
                 self.lambda_mlp = lambda_mlp.LambdaMLP(use_conf_ent=True, use_freq_fert=True)
             elif cfg.knn_use_conf_ent and cfg.use_faiss_centroids and not cfg.knn_use_freq_fert:
                 self.lambda_mlp = lambda_mlp.LambdaMLP(use_conf_ent=True, use_faiss_centroids=True)
