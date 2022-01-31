@@ -880,7 +880,7 @@ class EnsembleModel(nn.Module):
                 else:
                     decoder_out = model.forward(tokens, new_sent=new_sent)
 
-            print('num parameters', sum(p.numel() for p in model.parameters()))
+            #print('num parameters', sum(p.numel() for p in model.parameters()))
 
             attn: Optional[Tensor] = None
             decoder_len = len(decoder_out)
