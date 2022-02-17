@@ -51,6 +51,8 @@ class KNN_Dstore(object):
 
         self.mask_for_label_count = self.generate_label_count_mask(args.k)
 
+        self.knn_tgt_prob=None
+
     def generate_neighbor_mask(self, max_k):
 
         # [1, 1000, 1000]
@@ -408,7 +410,14 @@ class KNN_Dstore(object):
         knn_weight = torch.softmax(scaled_dists, dim=-1).unsqueeze(-1)  # [B, S, K, 1]
 
         # set the target index for each neighbor
-        knn_tgt_prob = torch.zeros(bsz, seq_len, self.k, self.vocab_size).to(queries.device)  # [B, S, K, Vocab Size]
+        #knn_tgt_prob = torch.zeros(bsz, seq_len, self.k, self.vocab_size).to(queries.device)  # [B, S, K, Vocab Size]
+        if self.knn_tgt_prob is None:
+            self.knn_tgt_prob = torch.zeros(bsz, seq_len, self.k, self.vocab_size).to(queries.device)  # [B, S, K, Vocab Size]
+            knn_tgt_prob=self.knn_tgt_prob
+        else:
+            self.knn_tgt_prob[:,:,:,:]=0
+            knn_tgt_prob=self.knn_tgt_prob[:bsz]
+
         tgt_index = tgt_index.unsqueeze_(-1)  # [B, S, K, 1]
 
         # implemented with pytorch_scatter
