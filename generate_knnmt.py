@@ -175,17 +175,6 @@ def _main(cfg: DictConfig, output_file):
     has_target = True
     wps_meter = TimeMeter()
 
-    analyse=False    
-    if analyse:
-        save_step=0
-        targets_save=[]
-        features_save=[]
-        knn_probs_save=[]
-        network_probs_save=[]
-        tokens_save=[]
-        conf=[]
-        ent=[]
-
     for sample in progress:
         sample = utils.move_to_cuda(sample) if use_cuda else sample
         if "net_input" not in sample:
@@ -201,21 +190,12 @@ def _main(cfg: DictConfig, output_file):
 
         gen_timer.start()
 
-        if analyse:
-            hypos, targets_difs, features_difs, knn_probs_difs, network_probs_difs, difs_dataset, len_dataset = task.inference_step(
-                generator,
-                models,
-                sample,
-                prefix_tokens=prefix_tokens,
-                constraints=constraints,)
-
-        else:
-            hypos = task.inference_step(
-                generator,
-                models,
-                sample,
-                prefix_tokens=prefix_tokens,
-                constraints=constraints,)
+        hypos = task.inference_step(
+            generator,
+            models,
+            sample,
+            prefix_tokens=prefix_tokens,
+            constraints=constraints,)
 
         num_generated_tokens = sum(len(h[0]["tokens"]) for h in hypos)
         gen_timer.stop(num_generated_tokens)
@@ -315,24 +295,7 @@ def _main(cfg: DictConfig, output_file):
                     else:
                         scorer.add(target_tokens, hypo_tokens)
 
-        if analyse:
-
-            for v in range(len(knn_probs_difs)):
-                if v==0:
-                    knn_probs=knn_probs_difs[v][hypo['tokens'][v]].unsqueeze(0)
-                    network_probs=network_probs_difs[v][hypo['tokens'][v]].unsqueeze(0)
-                else:
-                    knn_probs=torch.cat([knn_probs,knn_probs_difs[v][hypo['tokens'][v]].unsqueeze(0)],0)
-                    network_probs=torch.cat([network_probs,network_probs_difs[v][hypo['tokens'][v]].unsqueeze(0)],0)
-            
-            targets_save.append(targets_difs)
-            features_save.append(features_difs.cpu().data)
-            knn_probs_save.append(knn_probs.cpu().data)
-            network_probs_save.append(network_probs.cpu().data)
-            conf.append(torch.max(network_probs_difs, -1).values.cpu().data)
-            ent.append(torch.distributions.Categorical(network_probs_difs).entropy().cpu().data)
-            tokens_save.append(hypo['tokens'])
-
+        
         wps_meter.update(num_generated_tokens)
         progress.log({"wps": round(wps_meter.avg)})
         num_sentences += (sample["nsentences"] if "nsentences" in sample else sample["id"].numel())
@@ -362,10 +325,6 @@ def _main(cfg: DictConfig, output_file):
             ),
             file=output_file,
         )
-
-    if analyse:
-        feats = {'features': features_save, 'targets': targets_save, 'knn_probs': knn_probs_save, 'network_probs': network_probs_save, 'conf': conf, 'ent': ent, 'tokens': tokens_save}
-        torch.save(feats,'/media/hdd1/pam/mt/data/joint_multi_domain/koran/adaptive_retrieval/using_train_set/oracle_features_val')
 
     return scorer
 

@@ -153,81 +153,23 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
         self.use_knn_datastore = cfg.use_knn_datastore
         self.knn_lambda_type = cfg.knn_lambda_type
-        self.knn_lambda_threshold = cfg.knn_lambda_threshold
-        self.knn_use_conf_ent = cfg.knn_use_conf_ent
-        self.knn_use_freq_fert = cfg.knn_use_freq_fert
-        if self.knn_use_freq_fert:
-            self.freq_dict=pickle.load(open(cfg.knn_freq_fert_path+'freq_cache_id.pickle','rb'))
-            self.fert_dict=pickle.load(open(cfg.knn_freq_fert_path+'fertility_cache_id.pickle','rb'))
-
+        
         self.knn_temperature_type = cfg.knn_temperature_type
-        self.knn_search_prediction = cfg.knn_search_prediction
-        self.knn_oracle_mlp_path = cfg.knn_oracle_mlp_path
+        
         self.use_knn_cache = cfg.knn_cache
         self.knn_search_every = cfg.knn_search_every
         self.knn_search_random = cfg.knn_search_random
         self.searching=True
+        
         if self.use_knn_cache:
             self.knn_cache_threshold = cfg.knn_cache_threshold
             self.knn_cache=None
             self.knn_cache_probs=None
 
-        self.use_faiss_centroids=cfg.use_faiss_centroids
-        if self.use_faiss_centroids:
-            self.faiss_centroids = self.knn_datastore.get_faiss_centroids().cuda()
-
-        self.multiple_dstores = cfg.multiple_dstores
-        if self.multiple_dstores > 0:
-            self.dstore_centroids=torch.FloatTensor(np.load(cfg.dstore_filename+'centroids.npy')).cuda()
-
-        self.analyse=False
-
-        if self.knn_lambda_threshold>0 or self.knn_search_prediction or self.use_knn_cache or self.use_faiss_centroids:
+        
+        if self.use_knn_cache:
             self.need_to_search=0
             self.total_possible_searches=0
-
-        if self.knn_lambda_type == 'trainable':
-            ckpt_path = os.path.join(cfg.knn_lambda_mlp_path)
-            ckpt = torch.load(ckpt_path)
-
-            if cfg.knn_use_conf_ent and not cfg.knn_use_freq_fert and not cfg.use_faiss_centroids:
-                self.lambda_mlp = lambda_mlp.LambdaMLP(use_conf_ent=True)
-            elif cfg.knn_use_conf_ent and cfg.knn_use_freq_fert and not cfg.use_faiss_centroids:
-                self.lambda_mlp = lambda_mlp.LambdaMLP(use_conf_ent=True, use_freq_fert=True)
-            elif cfg.knn_use_conf_ent and cfg.use_faiss_centroids and not cfg.knn_use_freq_fert:
-                self.lambda_mlp = lambda_mlp.LambdaMLP(use_conf_ent=True, use_faiss_centroids=True)
-            else:
-                self.lambda_mlp = lambda_mlp.LambdaMLP()
-
-            self.lambda_mlp.load_state_dict(ckpt)
-
-        if self.knn_search_prediction:
-            ckpt_path = os.path.join(cfg.knn_oracle_mlp_path)
-            ckpt = torch.load(ckpt_path)            
-
-            if not cfg.knn_oracle_nocontext:
-                if cfg.knn_use_conf_ent and not cfg.knn_use_freq_fert and not cfg.use_faiss_centroids:
-                    self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True, use_leaky_relu=cfg.knn_oracle_leakyrelu)
-                elif cfg.knn_use_conf_ent and cfg.knn_use_freq_fert and not cfg.use_faiss_centroids:
-                    self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True, use_freq_fert=True, use_leaky_relu=cfg.knn_oracle_leakyrelu)
-                elif cfg.knn_use_conf_ent and cfg.use_faiss_centroids and not cfg.knn_use_freq_fert:
-                    self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True, use_faiss_centroids=True, use_leaky_relu=cfg.knn_oracle_leakyrelu)
-                elif cfg.knn_use_conf_ent and cfg.use_faiss_centroids and cfg.knn_use_freq_fert:
-                    self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True, use_conf_ent=True, use_faiss_centroids=True, use_freq_fert=True, use_leaky_relu=cfg.knn_oracle_leakyrelu)
-            else:
-                if cfg.knn_use_conf_ent and not cfg.knn_use_freq_fert and not cfg.use_faiss_centroids:
-                    self.oracle_mlp = mlp_oracle.MLPOracle(use_conf_ent=True, use_leaky_relu=cfg.knn_oracle_leakyrelu)
-                elif cfg.knn_use_conf_ent and cfg.knn_use_freq_fert and not cfg.use_faiss_centroids:
-                    self.oracle_mlp = mlp_oracle.MLPOracle(use_conf_ent=True, use_freq_fert=True, use_leaky_relu=cfg.knn_oracle_leakyrelu)
-                elif cfg.knn_use_conf_ent and cfg.use_faiss_centroids and not cfg.knn_use_freq_fert:
-                    self.oracle_mlp = mlp_oracle.MLPOracle(use_conf_ent=True, use_faiss_centroids=True, use_leaky_relu=cfg.knn_oracle_leakyrelu)
-                elif cfg.knn_use_conf_ent and cfg.use_faiss_centroids and cfg.knn_use_freq_fert:
-                    self.oracle_mlp = mlp_oracle.MLPOracle(use_conf_ent=True, use_faiss_centroids=True, use_freq_fert=True, use_leaky_relu=cfg.knn_oracle_leakyrelu)
-                else:
-                    self.oracle_mlp = mlp_oracle.MLPOracle(use_context=True)
-
-            self.oracle_mlp.load_state_dict(ckpt)
-
 
     def build_output_projection(self, cfg, dictionary, embed_tokens):
         if cfg.adaptive_softmax_cutoff is not None:
@@ -323,7 +265,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
 
 
         if self.use_knn_datastore:
-            if self.use_knn_cache or self.knn_search_prediction or self.knn_lambda_threshold>0 or self.knn_search_every or self.knn_search_random or self.use_faiss_centroids:
+            if self.use_knn_cache or self.knn_search_every or self.knn_search_random:
                 mask = torch.ones(last_hidden.size(0), dtype=torch.bool)
                 knn_probs=torch.zeros(last_hidden.size(0), 1, 42024).cuda()
 
@@ -376,195 +318,12 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 else:
                     self.knn_cache=last_hidden
 
-            """
-            if self.use_faiss_centroids:
-                dists = torch.cdist(last_hidden.squeeze(1), self.faiss_centroids, p=2).min(-1)
+            
+            knn_lambda = self.knn_datastore.get_lambda()
 
-                mask_ = torch.ones(last_hidden.size(0), dtype=torch.bool)
-                indices = (dists.values>10).nonzero()[:,0]
-                mask[indices] = False
-                last_hidden=last_hidden[mask]
-
-                self.need_to_search += last_hidden.size(0) #x.size(0) - indices.size(0)
-                self.total_possible_searches+=x.size(0)    
-
-                print(self.need_to_search, self.total_possible_searches)
-            """
-            if self.knn_lambda_type == 'trainable':
-                self.lambda_mlp.eval()
-                if self.knn_use_conf_ent and not self.knn_use_freq_fert and not self.use_faiss_centroids:
-                    network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
-                    conf=torch.max(network_probs, -1).values
-                    ent=torch.distributions.Categorical(network_probs).entropy()
-                    knn_lambda = self.lambda_mlp.forward(last_hidden, conf=conf.unsqueeze(-1), ent=ent.unsqueeze(-1))
-
-                elif self.knn_use_conf_ent and self.knn_use_freq_fert:
-                    network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
-                    conf=torch.max(network_probs, -1).values.unsqueeze(-1)
-                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
-                    
-                    if prev_output_tokens.size(1)==1:
-                        aux=torch.ones(prev_output_tokens.size(0),3).cuda()
-                        aux[:,:]=2
-                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
-                    elif prev_output_tokens.size(1)==2:
-                        aux=torch.ones(prev_output_tokens.size(0),2).cuda()
-                        aux[:,:]=2
-                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
-                    elif prev_output_tokens.size(1)==3:
-                        aux=torch.ones(prev_output_tokens.size(0),2).cuda()
-                        aux[:,:]=2
-                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
-                    elif prev_output_tokens.size(1)>4:
-                        prev_output_tokens=prev_output_tokens[:,-4:].type(torch.LongTensor)
-                    
-                    freq_1=torch.FloatTensor([self.freq_dict[tuple(tokens[:-1])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    freq_2=torch.FloatTensor([self.freq_dict[tuple(tokens[:-2])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    freq_3=torch.FloatTensor([self.freq_dict[tuple(tokens[:-3])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    freq_4=torch.FloatTensor([self.freq_dict[tuple(tokens[:-4])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-
-                    fert_1=torch.FloatTensor([self.fert_dict[tuple(tokens[:-1])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    fert_2=torch.FloatTensor([self.fert_dict[tuple(tokens[:-2])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    fert_3=torch.FloatTensor([self.fert_dict[tuple(tokens[:-3])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    fert_4=torch.FloatTensor([self.fert_dict[tuple(tokens[:-4])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    
-                    knn_lambda = self.lambda_mlp.forward(last_hidden, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4 ).squeeze(-1)
-                    
-                elif self.knn_use_conf_ent and self.use_faiss_centroids:
-                    network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
-                    conf=torch.max(network_probs, -1).values.unsqueeze(-1)
-                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
-
-                    dists = torch.cdist(last_hidden, self.faiss_centroids, p=2)
-                    min_dist = dists.min(-1).values.unsqueeze(-1)
-                    min_top32_dist = torch.topk(dists, 32, largest=False, dim=-1).values.mean(-1).unsqueeze(-1)
-
-                    knn_lambda = self.lambda_mlp.forward(last_hidden, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist).squeeze(-1)                     
-                else:
-                    knn_lambda = self.lambda_mlp.forward(last_hidden)
-                
-                knn_lambda = torch.exp(knn_lambda[:,:,1])
-
-                if self.knn_lambda_threshold>0:
-                    indices = (knn_lambda <= self.knn_lambda_threshold).nonzero()[:,0]
-                    mask[indices] = False
-                    last_hidden=last_hidden[mask]
-                    knn_lambda[indices]=0
-                    self.need_to_search += knn_lambda.size(0) - indices.size(0)
-                    self.total_possible_searches+=knn_lambda.size(0)
-
-                    print(self.need_to_search, self.total_possible_searches)
-                
-            else:
-                knn_lambda = self.knn_datastore.get_lambda()
-
-            if self.knn_search_prediction:
-                self.oracle_mlp.eval()
-                if self.knn_use_conf_ent and not self.knn_use_freq_fert and not self.use_faiss_centroids:
-                    network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
-                    conf=torch.max(network_probs, -1).values.unsqueeze(-1)
-                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
-                    scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent).squeeze(-1)
-                elif self.knn_use_conf_ent and self.knn_use_freq_fert and not self.use_faiss_centroids:
-                    network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
-                    conf=torch.max(network_probs, -1).values.unsqueeze(-1)
-                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
-                    
-                    if prev_output_tokens.size(1)==1:
-                        aux=torch.ones(prev_output_tokens.size(0),3).cuda()
-                        aux[:,:]=2
-                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
-                    elif prev_output_tokens.size(1)==2:
-                        aux=torch.ones(prev_output_tokens.size(0),2).cuda()
-                        aux[:,:]=2
-                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
-                    elif prev_output_tokens.size(1)==3:
-                        aux=torch.ones(prev_output_tokens.size(0),2).cuda()
-                        aux[:,:]=2
-                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
-                    elif prev_output_tokens.size(1)>4:
-                        prev_output_tokens=prev_output_tokens[:,-4:].type(torch.LongTensor)
-                    
-                    freq_1=torch.FloatTensor([self.freq_dict[tuple(tokens[:-1])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    freq_2=torch.FloatTensor([self.freq_dict[tuple(tokens[:-2])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    freq_3=torch.FloatTensor([self.freq_dict[tuple(tokens[:-3])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    freq_4=torch.FloatTensor([self.freq_dict[tuple(tokens[:-4])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-
-                    fert_1=torch.FloatTensor([self.fert_dict[tuple(tokens[:-1])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    fert_2=torch.FloatTensor([self.fert_dict[tuple(tokens[:-2])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    fert_3=torch.FloatTensor([self.fert_dict[tuple(tokens[:-3])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    fert_4=torch.FloatTensor([self.fert_dict[tuple(tokens[:-4])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-
-                    
-                    scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4 ).squeeze(-1)
-                elif self.knn_use_conf_ent and self.use_faiss_centroids and not self.knn_use_freq_fert:
-                    network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
-                    conf=torch.max(network_probs, -1).values.unsqueeze(-1)
-                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
-
-                    dists = torch.cdist(last_hidden, self.faiss_centroids, p=2)
-                    min_dist = dists.min(-1).values.unsqueeze(-1)
-                    min_top32_dist = torch.topk(dists, 32, largest=False, dim=-1).values.mean(-1).unsqueeze(-1)
-
-                    scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent, min_dist=min_dist, min_top32_dist=min_top32_dist).squeeze(-1)                    
-
-                elif self.knn_use_conf_ent and self.use_faiss_centroids and self.knn_use_freq_fert:
-                    network_probs = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
-                    conf=torch.max(network_probs, -1).values.unsqueeze(-1)
-                    ent=torch.distributions.Categorical(network_probs).entropy().unsqueeze(-1)
-                    
-                    if prev_output_tokens.size(1)==1:
-                        aux=torch.ones(prev_output_tokens.size(0),3).cuda()
-                        aux[:,:]=2
-                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
-                    elif prev_output_tokens.size(1)==2:
-                        aux=torch.ones(prev_output_tokens.size(0),2).cuda()
-                        aux[:,:]=2
-                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
-                    elif prev_output_tokens.size(1)==3:
-                        aux=torch.ones(prev_output_tokens.size(0),2).cuda()
-                        aux[:,:]=2
-                        prev_output_tokens=torch.cat([aux, prev_output_tokens],1).type(torch.LongTensor)
-                    elif prev_output_tokens.size(1)>4:
-                        prev_output_tokens=prev_output_tokens[:,-4:].type(torch.LongTensor)
-
-                    dists = torch.cdist(last_hidden, self.faiss_centroids, p=2)
-                    min_dist = torch.log(dists.min(-1).values.unsqueeze(-1))
-                    min_top32_dist = torch.log(torch.topk(dists, 32, largest=False, dim=-1).values.mean(-1).unsqueeze(-1))
-                    
-                    freq_1=torch.FloatTensor([self.freq_dict[tuple(tokens[:-1])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    freq_2=torch.FloatTensor([self.freq_dict[tuple(tokens[:-2])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    freq_3=torch.FloatTensor([self.freq_dict[tuple(tokens[:-3])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    freq_4=torch.FloatTensor([self.freq_dict[tuple(tokens[:-4])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-
-                    fert_1=torch.FloatTensor([self.fert_dict[tuple(tokens[:-1])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    fert_2=torch.FloatTensor([self.fert_dict[tuple(tokens[:-2])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    fert_3=torch.FloatTensor([self.fert_dict[tuple(tokens[:-3])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-                    fert_4=torch.FloatTensor([self.fert_dict[tuple(tokens[:-4])] for tokens in prev_output_tokens.tolist()]).cuda().unsqueeze(-1).unsqueeze(-1)
-
-                    
-                    scores = self.oracle_mlp.forward(last_hidden, conf=conf, ent=ent, freq_1=freq_1, freq_2=freq_2, freq_3=freq_3, freq_4=freq_4, fert_1=fert_1, fert_2=fert_2, fert_3=fert_3, fert_4=fert_4, min_dist=min_dist, min_top32_dist=min_top32_dist).squeeze(-1)                    
-
-
-                else:
-                    scores = self.oracle_mlp.forward(last_hidden).squeeze(-1)
-                indices = (scores < 0.5).nonzero()[:,0]
-                #knn_lambda = (torch.ones(last_hidden.size(0), dtype=torch.bool) * knn_lambda).unsqueeze(-1).cuda()
-                mask[indices] = False
-                #knn_lambda[indices] = 0
-                last_hidden=last_hidden[mask]
-
-                self.need_to_search += scores.size(0) - indices.size(0) 
-                self.total_possible_searches+=scores.size(0)
-
-                print(self.need_to_search, self.total_possible_searches)
-
-            if ((self.knn_lambda_threshold == 0 and not self.knn_search_prediction and not self.use_knn_cache and not self.use_faiss_centroids) or last_hidden.size(0) > 0) and self.searching:
-                if self.multiple_dstores>0:
-                    dstore_idx = torch.cdist(last_hidden.squeeze(1), self.dstore_centroids, p=2).min(-1).indices
-                    knn_search_result = self.knn_datastore.retrieve(last_hidden, dstore_idx)
-                else:
-                    knn_search_result = self.knn_datastore.retrieve(last_hidden)
+            
+            if (not self.use_knn_cache or last_hidden.size(0) > 0) and self.searching:
+                knn_search_result = self.knn_datastore.retrieve(last_hidden)
 
                 knn_dists = knn_search_result['distance']  # [batch, seq len, k]  # we need do sort
                 knn_index = knn_search_result['knn_index']
@@ -575,7 +334,7 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 decode_result = self.knn_datastore.calculate_knn_prob(knn_index, tgt_index, knn_dists, last_hidden, knn_temperature)
                 knn_prob = decode_result['prob']
 
-                if self.knn_lambda_threshold > 0 or self.knn_search_prediction or self.use_knn_cache or self.use_faiss_centroids:    
+                if self.use_knn_cache:    
                     knn_probs[mask]=knn_prob
                     if self.use_knn_cache:
                         if self.knn_cache_probs is None:
@@ -609,8 +368,6 @@ class TransformerDecoderBase(FairseqIncrementalDecoder):
                 prob = utils.softmax(self.output_layer(x), dim=-1, onnx_trace=self.onnx_trace)
                 return x, extra, knn_prob, prob, prev_output_tokens
 
-            if self.analyse:
-                return x, extra, knn_prob, knn_lambda, knn_dists, knn_index, last_hidden
 
             return x, extra, knn_prob, knn_lambda, knn_dists, knn_index
 

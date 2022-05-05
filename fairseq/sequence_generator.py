@@ -99,13 +99,7 @@ class SequenceGenerator(nn.Module):
 
         assert temperature > 0, "--temperature must be greater than 0"
 
-        self.analyse=False
-
-        if self.analyse:
-            self.difs_dataset=0
-            self.len_dataset=0
-            self.search_without_knn = (search.BeamSearch(tgt_dict) if search_strategy is None else search_strategy)    
-
+        
         self.search = (search.BeamSearch(tgt_dict) if search_strategy is None else search_strategy)
 
         # We only need to set src_lengths in LengthConstrainedBeamSearch.
@@ -242,9 +236,6 @@ class SequenceGenerator(nn.Module):
             )
 
         # Initialize constraints, when active
-        if self.analyse:
-            self.search_without_knn.init_constraints(constraints, beam_size)
-
         self.search.init_constraints(constraints, beam_size)
 
         max_len: int = -1
@@ -312,15 +303,6 @@ class SequenceGenerator(nn.Module):
         else:
             original_batch_idxs = torch.arange(0, bsz).type_as(tokens)
 
-        if self.analyse:
-            self.difs=None
-            self.analyse_difs=[]
-            self.analyse_difs_tokens=[]
-            self.analyse_difs_features=[]
-            self.analyse_difs_knn_probs=[]
-            self.analyse_difs_network_probs=[]
-            self.analyse_scores=[None for _ in range(beam_size)]
-
         new_sent=True
         for step in range(max_len + 1):  # one extra step for EOS marker
             # reorder decoder internal states based on the prev choice of beams
@@ -334,16 +316,7 @@ class SequenceGenerator(nn.Module):
                 encoder_outs = self.model.reorder_encoder_out(encoder_outs, reorder_state)
             
             with torch.autograd.profiler.record_function("EnsembleModel: forward_decoder"):
-                if self.analyse:
-                    lprobs, lnetwork_probs, knn_probs, avg_attn_scores, features = self.model.forward_decoder(
-                        tokens[:, : step + 1],
-                        encoder_outs,
-                        incremental_states,
-                        self.temperature,
-                        new_sent=new_sent)
-                    
-                else:
-                    lprobs, avg_attn_scores = self.model.forward_decoder(
+                lprobs, avg_attn_scores = self.model.forward_decoder(
                         tokens[:, : step + 1],
                         encoder_outs,
                         incremental_states,
@@ -362,32 +335,20 @@ class SequenceGenerator(nn.Module):
             lprobs[:, self.pad] = -math.inf  # never select pad
             lprobs[:, self.unk] -= self.unk_penalty  # apply unk penalty
 
-            if self.analyse:
-                lnetwork_probs[lnetwork_probs != lnetwork_probs] = torch.tensor(-math.inf).to(lnetwork_probs)
-                lnetwork_probs[:, self.pad] = -math.inf  # never select pad
-                lnetwork_probs[:, self.unk] -= self.unk_penalty  # apply unk penalty
-
-
+           
             # handle max length constraint
             if step >= max_len:
                 lprobs[:, : self.eos] = -math.inf
                 lprobs[:, self.eos + 1 :] = -math.inf
-                if self.analyse:
-                    lnetwork_probs[:, : self.eos] = -math.inf
-                    lnetwork_probs[:, self.eos + 1 :] = -math.inf
-
+                
             # handle prefix tokens (possibly with different lengths)
             if (prefix_tokens is not None and step < prefix_tokens.size(1) and step < max_len):
                 lprobs, tokens, scores = self._prefix_tokens(step, lprobs, scores, tokens, prefix_tokens, beam_size)
-                if self.analyse:
-                    lnetwork_probs, tokens, scores = self._prefix_tokens(step, lnetwork_probs, scores, tokens, prefix_tokens, beam_size)
-
+                
             elif step < self.min_len:
                 # minimum length constraint (does not apply if using prefix_tokens)
                 lprobs[:, self.eos] = -math.inf
-                if self.analyse:
-                    lnetwork_probs[:, self.eos] = -math.inf
-
+                
             # Record attention scores, only support avg_attn_scores is a Tensor
             if avg_attn_scores is not None:
                 if attn is None:
@@ -399,15 +360,11 @@ class SequenceGenerator(nn.Module):
             eos_scores = torch.empty(0).to(scores)  # scores of hypothesis ending with eos (finished sentences)
 
             if self.should_set_src_lengths:
-                if self.analyse:
-                    self.search_without_knn.set_src_lengths(src_lengths)
                 self.search.set_src_lengths(src_lengths)
 
             if self.repeat_ngram_blocker is not None:
                 lprobs = self.repeat_ngram_blocker(tokens, lprobs, bsz, beam_size, step)
-                if self.analyse:
-                    lnetwork_probs = self.repeat_ngram_blocker(tokens, lprobs, bsz, beam_size, step)
-
+                
             # Shape: (batch, cand_size)
             cand_scores, cand_indices, cand_beams = self.search.step(
                 step,
@@ -417,55 +374,7 @@ class SequenceGenerator(nn.Module):
                 original_batch_idxs,
             )
 
-            if self.analyse:
-                cand_scores_without_knn, cand_indices_without_knn, cand_beams_without_knn = self.search_without_knn.step(
-                step,
-                lnetwork_probs.view(bsz, -1, self.vocab_size),
-                scores.view(bsz, beam_size, -1)[:, :, :step],
-                tokens[:, : step + 1],
-                original_batch_idxs,)
-
-            if self.analyse:
-                if self.difs is None:
-                    self.difs={}
-                    self.difs_tokens={}
-                    self.difs_features={}
-                    self.difs_knn_probs={}
-                    self.difs_network_probs={}
-                    for i in range(len(cand_indices[0])):
-                        self.difs_features[i]=features[cand_beams[0][i]].unsqueeze(0)
-                        self.difs_knn_probs[i]=knn_probs[cand_beams[0][i]].unsqueeze(0)
-                        self.difs_network_probs[i]=torch.exp(lnetwork_probs[cand_beams[0][i]]).unsqueeze(0)
-                        if cand_indices[0][i]==cand_indices_without_knn[0][i]:
-                            self.difs[i]=0
-                            self.difs_tokens[i]=[0]
-                        else:
-                            self.difs[i]=1
-                            self.difs_tokens[i]=[1]
-                else:
-                    x=self.difs.copy()
-                    x_tokens=self.difs_tokens.copy()
-                    x_features=self.difs_features.copy()
-                    x_knn_probs=self.difs_knn_probs.copy()
-                    x_network_probs=self.difs_network_probs.copy()
-                    self.difs={}
-                    self.difs_tokens={}
-                    self.difs_features={}
-                    self.difs_knn_probs={}
-                    self.difs_network_probs={}
-                    for i in range(len(cand_indices[0])):
-                        self.difs_features[i]=torch.cat([x_features[cand_beams[0][i].item()],features[cand_beams[0][i]].unsqueeze(0)],0) 
-                        self.difs_knn_probs[i]=torch.cat([x_knn_probs[cand_beams[0][i].item()],knn_probs[cand_beams[0][i]].unsqueeze(0)],0)
-                        self.difs_network_probs[i]=torch.cat([x_network_probs[cand_beams[0][i].item()],torch.exp(lnetwork_probs[cand_beams[0][i]]).unsqueeze(0)],0)
-                        if cand_indices[0][i]==cand_indices_without_knn[0][i]:
-                            self.difs[i]=0 + x[cand_beams[0][i].item()]
-                            self.difs_tokens[i]= x_tokens[cand_beams[0][i].item()].copy()
-                            self.difs_tokens[i].append(0)
-                        else:
-                            self.difs[i]=1 + x[cand_beams[0][i].item()]
-                            self.difs_tokens[i]= x_tokens[cand_beams[0][i].item()].copy()
-                            self.difs_tokens[i].append(1)
-
+            
             # cand_bbsz_idx contains beam indices for the top candidate
             # hypotheses, with a range of values: [0, bsz*beam_size),
             # and dimensions: [bsz, cand_size]
@@ -480,14 +389,7 @@ class SequenceGenerator(nn.Module):
             # Now we know what beam item(s) to finish
             # Shape: 1d list of absolute-numbered
             eos_bbsz_idx = torch.masked_select(cand_bbsz_idx[:, :beam_size], mask=eos_mask[:, :beam_size])
-            if self.analyse:
-                for i in eos_bbsz_idx:
-                    self.analyse_difs.append(self.difs[i.item()])
-                    self.analyse_difs_tokens.append(self.difs_tokens[i.item()])
-                    self.analyse_difs_features.append(self.difs_features[i.item()])
-                    self.analyse_difs_knn_probs.append(self.difs_knn_probs[i.item()])
-                    self.analyse_difs_network_probs.append(self.difs_network_probs[i.item()])
-
+            
             finalized_sents: List[int] = []
             if eos_bbsz_idx.numel() > 0:
                 eos_scores = torch.masked_select(cand_scores[:, :beam_size], mask=eos_mask[:, :beam_size])
@@ -572,12 +474,6 @@ class SequenceGenerator(nn.Module):
             # Make sure there is at least one active item for each sentence in the batch.
             assert (~cands_to_ignore).any(dim=1).all()
 
-            if self.analyse:
-                x=self.difs
-                self.difs={}
-                for i in range(len(active_hypos[0])):
-                    self.difs[i]=x[active_hypos[0][i].item()]
-
             # update cands_to_ignore to ignore any finalized hypos
 
             # {active_bbsz_idx} denotes which beam number is continued for each new hypothesis (a beam
@@ -616,10 +512,8 @@ class SequenceGenerator(nn.Module):
             _, sorted_scores_indices = torch.sort(scores, descending=True)
             finalized[sent] = [finalized[sent][ssi] for ssi in sorted_scores_indices]
             finalized[sent] = torch.jit.annotate(List[Dict[str, Tensor]], finalized[sent])
-        if self.analyse:
-            return finalized, self.tokens_difs, self.features_difs, self.knn_probs_difs, self.network_probs_difs, self.difs_dataset, self.len_dataset
-        else:
-            return finalized
+        
+        return finalized
 
     def _prefix_tokens(
         self, step: int, lprobs, scores, tokens, prefix_tokens, beam_size: int
@@ -751,35 +645,6 @@ class SequenceGenerator(nn.Module):
                         "positional_scores": pos_scores[i],
                     }
                 )
-        if self.analyse:
-            if len(finalized[0])==self.beam_size:
-                for i in range(len(finalized[0])):
-                    self.analyse_scores[i]=finalized[0][i]['score'].item()
-            
-                self.analyse_difs=self.analyse_difs[:beam_size]
-                self.analyse_difs_tokens=self.analyse_difs_tokens[:beam_size]
-                self.analyse_difs_features=self.analyse_difs_features[:beam_size]
-                self.analyse_difs_knn_probs=self.analyse_difs_knn_probs[:beam_size]
-                self.analyse_difs_network_probs=self.analyse_difs_network_probs[:beam_size]
-
-                index, value = max(enumerate(self.analyse_scores), key=operator.itemgetter(1))
-
-                self.tokens_difs=self.analyse_difs_tokens[index]
-                self.features_difs=self.analyse_difs_features[index]
-                self.knn_probs_difs=self.analyse_difs_knn_probs[index]
-                self.network_probs_difs=self.analyse_difs_network_probs[index]
-
-                self.difs_dataset+=self.analyse_difs[index]
-                self.len_dataset+=len(finalized[0][index]['tokens'])
-                
-
-                #print(self.difs_dataset, self.len_dataset)
-            else:
-                self.tokens_difs=None
-                self.features_difs=None
-                self.knn_probs_difs=None
-                self.network_probs_difs=None
-
         newly_finished: List[int] = []
 
         for seen in sents_seen.keys():
@@ -831,7 +696,6 @@ class EnsembleModel(nn.Module):
         ):
             self.has_incremental = True
 
-        self.analyse=False
 
     def forward(self):
         pass
@@ -906,19 +770,11 @@ class EnsembleModel(nn.Module):
                 None if decoder_len <= 6 else decoder_out[6],  # knn label counts
             )
 
-            if self.analyse:
-                probs, network_probs, knn_probs, logits = model.get_normalized_probs(decoder_out_tuple, log_probs=True, sample=None)
-                probs = probs[:, -1, :]
-                knn_probs = knn_probs[:, -1, :]
-                network_probs = network_probs[:, -1, :]
-                features = logits[:, -1, :]
-            else:    
-                probs = model.get_normalized_probs(decoder_out_tuple, log_probs=True, sample=None)
-                probs = probs[:, -1, :]
+            
+            probs = model.get_normalized_probs(decoder_out_tuple, log_probs=True, sample=None)
+            probs = probs[:, -1, :]
 
             if self.models_size == 1:
-                if self.analyse:
-                    return probs, network_probs, knn_probs, attn, features
                 return probs, attn
 
             log_probs.append(probs)

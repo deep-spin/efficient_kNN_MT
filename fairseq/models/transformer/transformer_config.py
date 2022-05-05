@@ -237,15 +237,6 @@ class TransformerConfig(FairseqDataclass):
     only_use_max_idx: bool = field(default=False)
     knn_lambda_type: str = field(default='fix')
     knn_lambda_value: float = field(default=.5)
-    knn_lambda_threshold: float = field(default=0)
-    knn_lambda_mlp_path: str = field(default=None)
-    knn_use_conf_ent: bool = field(default=False)
-    knn_use_freq_fert: bool = field(default=False)
-    knn_freq_fert_path: str = field(default=None)
-    knn_search_prediction: bool = field(default=False)
-    knn_oracle_mlp_path: str = field(default=None)
-    knn_oracle_leakyrelu: bool = field(default=False)
-    knn_oracle_nocontext: bool = field(default=False)
     knn_cache: str = field(default=None)
     knn_cache_threshold: int = field(default=0)
     knn_search_every: int = field(default=0)
@@ -253,9 +244,7 @@ class TransformerConfig(FairseqDataclass):
     knn_temperature_type: str = field(default='fix')
     knn_temperature_value: float = field(default=10)
     only_train_knn_parameters: bool = field(default=False)
-    multiple_dstores: int = field(default=0)
-    use_faiss_centroids: bool = field(default=False)
-
+    
     
     # We need to make this hierarchical dataclass like the flat namespace
     # __getattr__ and __setattr__ here allow backward compatibility

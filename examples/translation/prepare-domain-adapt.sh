@@ -4,8 +4,8 @@
 
 # Usage: bash prepare-domadap.sh medical
 
-DATADIR=/media/hdd1/pam/mt/data/joint_multi_domain/$1
-HOME=/home/pam
+DATADIR=$1
+HOME=$2
 if [ -z $HOME ]
 then
   echo "HOME var is empty, please set it"

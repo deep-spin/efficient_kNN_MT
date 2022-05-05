@@ -23,13 +23,7 @@ class KNN_Dstore(object):
         self.use_gpu_to_search = args.use_gpu_to_search
         self.vocab_size = trg_vocab_size
 
-        if args.multiple_dstores>0:
-            self.multiple_dstores=True
-            self.indexes = self.setup_faiss(args)
-            #torch.multiprocessing.set_start_method('spawn', force=True)
-        else:
-            self.multiple_dstores=False
-            self.index = self.setup_faiss(args)
+        self.index = self.setup_faiss(args)
 
         self.time_for_retrieve = 0.
         self.retrieve_count = 0.
@@ -50,8 +44,6 @@ class KNN_Dstore(object):
         self.k = args.k
 
         self.mask_for_label_count = self.generate_label_count_mask(args.k)
-
-        self.knn_tgt_prob=None
 
     def generate_neighbor_mask(self, max_k):
 
@@ -158,110 +150,65 @@ class KNN_Dstore(object):
         if not args.dstore_filename:
             raise ValueError('Cannot build a datastore without the data.')
 
-        
+        start = time.time()
+        index = faiss.read_index(args.dstore_filename + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
 
-        if self.multiple_dstores:
-            self.vals_={}
-            indexes={}
-            
-            if self.use_gpu_to_search:
-                print('put index from cpu to gpu')
-                res = faiss.StandardGpuResources()
-                self.res = res
-                self.co = faiss.GpuClonerOptions()
-                self.co.useFloat16 = True
-                #index = faiss.index_cpu_to_gpu(res, 0, index, co)
+        if self.use_gpu_to_search:
+            print('put index from cpu to gpu')
+            res = faiss.StandardGpuResources()
+            self.res = res
+            co = faiss.GpuClonerOptions()
+            co.useFloat16 = True
+            index = faiss.index_cpu_to_gpu(res, 0, index, co)
 
-            with open(args.dstore_filename+'dstore_sizes', 'rb') as f:
-                dstore_sizes=pickle.load(f)
+        print('Reading datastore took {} s'.format(time.time() - start))
+        print('the datastore is {}, size is {}, and dim is {} '.format(args.dstore_filename, self.dstore_size, self.dimension))
 
-            for i in range(len(dstore_sizes)):
-                start = time.time()
-                indexes[i] = faiss.read_index(args.dstore_filename + str(i) + '_knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
+        index.nprobe = args.probe
 
-                print('Reading datastore took {} s'.format(time.time() - start))
-                print('the datastore is {}, size is {}, and dim is {} '.format(args.dstore_filename+str(i), dstore_sizes[i], self.dimension))
+        if args.dstore_fp16:
+            print('Keys are fp16 and vals are int32')
+            if not args.no_load_keys:
+                self.keys = np.memmap(args.dstore_filename + 'keys.npy', dtype=np.float16, mode='r',shape=(self.dstore_size, self.dimension))
+            self.vals = np.memmap(args.dstore_filename + 'vals.npy', dtype=np.int, mode='r',shape=(self.dstore_size, 1))
+        else:
+            print('Keys are fp32 and vals are int32')
+            if not args.no_load_keys:
+                self.keys = np.memmap(args.dstore_filename + 'keys.npy', dtype=np.float32, mode='r',shape=(self.dstore_size, self.dimension))
 
-                indexes[i].nprobe = args.probe
-
-                self.vals_[i] = np.memmap(args.dstore_filename + 'vals_' +str(i) +'.npy', dtype=np.int, mode='r',shape=(dstore_sizes[i], 1))
-
-            if args.move_dstore_to_mem:
-                print('Loading to memory...')
-                start = time.time()
-
-                self.vals={}
-                for i in range(len(dstore_sizes)):
-                    self.vals[i] = np.zeros((dstore_sizes[i], 1), dtype=np.int)
-                    self.vals[i] = self.vals_[i][:]
-                    self.vals[i] = self.vals[i].astype(np.int)
-
-                    print('Loading to memory took {} s'.format(time.time() - start))
-            else:
-                self.vals=self.vals_
-
-            return indexes
-
-        else:    
+            self.vals = np.memmap(args.dstore_filename + 'vals.npy', dtype=np.int, mode='r',shape=(self.dstore_size, 1))
+       
+        # If you wish to load all the keys into memory
+        # CAUTION: Only do this if your RAM can handle it!
+        if args.move_dstore_to_mem:
+            print('Loading to memory...')
             start = time.time()
-            index = faiss.read_index(args.dstore_filename + 'knn_index', faiss.IO_FLAG_ONDISK_SAME_DIR)
+
+            if not args.no_load_keys:
+                del self.keys
+                self.keys_from_memmap = np.memmap(args.dstore_filename + '/keys.npy',
+                                                  dtype=np.float16 if args.dstore_fp16 else np.float32, mode='r',
+                                                  shape=(self.dstore_size, self.dimension))
+                self.keys = np.zeros((self.dstore_size, self.dimension),
+                                     dtype=np.float16 if args.dstore_fp16 else np.float32)
+                self.keys = self.keys_from_memmap[:]
+                self.keys = self.keys.astype(np.float16 if args.dstore_fp16 else np.float32)
+
+            del self.vals
+            self.vals_from_memmap = np.memmap(args.dstore_filename + 'vals.npy',
+                                              dtype=np.int, mode='r',
+                                              shape=(self.dstore_size, 1))
+            self.vals = np.zeros((self.dstore_size, 1), dtype=np.int)
+            self.vals = self.vals_from_memmap[:]
+            self.vals = self.vals.astype(np.int)
 
             if self.use_gpu_to_search:
-                print('put index from cpu to gpu')
-                res = faiss.StandardGpuResources()
-                self.res = res
-                co = faiss.GpuClonerOptions()
-                co.useFloat16 = True
-                index = faiss.index_cpu_to_gpu(res, 0, index, co)
+                self.vals = torch.from_numpy(self.vals)
+                if torch.cuda.is_available():
+                    print('put vals to gpu')
+                    self.vals = self.vals.cuda()
 
-            print('Reading datastore took {} s'.format(time.time() - start))
-            print('the datastore is {}, size is {}, and dim is {} '.format(args.dstore_filename, self.dstore_size, self.dimension))
-
-            index.nprobe = args.probe
-
-            if args.dstore_fp16:
-                print('Keys are fp16 and vals are int32')
-                if not args.no_load_keys:
-                    self.keys = np.memmap(args.dstore_filename + 'keys.npy', dtype=np.float16, mode='r',shape=(self.dstore_size, self.dimension))
-                self.vals = np.memmap(args.dstore_filename + 'vals.npy', dtype=np.int, mode='r',shape=(self.dstore_size, 1))
-            else:
-                print('Keys are fp32 and vals are int32')
-                if not args.no_load_keys:
-                    self.keys = np.memmap(args.dstore_filename + 'keys.npy', dtype=np.float32, mode='r',shape=(self.dstore_size, self.dimension))
-
-                self.vals = np.memmap(args.dstore_filename + 'vals.npy', dtype=np.int, mode='r',shape=(self.dstore_size, 1))
-           
-            # If you wish to load all the keys into memory
-            # CAUTION: Only do this if your RAM can handle it!
-            if args.move_dstore_to_mem:
-                print('Loading to memory...')
-                start = time.time()
-
-                if not args.no_load_keys:
-                    del self.keys
-                    self.keys_from_memmap = np.memmap(args.dstore_filename + '/keys.npy',
-                                                      dtype=np.float16 if args.dstore_fp16 else np.float32, mode='r',
-                                                      shape=(self.dstore_size, self.dimension))
-                    self.keys = np.zeros((self.dstore_size, self.dimension),
-                                         dtype=np.float16 if args.dstore_fp16 else np.float32)
-                    self.keys = self.keys_from_memmap[:]
-                    self.keys = self.keys.astype(np.float16 if args.dstore_fp16 else np.float32)
-
-                del self.vals
-                self.vals_from_memmap = np.memmap(args.dstore_filename + 'vals.npy',
-                                                  dtype=np.int, mode='r',
-                                                  shape=(self.dstore_size, 1))
-                self.vals = np.zeros((self.dstore_size, 1), dtype=np.int)
-                self.vals = self.vals_from_memmap[:]
-                self.vals = self.vals.astype(np.int)
-
-                if self.use_gpu_to_search:
-                    self.vals = torch.from_numpy(self.vals)
-                    if torch.cuda.is_available():
-                        print('put vals to gpu')
-                        self.vals = self.vals.cuda()
-
-                print('Loading to memory took {} s'.format(time.time() - start))
+            print('Loading to memory took {} s'.format(time.time() - start))
 
         return index
 
@@ -295,8 +242,6 @@ class KNN_Dstore(object):
 
         raise ValueError("Invalid knn similarity function!")
 
-    #def search(self, queries, idx):
-    #    return self.indexes[idx].search(queries, self.k)
 
     def search(self, queries, idx):
         self.dists[self.idx_dstores[idx]], self.knns[self.idx_dstores[idx]] = self.indexes[idx].search(queries, self.k)
@@ -306,52 +251,9 @@ class KNN_Dstore(object):
         # move query to numpy, if faiss version < 1.6.5
         # numpy_queries = queries.detach().cpu().float().numpy()
 
-        if self.multiple_dstores:
-            self.idx_dstores={}
-            for i in range(len(dstore_idx)):
-                if dstore_idx[i].item() not in self.idx_dstores.keys():
-                    self.idx_dstores[dstore_idx[i].item()]=[i]
-                else:
-                    self.idx_dstores[dstore_idx[i].item()].append(i)
-
-            self.dists = torch.zeros(dstore_idx.size(0), self.k)
-            self.knns = torch.zeros(dstore_idx.size(0), self.k).long()
-
-            #threads = [None] * len(self.idx_dstores.keys())
-            #j=0
-            #for i in self.idx_dstores.keys():
-            #    threads[j] = Thread(target=self.search, args=(queries[self.idx_dstores[i]], i))
-            #    threads[j].start()
-            #    j+=1
-
-            #for i in range(len(threads)):
-            #    threads[i].join()
-
-            """
-            values = []
-            for i in self.idx_dstores.keys():
-                values.append((queries[self.idx_dstores[i]], i))            
-
-
-            with torch.multiprocessing.Pool(processes=24) as pool:
-                res = pool.starmap(self.search, values)
-
-            j=0
-            for i in self.idx_dstores.keys():
-                dists[self.idx_dstores[i]], knns[self.idx_dstores[i]] = res[j]
-                j+=1
-            """
-
-            for i in self.idx_dstores.keys():
-                #self.indexes[i] = faiss.index_cpu_to_gpu(self.res, 0, self.indexes[i], self.co)
-                self.dists[self.idx_dstores[i]], self.knns[self.idx_dstores[i]] = self.indexes[i].search(queries[self.idx_dstores[i]], self.k)
-                #self.indexes[i] = faiss.index_gpu_to_cpu(self.indexes[i])
-
-            #self.dists, self.knns = self.indexes[0].search(queries, self.k)
-        else:
-            dists, knns = self.index.search(queries, self.k)
-            return dists, knns
-        return self.dists, self.knns
+        dists, knns = self.index.search(queries, self.k)
+        return dists, knns
+        
 
 
     def retrieve(self, queries, dstore_idx=None):
@@ -361,25 +263,13 @@ class KNN_Dstore(object):
         # retrieve
         bsz = queries.size(0)
         seq_len = queries.size(1)
-
-        if self.multiple_dstores:
-            dists, knns = self.get_knns(queries.contiguous().view(-1, queries.size(-1)).cpu(), dstore_idx=dstore_idx)  # [Batch * seq len, K]
-            
-            tgt_idx = torch.zeros(dstore_idx.size(0), self.k).long().to(queries.device)
-            for i in self.idx_dstores.keys():
-                tgt_idx[self.idx_dstores[i]] = torch.from_numpy(self.vals[i][knns[self.idx_dstores[i]]]).to(queries.device).squeeze(-1)  # [Batch size * Seq len, K]
-
+    
+        dists, knns = self.get_knns(queries.contiguous().view(-1, queries.size(-1)).cpu())  # [Batch * seq len, K]
+    
+        if not self.use_gpu_to_search:
+            tgt_idx = torch.from_numpy(self.vals[knns]).to(queries.device).squeeze(-1)  # [Batch size * Seq len, K]
         else:
-            dists, knns = self.get_knns(queries.contiguous().view(-1, queries.size(-1)).cpu())  # [Batch * seq len, K]
-        
-            # move retireval results to torch tensor from numpy, if faiss version < 1.6.5
-            #knns = torch.from_numpy(knns).to(queries.device)
-            #dists = torch.from_numpy(dists).to(queries.device)  # [Batch size * seq len, k]
-            
-            if not self.use_gpu_to_search:
-                tgt_idx = torch.from_numpy(self.vals[knns]).to(queries.device).squeeze(-1)  # [Batch size * Seq len, K]
-            else:
-                tgt_idx = self.vals[knns].to(queries.device).squeeze(-1)
+            tgt_idx = self.vals[knns].to(queries.device).squeeze(-1)
         
         tgt_idx = tgt_idx.view(bsz, seq_len, -1)  # [B, S, K]
 
@@ -410,14 +300,7 @@ class KNN_Dstore(object):
         knn_weight = torch.softmax(scaled_dists, dim=-1).unsqueeze(-1)  # [B, S, K, 1]
 
         # set the target index for each neighbor
-        #knn_tgt_prob = torch.zeros(bsz, seq_len, self.k, self.vocab_size).to(queries.device)  # [B, S, K, Vocab Size]
-        if self.knn_tgt_prob is None:
-            self.knn_tgt_prob = torch.zeros(bsz, seq_len, self.k, self.vocab_size).to(queries.device)  # [B, S, K, Vocab Size]
-            knn_tgt_prob=self.knn_tgt_prob
-        else:
-            self.knn_tgt_prob[:,:,:,:]=0
-            knn_tgt_prob=self.knn_tgt_prob[:bsz]
-
+        knn_tgt_prob = torch.zeros(bsz, seq_len, self.k, self.vocab_size).to(queries.device)  # [B, S, K, Vocab Size]
         tgt_index = tgt_index.unsqueeze_(-1)  # [B, S, K, 1]
 
         # implemented with pytorch_scatter
